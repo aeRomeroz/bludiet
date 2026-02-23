@@ -16,7 +16,7 @@ export default function Layout() {
   return (
     <div className="flex flex-col min-h-screen bg-primary">
       {/* NAVBAR - Puedes crear un componente separado aquí */}
-      <nav className="bg-white border-b-0.5 border-primary text-black-primary p-4">
+      <nav className="bg-white shadow-sm border-b-[0.5px] border-primary-30 text-black-primary p-4">
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold">BluDiet</h1>
           <ul className="flex gap-4">
@@ -24,6 +24,7 @@ export default function Layout() {
             <li><a href="/about" className="hover:underline">About</a></li>
             <li><a href="/contact" className="hover:underline">Contacto</a></li>
           </ul>
+          ‹div
         </div>
       </nav>
 

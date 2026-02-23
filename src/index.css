@@ -1,1 +1,7 @@
 @import "tailwindcss";
+
+@layer utilities {
+  .border-primary-30 {
+    border-color: rgba(191, 191, 191, 0.3);
+  }
+}
