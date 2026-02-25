@@ -32,7 +32,8 @@ export default function Home() {
     <div className="space-y-12">
       <div className='flex justify-between items-center'>
         <div>
-          <h1 className="font-serif text-4xl font-bold mb-4">¡Buen día, {name}!</ h1>
+          <h1 className="text-black-primary font-serif text-4xl font-bold mb-1">¡Buen día, {name}!</ h1>
+          <span className='text-gray-primary'>Accede a tus dietas y pacientes más recientes facilmente!</span>
         </div>
 
         <div className='flex gap-4'>

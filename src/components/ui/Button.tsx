@@ -26,10 +26,10 @@ export default function Button({
   disabled = false,
   className = '',
 }: ButtonProps) {
-  const baseStyles = 'font-bold rounded-lg transition cursor-pointer';
+  const baseStyles = 'rounded-lg transition cursor-pointer';
 
   const variantStyles = {
-    primary: 'bg-white border-[0.5px] border-primary-30 text-black-primary hover:bg-gray-300/20',
+    primary: 'bg-white text-black-primary border-[0.5px] border-primary-30 hover:bg-gray-300/20',
     secondary: 'bg-gray-300 text-gray-800 hover:bg-gray-400',
     danger: 'bg-red-600 text-white hover:bg-red-700',
   };
