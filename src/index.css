@@ -8,6 +8,8 @@
   --color-green-brand: #80BF3A;
   --color-blue-brand: #396DB0;
   --color-gray-primary: #606060;
+  --color-gray-secondary: #B0B0B0;
+  --color-yellow-warning: #E2C000;
 }
 
 :root {
