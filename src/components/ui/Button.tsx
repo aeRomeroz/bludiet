@@ -29,7 +29,7 @@ export default function Button({
   const baseStyles = 'font-bold rounded-lg transition cursor-pointer';
 
   const variantStyles = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700',
+    primary: 'bg-white border-[0.5px] border-primary-30 text-black-primary hover:bg-gray-300/20',
     secondary: 'bg-gray-300 text-gray-800 hover:bg-gray-400',
     danger: 'bg-red-600 text-white hover:bg-red-700',
   };

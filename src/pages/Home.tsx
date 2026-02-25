@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
+import { PlusIcon } from '@heroicons/react/24/outline';
 
 /**
  * Home Page - Página de inicio
@@ -34,9 +35,9 @@ export default function Home() {
           <h1 className="font-serif text-4xl font-bold mb-4">¡Buen día, {name}!</ h1>
         </div>
 
-        <div>
-          <Button variant="primary" className='bg-white border-[0.5px] border-primary-30'> Paciente</Button>
-          <Button variant="primary" > Dieta</Button>
+        <div className='flex gap-4'>
+          <Button variant="primary" className='flex items-center gap-3'> <PlusIcon className='text-green-brand h-5 w-5'/> Paciente</Button>
+          <Button variant="primary" className='flex items-center gap-3'> <PlusIcon className='text-blue-brand h-5 w-5'/> Dieta</Button>
         </div>
       </div>
       {/* SECCIÓN HERO */}
