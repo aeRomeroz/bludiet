@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 
@@ -9,6 +10,8 @@ import Card from '../components/ui/Card';
  */
 
 export default function Home() {
+  const [name, setName] = useState('Dietista');
+  
   const features = [
     {
       title: 'Monitoreo 📊',
@@ -26,6 +29,16 @@ export default function Home() {
 
   return (
     <div className="space-y-12">
+      <div className='flex justify-between items-center'>
+        <div>
+          <h1 className="font-serif text-4xl font-bold mb-4">¡Buen día, {name}!</ h1>
+        </div>
+
+        <div>
+          <Button variant="primary" className='bg-white border-[0.5px] border-primary-30'> Paciente</Button>
+          <Button variant="primary" > Dieta</Button>
+        </div>
+      </div>
       {/* SECCIÓN HERO */}
       <section className="text-center py-16 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-lg">
         <h1 className="text-5xl font-bold mb-4">Bienvenido a BluDiet</h1>
