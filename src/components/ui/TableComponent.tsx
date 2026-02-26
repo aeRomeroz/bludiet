@@ -2,20 +2,20 @@
   import { Link } from "react-router-dom";  
   import { ChevronDownIcon } from "@heroicons/react/24/outline";
   import React, { useState } from "react";
-  import { type Status, PATIENT_STATUS } from "../../types/patients";
+  import { type Patient, type Status, PATIENT_STATUS } from "../../types/patients";
 
   interface TableComponentProps {
       title?: string;
       buttonText?: string;
       buttonRoute?: string;
       headers: string[];
-      data: any[];
+      data: Patient[];
   }
 
   const statusStyles: Record<Status, string> = {
-    [PATIENT_STATUS.ACTIVE]: 'bg-green-active/30 text-green-active',
-    [PATIENT_STATUS.PENDING]: 'bg-yellow-warning/30 text-yellow-warning',
-    [PATIENT_STATUS.REVIEW]: 'bg-yellow-warning/30 text-yellow-warning'
+    ACTIVE: 'bg-green-active/30 text-green-active',
+    PENDING: 'bg-yellow-warning/30 text-yellow-warning',
+    REVIEW: 'bg-yellow-warning/30 text-yellow-warning'
   };
 
   export default function TableComponent({
@@ -65,28 +65,41 @@
 
             <Table.Body>
               {data.map((item, index) => (
-              <React.Fragment key={index}>
+              <React.Fragment key={item.id}>
                 {/* Fila Principal */}
                 <Table.Row 
                   className="cursor-pointer hover:bg-gray-50 transition-colors"
                   onClick={() => toggleRow(index)}
                 >
                   <Table.Cell className="p-0 text-center">
-                    <div className="font-medium text-black-primary py-4 px-6">{item.name}</div>
-                  </Table.Cell>
-                  <Table.Cell className="p-0 text-center">
-                    <div className="text-gray-primary py-4 px-6">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[item.state as Status]} tracking-wide`}>
-                        {item.state}
-                      </span>
+                    <div className="font-medium text-black-primary py-4 px-6">
+                      {item.firstName} {item.lastName}
                     </div>
                   </Table.Cell>
                   <Table.Cell className="p-0 text-center">
-                    <div className="font-medium text-black-primary py-4 px-6">{item.last_action}</div>
+                    <div className="text-gray-primary py-4 px-6">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[item.status]} tracking-wide uppercase`}>
+                        {PATIENT_STATUS[item.status]}
+                      </span>
+                    </div>
                   </Table.Cell>
+                  
+                  {/* ULTIMA ACCIÓN (Mapeado a motivo por ahora) */}
                   <Table.Cell className="p-0 text-center">
-                    <div className="lining-nums py-4 px-6">{item.date}</div>
+                    <div className="font-medium text-black-primary py-4 px-6">
+                      {item.consultationReason.length > 20 
+                      ? `${item.consultationReason.substring(0, 20)}...` 
+                      : item.consultationReason}
+                    </div>
                   </Table.Cell>
+
+                  {/* FECHA (Usando birthDate como placeholder) */}
+                  <Table.Cell className="p-0 text-center">
+                    <div className="lining-nums py-4 px-6">
+                      {item.birthDate}
+                    </div>
+                  </Table.Cell>
+
                   {/*Flechita de acción*/}
                   <Table.Cell className="p-0">
                     <div className="py-4 px-6 flex justify-center items-center">
@@ -99,11 +112,11 @@
 
                 {/* Fila Desplegable (Detalles) */}
                 {expandedRow === index && (
-                  <Table.Row className="bg-primary/30">
-                    <Table.Cell colSpan={headers.length + 1}>
-                      <div className="p-4 text-sm text-gray-600 animate-in fade-in slide-in-from-top-1">
-                        {/* Aquí puedes poner lo que quieras: notas, peso, última cita... */}
-                        <p><strong>Notas del paciente:</strong> {item.notas || 'Sin observaciones adicionales.'}</p>
+                  <Table.Row className="bg-primary-10/20">
+                    <Table.Cell colSpan={headers.length + 1} className="p-6">
+                      <div className="text-sm text-gray-600 animate-in fade-in slide-in-from-top-1">
+                        <p className="mb-1"><strong>Ocupación:</strong> {item.occupation}</p>
+                        <p><strong>Motivo completo:</strong> {item.consultationReason}</p>
                       </div>
                     </Table.Cell>
                   </Table.Row>

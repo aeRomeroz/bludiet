@@ -19,7 +19,7 @@ export interface Patient {
   birthDate: string; // ISO Date
   gender: Gender;
   occupation: string;
-  reasonForConsultation: string;
+  consultationReason: string;
   medicalHistory?: {
     chronicDiseases: MedicalRecord;
     previousSurgeries: MedicalRecord;
