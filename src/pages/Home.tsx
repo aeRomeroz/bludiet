@@ -4,7 +4,7 @@ import Card from '../components/ui/Card';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { ExclamationCircleIcon, UserGroupIcon } from '@heroicons/react/24/solid';
 import { UtensilsCrossedIcon } from 'lucide-react';
-import TableComponent from '../components/ui/Table';
+import TableComponent from '../components/ui/TableComponent';
 
 /**
  * Home Page - Página de inicio
