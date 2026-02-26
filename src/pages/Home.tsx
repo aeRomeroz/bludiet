@@ -7,6 +7,7 @@ import { UtensilsCrossedIcon } from 'lucide-react';
 import TableComponent from '../components/ui/TableComponent';
 import { dummyPatients } from '../constants/patients';
 import type { Patient } from '../types/patients';
+import PatientCreateModal from '../components/dashboard/patients/PatientCreateModal';
 
 /**
  * Home Page - Página de inicio
@@ -23,7 +24,6 @@ export default function Home() {
 
   // FUNCIÓN PARA AÑADIR PACIENTE
   const handleAddPatient = (newPatient: Patient) => {
-    // Lo añadimos al principio de la lista para que se vea en el "Preview"
     setPatients((prev) => [newPatient, ...prev]);
   };
 
@@ -70,7 +70,7 @@ export default function Home() {
         </div>
 
         <div className='flex gap-4'>
-          <Button variant="primary" className='flex items-center gap-3'> <PlusIcon className='text-green-brand h-5 w-5'/> Paciente</Button>
+          <Button variant="primary" className='flex items-center gap-3' onClick={()=>{setIsModalOpen(true)}}> <PlusIcon className='text-green-brand h-5 w-5'/> Paciente</Button>
           <Button variant="primary" className='flex items-center gap-3'> <PlusIcon className='text-blue-brand h-5 w-5'/> Dieta</Button>
         </div>
       </div>
@@ -95,7 +95,12 @@ export default function Home() {
       </section>
 
       <TableComponent title="Actividad de Pacientes Reciente" buttonText="Ver todos" buttonRoute="/pacientes" headers={headers} data={patients}/>
-
+      <PatientCreateModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)}
+        onPatientCreate={handleAddPatient} 
+      />
+      
       {/* SECCIÓN CTA */}
       <section className="text-center py-12 bg-gray-100 rounded-lg">
         <h2 className="text-2xl font-bold mb-4">¿Listo para transformar tu vida?</h2>
