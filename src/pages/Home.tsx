@@ -4,6 +4,7 @@ import Card from '../components/ui/Card';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { ExclamationCircleIcon, UserGroupIcon } from '@heroicons/react/24/solid';
 import { UtensilsCrossedIcon } from 'lucide-react';
+import TableComponent from '../components/ui/Table';
 
 /**
  * Home Page - Página de inicio
@@ -15,6 +16,33 @@ import { UtensilsCrossedIcon } from 'lucide-react';
 export default function Home() {
   const [name, setName] = useState('Dietista');
   
+  const dummyPatients = [
+  {
+    id: 1,
+    name: 'Juan Pérez',
+    state: 'Activo',
+    last_action: 'Dieta asignada',
+    date: '24 Feb 2024',
+    notas: 'Paciente con intolerancia a la lactosa. Prefiere entrenar por las mañanas.'
+  },
+  {
+    id: 2,
+    name: 'María García',
+    state: 'Pendiente',
+    last_action: 'Registro completado',
+    date: '22 Feb 2024',
+    notas: 'Pendiente de análisis de sangre para ajustar macronutrientes.'
+  },
+  {
+    id: 3,
+    name: 'Carlos Ruiz',
+    state: 'Revisión',
+    last_action: 'Subió fotos de progreso',
+    date: '20 Feb 2024',
+    notas: 'Ha bajado 2kg en la última semana. Muy motivado con el plan de fuerza.'
+  }
+];
+
   const features = [
     {
       title: 'Pacientes totales',
@@ -44,6 +72,8 @@ export default function Home() {
       )
     },
   ];
+
+  const headers = ['PACIENTE', 'ESTADO', 'ULTIMA ACCIÓN', 'FECHA'];
 
   return (
     <div className="space-y-12">
@@ -77,6 +107,8 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      <TableComponent title="Actividad de Pacientes Reciente" buttonText="Ver todos" buttonRoute="/pacientes" headers={headers} data={dummyPatients}/>
 
       {/* SECCIÓN CTA */}
       <section className="text-center py-12 bg-gray-100 rounded-lg">
