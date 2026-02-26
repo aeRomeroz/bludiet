@@ -16,14 +16,21 @@ import type { Patient } from '../types/patients';
  */
 
 export default function Home() {
-  const [name, setName] = useState('Dietista');
+  const [name] = useState('Dietista');
   const [patients, setPatients] = useState<Patient[]>(dummyPatients);
   const headers = ['PACIENTE', 'ESTADO', 'ULTIMA ACCIÓN', 'FECHA'];
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // FUNCIÓN PARA AÑADIR PACIENTE
+  const handleAddPatient = (newPatient: Patient) => {
+    // Lo añadimos al principio de la lista para que se vea en el "Preview"
+    setPatients((prev) => [newPatient, ...prev]);
+  };
+
   const features = [
     {
       title: 'Pacientes totales',
+      value: patients.length,
       description: '+0% desde el último mes',
       icon: (
         <div className="flex items-center justify-center rounded-lg bg-blue-brand/20 p-4 shrink-0">
@@ -33,6 +40,7 @@ export default function Home() {
     },
     {
       title: 'Dietas Activas',
+      value: 12,
       description: '+4% desde el último mes',
       icon: (
         <div className="flex items-center justify-center rounded-lg bg-green-brand/20 p-4 shrink-0">
@@ -42,6 +50,7 @@ export default function Home() {
     },
     {
       title: 'Pacientes Por Revisar',
+      value: patients.filter(p => p.status === 'REVIEW').length,
       description: '+0% desde el último mes',
       icon: (
         <div className="flex items-center justify-center rounded-lg bg-yellow-warning/20 p-4 shrink-0">
@@ -70,7 +79,7 @@ export default function Home() {
       <section>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {features.map((feature) => (
-            <Card key={feature.title} title={feature.title} icon={feature.icon}>
+            <Card key={feature.title} title={feature.title} value={feature.value} icon={feature.icon}>
               <p className="text-gray-secondary">{feature.description}</p>
               <Button
                 variant="primary"
