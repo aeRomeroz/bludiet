@@ -2,6 +2,7 @@
   import { Link } from "react-router-dom";  
   import { ChevronDownIcon } from "@heroicons/react/24/outline";
   import React, { useState } from "react";
+  import { type Status, PATIENT_STATUS } from "../../types/patients";
 
   interface TableComponentProps {
       title?: string;
@@ -10,6 +11,12 @@
       headers: string[];
       data: any[];
   }
+
+  const statusStyles: Record<Status, string> = {
+    [PATIENT_STATUS.ACTIVE]: 'bg-green-active/30 text-green-active',
+    [PATIENT_STATUS.PENDING]: 'bg-yellow-warning/30 text-yellow-warning',
+    [PATIENT_STATUS.REVIEW]: 'bg-yellow-warning/30 text-yellow-warning'
+  };
 
   export default function TableComponent({
     title,
@@ -68,7 +75,11 @@
                     <div className="font-medium text-black-primary py-4 px-6">{item.name}</div>
                   </Table.Cell>
                   <Table.Cell className="p-0 text-center">
-                    <div className="text-gray-primary py-4 px-6">{item.state}</div>
+                    <div className="text-gray-primary py-4 px-6">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[item.state as Status]} tracking-wide`}>
+                        {item.state}
+                      </span>
+                    </div>
                   </Table.Cell>
                   <Table.Cell className="p-0 text-center">
                     <div className="font-medium text-black-primary py-4 px-6">{item.last_action}</div>
