@@ -12,6 +12,7 @@
   --color-gray-secondary: #B0B0B0;
   --color-yellow-warning: #E2C000;
   --color-green-active: #349E1F;
+  --color-red-error: #E0000F;
 }
 
 :root {
