@@ -3,6 +3,7 @@ import Layout from '../components/layout/Layout';
 import Home from '../pages/Home';
 import About from '../pages/About';
 import Contact from '../pages/Contact';
+import '../index.css';
 
 /**
  * Configuración de rutas

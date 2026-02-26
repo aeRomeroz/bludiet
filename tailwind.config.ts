@@ -7,10 +7,9 @@ export default {
   ],
   theme: {
     extend: {
-      colors: {
-        primary: '#F8FAFC',
-        'black-primary': '#191919',
-        'border-primary': '#BFBFBF',
+      fontFamily: {
+        sans: ['"Lato"', 'sans-serif'],
+        serif: ['"Playfair Display"', 'serif']
       },
       borderWidth: {
         '0.5': '0.5px',

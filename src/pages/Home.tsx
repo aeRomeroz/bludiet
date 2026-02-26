@@ -1,5 +1,10 @@
+import { useState } from 'react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
+import { PlusIcon } from '@heroicons/react/24/outline';
+import { ExclamationCircleIcon, UserGroupIcon } from '@heroicons/react/24/solid';
+import { UtensilsCrossedIcon } from 'lucide-react';
+import TableComponent from '../components/ui/TableComponent';
 
 /**
  * Home Page - Página de inicio
@@ -9,45 +14,87 @@ import Card from '../components/ui/Card';
  */
 
 export default function Home() {
+  const [name, setName] = useState('Dietista');
+  
+  const dummyPatients = [
+  {
+    id: 1,
+    name: 'Juan Pérez',
+    state: 'Activo',
+    last_action: 'Dieta asignada',
+    date: '24 Feb 2024',
+    notas: 'Paciente con intolerancia a la lactosa. Prefiere entrenar por las mañanas.'
+  },
+  {
+    id: 2,
+    name: 'María García',
+    state: 'Pendiente',
+    last_action: 'Registro completado',
+    date: '22 Feb 2024',
+    notas: 'Pendiente de análisis de sangre para ajustar macronutrientes.'
+  },
+  {
+    id: 3,
+    name: 'Carlos Ruiz',
+    state: 'Revisión',
+    last_action: 'Subió fotos de progreso',
+    date: '20 Feb 2024',
+    notas: 'Ha bajado 2kg en la última semana. Muy motivado con el plan de fuerza.'
+  }
+];
+
   const features = [
     {
-      title: 'Monitoreo 📊',
-      description: 'Sigue tu progreso diario con análisis detallados',
+      title: 'Pacientes totales',
+      description: '+0% desde el último mes',
+      icon: (
+        <div className="flex items-center justify-center rounded-lg bg-blue-brand/20 p-4 shrink-0">
+          <UserGroupIcon className="text-blue-brand h-8 w-8" />
+        </div>
+      )
     },
     {
-      title: 'Planes 🥗',
-      description: 'Recibe planes de dieta personalizados',
+      title: 'Dietas Activas',
+      description: '+4% desde el último mes',
+      icon: (
+        <div className="flex items-center justify-center rounded-lg bg-green-brand/20 p-4 shrink-0">
+          <UtensilsCrossedIcon className="text-green-brand h-8 w-8 fill-green-brand" fill="currentColor"/>
+        </div>
+      )
     },
     {
-      title: 'Comunidad 👥',
-      description: 'Conecta con otros usuarios en tu viaje',
+      title: 'Pacientes Por Revisar',
+      description: '+0% desde el último mes',
+      icon: (
+        <div className="flex items-center justify-center rounded-lg bg-yellow-warning/20 p-4 shrink-0">
+          <ExclamationCircleIcon className="text-yellow-warning h-8 w-8" />
+        </div>
+      )
     },
   ];
 
+  const headers = ['PACIENTE', 'ESTADO', 'ULTIMA ACCIÓN', 'FECHA'];
+
   return (
     <div className="space-y-12">
-      {/* SECCIÓN HERO */}
-      <section className="text-center py-16 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-lg">
-        <h1 className="text-5xl font-bold mb-4">Bienvenido a BluDiet</h1>
-        <p className="text-xl mb-8">
-          Tu aplicación de dieta y nutrición personal
-        </p>
-        <Button
-          variant="secondary"
-          size="large"
-          onClick={() => alert('¡Comienza tu viaje hoy!')}
-        >
-          Comenzar Ahora
-        </Button>
-      </section>
+      <div className='flex justify-between items-center'>
+        <div>
+          <h1 className="text-black-primary font-serif text-4xl font-bold mb-1">¡Buen día, {name}!</ h1>
+          <span className='text-gray-primary'>Accede a tus dietas y pacientes más recientes facilmente!</span>
+        </div>
 
-      {/* SECCIÓN DE CARACTERÍSTICAS */}
+        <div className='flex gap-4'>
+          <Button variant="primary" className='flex items-center gap-3'> <PlusIcon className='text-green-brand h-5 w-5'/> Paciente</Button>
+          <Button variant="primary" className='flex items-center gap-3'> <PlusIcon className='text-blue-brand h-5 w-5'/> Dieta</Button>
+        </div>
+      </div>
+
+      {/* ATAJOS */}
       <section>
-        <h2 className="text-3xl font-bold mb-8 text-center">Características</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {features.map((feature) => (
-            <Card key={feature.title} title={feature.title}>
-              <p className="text-gray-600">{feature.description}</p>
+            <Card key={feature.title} title={feature.title} icon={feature.icon}>
+              <p className="text-gray-secondary">{feature.description}</p>
               <Button
                 variant="primary"
                 size="small"
@@ -60,6 +107,8 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      <TableComponent title="Actividad de Pacientes Reciente" buttonText="Ver todos" buttonRoute="/pacientes" headers={headers} data={dummyPatients}/>
 
       {/* SECCIÓN CTA */}
       <section className="text-center py-12 bg-gray-100 rounded-lg">
