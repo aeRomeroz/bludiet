@@ -5,6 +5,9 @@ import { PlusIcon } from '@heroicons/react/24/outline';
 import { ExclamationCircleIcon, UserGroupIcon } from '@heroicons/react/24/solid';
 import { UtensilsCrossedIcon } from 'lucide-react';
 import TableComponent from '../components/ui/TableComponent';
+import { dummyPatients } from '../constants/patients';
+import type { Patient } from '../types/patients';
+import PatientCreateModal from '../components/dashboard/patients/PatientCreateModal';
 
 /**
  * Home Page - Página de inicio
@@ -14,38 +17,20 @@ import TableComponent from '../components/ui/TableComponent';
  */
 
 export default function Home() {
-  const [name, setName] = useState('Dietista');
-  
-  const dummyPatients = [
-  {
-    id: 1,
-    name: 'Juan Pérez',
-    state: 'Activo',
-    last_action: 'Dieta asignada',
-    date: '24 Feb 2024',
-    notas: 'Paciente con intolerancia a la lactosa. Prefiere entrenar por las mañanas.'
-  },
-  {
-    id: 2,
-    name: 'María García',
-    state: 'Pendiente',
-    last_action: 'Registro completado',
-    date: '22 Feb 2024',
-    notas: 'Pendiente de análisis de sangre para ajustar macronutrientes.'
-  },
-  {
-    id: 3,
-    name: 'Carlos Ruiz',
-    state: 'Revisión',
-    last_action: 'Subió fotos de progreso',
-    date: '20 Feb 2024',
-    notas: 'Ha bajado 2kg en la última semana. Muy motivado con el plan de fuerza.'
-  }
-];
+  const [name] = useState('Dietista');
+  const [patients, setPatients] = useState<Patient[]>(dummyPatients);
+  const headers = ['PACIENTE', 'ESTADO', 'ULTIMA ACCIÓN', 'FECHA'];
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // FUNCIÓN PARA AÑADIR PACIENTE
+  const handleAddPatient = (newPatient: Patient) => {
+    setPatients((prev) => [newPatient, ...prev]);
+  };
 
   const features = [
     {
       title: 'Pacientes totales',
+      value: patients.length,
       description: '+0% desde el último mes',
       icon: (
         <div className="flex items-center justify-center rounded-lg bg-blue-brand/20 p-4 shrink-0">
@@ -55,6 +40,7 @@ export default function Home() {
     },
     {
       title: 'Dietas Activas',
+      value: 12,
       description: '+4% desde el último mes',
       icon: (
         <div className="flex items-center justify-center rounded-lg bg-green-brand/20 p-4 shrink-0">
@@ -64,6 +50,7 @@ export default function Home() {
     },
     {
       title: 'Pacientes Por Revisar',
+      value: patients.filter(p => p.status === 'REVIEW').length,
       description: '+0% desde el último mes',
       icon: (
         <div className="flex items-center justify-center rounded-lg bg-yellow-warning/20 p-4 shrink-0">
@@ -73,7 +60,6 @@ export default function Home() {
     },
   ];
 
-  const headers = ['PACIENTE', 'ESTADO', 'ULTIMA ACCIÓN', 'FECHA'];
 
   return (
     <div className="space-y-12">
@@ -84,7 +70,7 @@ export default function Home() {
         </div>
 
         <div className='flex gap-4'>
-          <Button variant="primary" className='flex items-center gap-3'> <PlusIcon className='text-green-brand h-5 w-5'/> Paciente</Button>
+          <Button variant="primary" className='flex items-center gap-3' onClick={()=>{setIsModalOpen(true)}}> <PlusIcon className='text-green-brand h-5 w-5'/> Paciente</Button>
           <Button variant="primary" className='flex items-center gap-3'> <PlusIcon className='text-blue-brand h-5 w-5'/> Dieta</Button>
         </div>
       </div>
@@ -93,7 +79,7 @@ export default function Home() {
       <section>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {features.map((feature) => (
-            <Card key={feature.title} title={feature.title} icon={feature.icon}>
+            <Card key={feature.title} title={feature.title} value={feature.value} icon={feature.icon}>
               <p className="text-gray-secondary">{feature.description}</p>
               <Button
                 variant="primary"
@@ -108,8 +94,13 @@ export default function Home() {
         </div>
       </section>
 
-      <TableComponent title="Actividad de Pacientes Reciente" buttonText="Ver todos" buttonRoute="/pacientes" headers={headers} data={dummyPatients}/>
-
+      <TableComponent title="Actividad de Pacientes Reciente" buttonText="Ver todos" buttonRoute="/pacientes" headers={headers} data={patients}/>
+      <PatientCreateModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)}
+        onPatientCreate={handleAddPatient} 
+      />
+      
       {/* SECCIÓN CTA */}
       <section className="text-center py-12 bg-gray-100 rounded-lg">
         <h2 className="text-2xl font-bold mb-4">¿Listo para transformar tu vida?</h2>

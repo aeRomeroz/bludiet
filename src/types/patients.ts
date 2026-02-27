@@ -4,4 +4,29 @@ export const PATIENT_STATUS = {
   REVIEW: 'Revisión'
 } as const;
 
-export type Status = typeof PATIENT_STATUS[keyof typeof PATIENT_STATUS];
+export type Status = keyof typeof PATIENT_STATUS; // 'ACTIVE' | 'PENDING' | 'REVIEW'
+export type Gender = 'Male' | 'Female';
+
+export interface MedicalRecord {
+  hasCondition: boolean;
+  observation: string;
+}
+
+export interface Patient {
+  id: string; // Necesario para la UI y rutas
+  firstName: string;
+  lastName: string;
+  birthDate: string; // ISO Date
+  gender: Gender;
+  occupation: string;
+  consultationReason: string;
+  medicalHistory?: {
+    chronicDiseases: MedicalRecord;
+    previousSurgeries: MedicalRecord;
+    allergies: MedicalRecord;
+    medications: MedicalRecord;
+    smokes: MedicalRecord;
+    drinksAlcohol: MedicalRecord;
+  };
+  status: Status; 
+}

@@ -16,15 +16,17 @@ interface ButtonProps {
   onClick?: () => void;
   disabled?: boolean;
   className?: string;
+  type?: 'button' | 'submit' | 'reset';
 }
 
 export default function Button({
   children,
-  variant = 'primary',
+  variant,
   size = 'medium',
   onClick,
   disabled = false,
   className = '',
+  type = 'button'
 }: ButtonProps) {
   const baseStyles = 'rounded-lg transition cursor-pointer';
 
@@ -46,6 +48,7 @@ export default function Button({
 
   return (
     <button
+      type={type}
       className={finalClassName}
       onClick={onClick}
       disabled={disabled}
