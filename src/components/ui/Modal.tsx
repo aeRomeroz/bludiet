@@ -8,6 +8,7 @@ interface ModalProps {
   title?: string;
   description?: string;
   children: ReactNode;
+  footer: ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
@@ -18,7 +19,7 @@ const sizeClasses = {
   xl: 'max-w-xl'
 }
 
-export default function Modal({ isOpen, onClose, title, description, children, size }: ModalProps) {
+export default function Modal({ isOpen, onClose, title, description, children, footer, size }: ModalProps) {
   return (
     <Dialog.Root open={isOpen} onOpenChange={onClose}>
       <Dialog.Portal>
@@ -26,8 +27,9 @@ export default function Modal({ isOpen, onClose, title, description, children, s
         <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300 z-50" />
         
         {/*CONTENIDO*/}
-        <Dialog.Content className={`fixed left-1/2 top-1/2 w-full ${sizeClasses[size || 'md']} -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white p-6 shadow-xl animate-in zoom-in-95 duration-300 z-50`}>
-          <div className="flex items-center justify-between mb-4">
+        <Dialog.Content className={`fixed left-1/2 top-1/2 w-full ${sizeClasses[size || 'md']} -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white shadow-xl animate-in zoom-in-95 duration-300 z-50 overflow-hidden`}>
+          {/*HEADER*/}
+          <div className="bg-white px-6 py-4 flex items-center justify-between border-b border-primary-30 shrink-0">
             {title && (
               <Dialog.Title className="text-xl font-serif font-bold text-black-primary">
                 {title}
@@ -50,9 +52,16 @@ export default function Modal({ isOpen, onClose, title, description, children, s
             </Dialog.Description>
           )}
 
-          <div className="mt-2">
+          {/*CONTENIDO*/}
+          <div className='bg-primary p-6 overflow-y-auto max-h-[70vh]'>
             {children}
           </div>
+
+          {footer && (
+            <div className='bg-white px-6 py-4 border-t border-primary-30 flex gap-3 shrink-0'>
+              {footer}
+            </div>
+          )}
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
