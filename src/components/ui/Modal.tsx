@@ -10,6 +10,7 @@ interface ModalProps {
   children: ReactNode;
   footer: ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl';
+  headerExtension?: ReactNode;
 }
 
 const sizeClasses = {
@@ -19,7 +20,7 @@ const sizeClasses = {
   xl: 'max-w-xl'
 }
 
-export default function Modal({ isOpen, onClose, title, description, children, footer, size }: ModalProps) {
+export default function Modal({ isOpen, onClose, title, description, children, footer, size, headerExtension}: ModalProps) {
   return (
     <Dialog.Root open={isOpen} onOpenChange={onClose}>
       <Dialog.Portal>
@@ -29,21 +30,29 @@ export default function Modal({ isOpen, onClose, title, description, children, f
         {/*CONTENIDO*/}
         <Dialog.Content className={`fixed left-1/2 top-1/2 w-full ${sizeClasses[size || 'md']} -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white shadow-xl animate-in zoom-in-95 duration-300 z-50 overflow-hidden`}>
           {/*HEADER*/}
-          <div className="bg-white px-6 py-4 flex items-center justify-between border-b border-primary-30 shrink-0">
-            {title && (
-              <Dialog.Title className="text-xl font-serif font-bold text-black-primary">
-                {title}
-              </Dialog.Title>
+          <div className="bg-white border-b border-primary-30 shrink-0">
+            <div className='px-6 py-4 flex items-center justify-between'>
+              {title && (
+                <Dialog.Title className="text-xl font-serif font-bold text-black-primary">
+                  {title}
+                </Dialog.Title>
+              )}
+              
+              <Dialog.Close asChild>
+                <button 
+                  className="rounded-full p-1 text-gray-primary hover:bg-gray-100 transition-colors"
+                  aria-label="Close"
+                >
+                  <XMarkIcon className="h-6 w-6" />
+                </button>
+              </Dialog.Close>
+            </div>
+
+            {headerExtension && (
+              <div className="px-6 pb-4">
+                {headerExtension}
+              </div>
             )}
-            
-            <Dialog.Close asChild>
-              <button 
-                className="rounded-full p-1 text-gray-primary hover:bg-gray-100 transition-colors"
-                aria-label="Close"
-              >
-                <XMarkIcon className="h-6 w-6" />
-              </button>
-            </Dialog.Close>
           </div>
 
           {description && (

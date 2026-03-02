@@ -8,6 +8,7 @@ import MacronutrientDistributionSlider from "./MacronutrientDistributionSlider";
 import { calculateGramsFromKcalPercentage, KCAL_PER_GRAM } from "../../../utils/diets/dietMath";
 import { FireIcon } from "@heroicons/react/24/solid";
 import * as Slider from "@radix-ui/react-slider";
+import * as Progress from '@radix-ui/react-progress';
 import { MacroCard } from "./MacroCard";
 
 interface DietSetupModalProps {
@@ -30,6 +31,7 @@ export default function DietSetupModal({isOpen, onClose, patients, onDietCreate}
 
     const [step, setStep] = useState<SetupStep>(1);
     const [formData, setFormData] = useState<DietSetupData>(INITIAL_DIET_DATA);
+    const progressValue = (step / 2) * 100;
 
     const resetForm = () => {
         setStep(1);
@@ -76,11 +78,34 @@ export default function DietSetupModal({isOpen, onClose, patients, onDietCreate}
 
     return (
         <Modal 
-            isOpen={isOpen} 
-            onClose={onClose} 
-            title={step === 1 ? "Crear nueva dieta" : "Configuración inicial"} 
-            size="xl" 
-            footer={
+        isOpen={isOpen} 
+        onClose={onClose} 
+        title={step === 1 ? "Crear nueva dieta" : "Configuración inicial"} 
+        size="xl" 
+        headerExtension={
+            <div className="space-y-2">
+                    {/* Subtítulo dinámico */}
+                    <p className="text-xs font-bold text-blue-brand uppercase">
+                        Paso 
+                        {step === 1 
+                            ? " 1: Seleccionar paciente" 
+                            : " 2: Configurar parámetros iniciales"
+                        }
+                    </p>
+                    
+                    {/* Radix Progress Bar */}
+                    <Progress.Root 
+                        className="relative overflow-hidden bg-gray-100 rounded-full w-full h-1"
+                        value={progressValue}
+                    >
+                        <Progress.Indicator
+                            className="bg-blue-brand w-full h-full transition-transform duration-500 ease-in-out"
+                            style={{ transform: `translateX(-${100 - progressValue}%)` }}
+                        />
+                    </Progress.Root>
+                </div>
+        }
+        footer={
                 <div className="flex justify-between items-center w-full">
                     <Button 
                         variant="secondary" 
