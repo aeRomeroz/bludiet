@@ -4,10 +4,10 @@
  * Ejemplo de cómo crear múltiples páginas en tu aplicación
  */
 
-export default function About() {
+export default function PatientsList() {
   return (
     <div className="space-y-8">
-      <h1 className="text-4xl font-bold">Acerca de BluDiet</h1>
+      <h1 className="text-4xl font-bold">Lista de Pacientes</h1>
       
       <section className="space-y-4">
         <h2 className="text-2xl font-bold">Nuestra Misión</h2>

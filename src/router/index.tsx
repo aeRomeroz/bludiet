@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import Home from '../pages/Home';
-import About from '../pages/About';
+import PatientsList from '../pages/PatientsList';
 import Contact from '../pages/Contact';
 import '../index.css';
 
@@ -29,12 +29,12 @@ export const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: 'about',
-        element: <About />,
+        path: 'patients',
+        element: <PatientsList/>,
       },
       {
-        path: 'contact',
-        element: <Contact />,
+        path: 'diets',
+        element: <Home/>,
       },
       // Agregar más rutas aquí
     ],
