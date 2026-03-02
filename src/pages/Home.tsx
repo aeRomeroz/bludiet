@@ -7,7 +7,9 @@ import { UtensilsCrossedIcon } from 'lucide-react';
 import TableComponent from '../components/ui/TableComponent';
 import { dummyPatients } from '../constants/patients';
 import type { Patient } from '../types/patients';
+import type { DietSetupData } from '../types/diet';
 import PatientCreateModal from '../components/dashboard/patients/PatientCreateModal';
+import DietSetupModal from '../components/dashboard/diets/DietSetupModal';
 
 /**
  * Home Page - Página de inicio
@@ -19,12 +21,22 @@ import PatientCreateModal from '../components/dashboard/patients/PatientCreateMo
 export default function Home() {
   const [name] = useState('Dietista');
   const [patients, setPatients] = useState<Patient[]>(dummyPatients);
-  const headers = ['PACIENTE', 'ESTADO', 'ULTIMA ACCIÓN', 'FECHA'];
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [diets, setDiets] = useState<DietSetupData[]>([]);
 
-  // FUNCIÓN PARA AÑADIR PACIENTE
+  const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
+  const [isDietModalOpen, setIsDietModalOpen] = useState(false);
+  
+  const headers = ['PACIENTE', 'ESTADO', 'ULTIMA ACCIÓN', 'FECHA'];
+
+  
   const handleAddPatient = (newPatient: Patient) => {
     setPatients((prev) => [newPatient, ...prev]);
+  };
+
+  const handleCreateDiet = (newDiet: DietSetupData) => {
+    setDiets((prev) => [newDiet, ...prev]);
+    // fetch a la API en un futuro
+    console.log("Dieta guardada en el estado:", newDiet);
   };
 
   const features = [
@@ -40,7 +52,7 @@ export default function Home() {
     },
     {
       title: 'Dietas Activas',
-      value: 12,
+      value: diets.length > 0 ? diets.length : 12,
       description: '+4% desde el último mes',
       icon: (
         <div className="flex items-center justify-center rounded-lg bg-green-brand/20 p-4 shrink-0">
@@ -70,8 +82,8 @@ export default function Home() {
         </div>
 
         <div className='flex gap-4'>
-          <Button variant="primary" className='flex items-center gap-3' onClick={()=>{setIsModalOpen(true)}}> <PlusIcon className='text-green-brand h-5 w-5'/> Paciente</Button>
-          <Button variant="primary" className='flex items-center gap-3'> <PlusIcon className='text-blue-brand h-5 w-5'/> Dieta</Button>
+          <Button variant="primary" className='flex items-center gap-3' onClick={()=>{setIsPatientModalOpen(true)}}> <PlusIcon className='text-green-brand h-5 w-5'/> Paciente</Button>
+          <Button variant="primary" className='flex items-center gap-3' onClick={()=>{setIsDietModalOpen(true)}}> <PlusIcon className='text-blue-brand h-5 w-5'/> Dieta</Button>
         </div>
       </div>
 
@@ -96,11 +108,18 @@ export default function Home() {
 
       <TableComponent title="Actividad de Pacientes Reciente" buttonText="Ver todos" buttonRoute="/pacientes" headers={headers} data={patients}/>
       <PatientCreateModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isPatientModalOpen} 
+        onClose={() => setIsPatientModalOpen(false)}
         onPatientCreate={handleAddPatient} 
       />
       
+      <DietSetupModal 
+        isOpen={isDietModalOpen} 
+        onClose={() => setIsDietModalOpen(false)}
+        patients={patients}
+        onDietCreate={handleCreateDiet}
+      />
+
       {/* SECCIÓN CTA */}
       <section className="text-center py-12 bg-gray-100 rounded-lg">
         <h2 className="text-2xl font-bold mb-4">¿Listo para transformar tu vida?</h2>
