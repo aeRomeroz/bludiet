@@ -53,7 +53,7 @@ export default function MacronutrientDistributionSlider({ value, onChange }: Pro
         minStepsBetweenThumbs={5} // Evita que un macro sea 0%
         onValueChange={handleValueChange}
       >
-        <Slider.Track className="bg-gray-200 relative grow rounded-full h-3 overflow-hidden flex">
+        <Slider.Track className="bg-gray-200 relative grow rounded-full h-2 overflow-hidden flex">
           {/* Segmento Proteína (Azul) */}
           <div 
             className="h-full bg-blue-brand transition-all duration-200" 

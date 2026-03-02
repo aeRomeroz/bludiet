@@ -79,27 +79,30 @@ export default function DietSetupModal({isOpen, onClose, patients, onDietCreate}
             isOpen={isOpen} 
             onClose={onClose} 
             title={step === 1 ? "Crear nueva dieta" : "Configuración inicial"} 
-            size="lg" 
+            size="xl" 
             footer={
-                <div className="flex justify-between w-full gap-3">
-                    {step === 2 && (
-                        <Button variant="secondary" onClick={() => setStep(1)} className="flex-1">
-                            Anterior
-                        </Button>
-                    )}
+                <div className="flex justify-between items-center w-full">
                     <Button 
                         variant="secondary" 
                         onClick={onClose} 
-                        className={step === 1 ? "flex-1" : "w-24"}
+                        className="px-6 border-none text-gray-500 hover:bg-gray-100"
                     >
                         Cancelar
                     </Button>
-                    <Button 
-                        onClick={step === 1 ? handleNext : handleSubmit}
-                        className="flex-1 bg-blue-brand text-white hover:bg-blue-brand/90 shadow-md transition-all"
-                    >
-                        {step === 1 ? "Siguiente " : "Crear"}
-                    </Button>
+                    
+                    <div className="flex gap-3 items-center">
+                        {step === 2 && (
+                            <Button variant="secondary" onClick={() => setStep(1)} className="px-4 text-sm">
+                                Anterior
+                            </Button>
+                        )}
+                        <Button 
+                            onClick={step === 1 ? handleNext : handleSubmit}
+                            className="min-w-[120px] px-8 bg-blue-brand text-white hover:bg-blue-brand/90 shadow-md transition-all"
+                        >
+                            {step === 1 ? "Siguiente " : "Crear"}
+                        </Button>
+                    </div>
                 </div>
             }
         >
