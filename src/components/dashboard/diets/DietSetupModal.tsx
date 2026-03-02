@@ -146,12 +146,12 @@ export default function DietSetupModal({isOpen, onClose, patients, onDietCreate}
                                 value={[formData.targetKcal]}
                                 onValueChange={([val]) => setFormData({...formData, targetKcal: val})}
                             >
-                                <Slider.Track className="bg-blue-200 relative grow rounded-full h-2">
+                                <Slider.Track className="bg-blue-brand/40 relative grow rounded-full h-1">
                                     <Slider.Range className="absolute bg-blue-brand rounded-full h-full" />
                                 </Slider.Track>     
 
 
-                                <Slider.Thumb className="block w-5 h-5 bg-white border-2 border-blue-brand rounded-full hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-brand shadow-md" />
+                                <Slider.Thumb className="block w-3 h-3 bg-blue-brand rounded-full outline-none hover:scale-110 cursor-grab shadow-[0_0_8px_3px_rgba(59,130,246,0.4)]" />
                             </Slider.Root>
 
                             <input
