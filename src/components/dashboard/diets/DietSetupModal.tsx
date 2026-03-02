@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 import Modal from "../../ui/Modal";
 import Button from "../../ui/Button";
 import toast from "react-hot-toast";
+import MacronutrientDistributionSlider from "./MacronutrientDistributionSlider";
+import { calculateGramsFromKcalPercentage, KCAL_PER_GRAM } from "../../../utils/diets/dietMath";
+import { FireIcon } from "@heroicons/react/24/solid";
+import * as Slider from "@radix-ui/react-slider";
 
 interface DietSetupModalProps {
     isOpen: boolean;
@@ -13,31 +17,29 @@ interface DietSetupModalProps {
 }
 
 export default function DietSetupModal({isOpen, onClose, patients, onDietCreate}: DietSetupModalProps) {
-    const [step, setStep] = useState<SetupStep>(1);
-    const [formData, setFormData] = useState<DietSetupData>({
+    const INITIAL_DIET_DATA: DietSetupData = {
         patientId: '',
         dietName: '',
         durationDays: 30,
         selectedMeals: [],
         targetKcal: 2000,
-        macros: { protein: 0, fats: 0, carbs: 0 },
+        macros: { protein: 25, fats: 35, carbs: 40 },
         startDate: new Date()
-    });
+    };
+
+    const [step, setStep] = useState<SetupStep>(1);
+    const [formData, setFormData] = useState<DietSetupData>(INITIAL_DIET_DATA);
+
+    const resetForm = () => {
+        setStep(1);
+        setFormData(INITIAL_DIET_DATA);
+    };
 
     useEffect(() => {
         if (!isOpen) {
-            setStep(1);
-            setFormData({
-                patientId: '',
-                dietName: '',
-                durationDays: 30,
-                selectedMeals: [],
-                targetKcal: 2000,
-                macros: { protein: 0, fats: 0, carbs: 0 },
-                startDate: new Date()
-            });
+            resetForm();
         }
-    }, [isOpen, onClose]);
+    }, [isOpen]);
 
     const handleNext = () => {
         if (!formData.patientId || !formData.dietName) {
@@ -58,17 +60,7 @@ export default function DietSetupModal({isOpen, onClose, patients, onDietCreate}
         toast.success("Configuración de dieta guardada");
         onClose();
 
-        // Limpiar estado 
-        setStep(1);
-        setFormData({
-            patientId: '',
-            dietName: '',
-            durationDays: 30,
-            selectedMeals: [],
-            targetKcal: 2000,
-            macros: { protein: 0, fats: 0, carbs: 0 },
-            startDate: new Date()
-        }); 
+        resetForm();
     };
 
     return (
@@ -145,59 +137,75 @@ export default function DietSetupModal({isOpen, onClose, patients, onDietCreate}
                     <div className="space-y-6">
                         {/* Target Calorías */}
                         <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
-                            <label className="block text-center text-xs font-bold text-blue-800 uppercase mb-2">Objetivo Calórico Total (Kcal)</label>
-                            <input 
+                                
+                            <label className="text-center items-center justify-center inline-flex gap-2 text-sm font-semibold text-black-primary uppercase mb-2"><FireIcon className="w-4 h-4 mx-auto text-fire shrink-0"/> Objetivo Calórico Total (Kcal)</label>
+                            <Slider.Root className="relative flex items-center select-none touch-none w-full h-5"
+                                min={500}
+                                max={5000}
+                                step={50}
+                                value={[formData.targetKcal]}
+                                onValueChange={([val]) => setFormData({...formData, targetKcal: val})}
+                            >
+                                <Slider.Track className="bg-blue-200 relative grow rounded-full h-2">
+                                    <Slider.Range className="absolute bg-blue-brand rounded-full h-full" />
+                                </Slider.Track>     
+
+
+                                <Slider.Thumb className="block w-5 h-5 bg-white border-2 border-blue-brand rounded-full hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-brand shadow-md" />
+                            </Slider.Root>
+
+                            <input
                                 type="number"
-                                className="w-full bg-white border-2 border-blue-200 p-3 rounded-lg text-center text-2xl font-bold text-blue-brand outline-none focus:border-blue-brand transition-all"
+                                className="w-full text-center text-2xl font-bold text-blue-brand bg-transparent border-none outline-none focus:bg-blue-50 focus:rounded-lg transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 value={formData.targetKcal}
+                                min={500}
+                                max={5000}
                                 onChange={(e) => setFormData({...formData, targetKcal: Number(e.target.value)})}
+                                onFocus={(e) => e.target.select()}
                             />
                         </div>
 
-                        {/* Inputs de Macros */}
-                        <div className="grid grid-cols-3 gap-4">
-                            <div className="flex flex-col gap-1">
-                                <label className="text-xs font-bold text-gray-primary uppercase text-center">Proteínas (g)</label>
-                                <input 
-                                    type="number"
-                                    className="border border-primary-30 p-2.5 rounded-lg text-center font-semibold focus:border-blue-brand outline-none"
-                                    value={formData.macros.protein}
-                                    onChange={(e) => setFormData({
-                                        ...formData, 
-                                        macros: {...formData.macros, protein: Number(e.target.value)}
-                                    })}
-                                />
+                        {/* Slider de Macros */}
+                        <div>
+                            <MacronutrientDistributionSlider
+                                value={{
+                                    p: formData.macros.protein,
+                                    g: formData.macros.fats,
+                                    c: formData.macros.carbs
+                                }}
+                                onChange={(newMacros) => setFormData({
+                                    ...formData,
+                                    macros: {
+                                        protein: newMacros.p,
+                                        fats: newMacros.g,
+                                        carbs: newMacros.c
+                                    }
+                                })}
+                            />
+                        </div>
+
+                        {/* DESGLOSE EN GRAMOS (Visualización de resultados) */}
+                        <div className="grid grid-cols-3 gap-3">
+                            <div className="bg-white border border-primary-30 p-3 rounded-xl text-center shadow-sm">
+                                <p className="text-[10px] font-bold text-blue-brand uppercase mb-1">Proteínas</p>
+                                <p className="text-xl font-bold text-black-primary">
+                                    {calculateGramsFromKcalPercentage(formData.macros.protein, KCAL_PER_GRAM.PROTEIN, formData.targetKcal)}<span className="text-xs ml-0.5 text-gray-secondary">g</span>
+                                </p>
                             </div>
-                            <div className="flex flex-col gap-1">
-                                <label className="text-xs font-bold text-gray-primary uppercase text-center">Grasas (g)</label>
-                                <input 
-                                    type="number"
-                                    className="border border-primary-30 p-2.5 rounded-lg text-center font-semibold focus:border-blue-brand outline-none"
-                                    value={formData.macros.fats}
-                                    onChange={(e) => setFormData({
-                                        ...formData, 
-                                        macros: {...formData.macros, fats: Number(e.target.value)}
-                                    })}
-                                />
+                            <div className="bg-white border border-primary-30 p-3 rounded-xl text-center shadow-sm">
+                                <p className="text-[10px] font-bold text-green-brand uppercase mb-1">Grasas</p>
+                                <p className="text-xl font-bold text-black-primary">
+                                    {calculateGramsFromKcalPercentage(formData.macros.fats, KCAL_PER_GRAM.FATS, formData.targetKcal)}<span className="text-xs ml-0.5 text-gray-secondary">g</span>
+                                </p>
                             </div>
-                            <div className="flex flex-col gap-1">
-                                <label className="text-xs font-bold text-gray-primary uppercase text-center">Carbs (g)</label>
-                                <input 
-                                    type="number"
-                                    className="border border-primary-30 p-2.5 rounded-lg text-center font-semibold focus:border-blue-brand outline-none"
-                                    value={formData.macros.carbs}
-                                    onChange={(e) => setFormData({
-                                        ...formData, 
-                                        macros: {...formData.macros, carbs: Number(e.target.value)}
-                                    })}
-                                />
+                            <div className="bg-white border border-primary-30 p-3 rounded-xl text-center shadow-sm">
+                                <p className="text-[10px] font-bold text-yellow-warning uppercase mb-1">Carbos</p>
+                                <p className="text-xl font-bold text-black-primary">
+                                    {calculateGramsFromKcalPercentage(formData.macros.carbs, KCAL_PER_GRAM.CARBS, formData.targetKcal)}<span className="text-xs ml-0.5 text-gray-secondary">g</span>
+                                </p>
                             </div>
                         </div>
 
-                        {/* Info tip informativa */}
-                        <p className="text-[11px] text-gray-secondary italic text-center">
-                            Tip: 1g Proteína/Carbo = 4 Kcal | 1g Grasa = 9 Kcal
-                        </p>
                     </div>
                 )}
             </div>
