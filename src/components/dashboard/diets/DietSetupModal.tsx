@@ -196,7 +196,7 @@ export default function DietSetupModal({isOpen, onClose, patients, onDietCreate}
                                         return (
                                             <button
                                                 key={meal.id}
-                                                type="button" // Evita el submit accidental
+                                                type="button" 
                                                 onClick={() => {
                                                     const newMeals = isSelected
                                                         ? formData.selectedMeals.filter(id => id !== meal.id)
@@ -205,7 +205,7 @@ export default function DietSetupModal({isOpen, onClose, patients, onDietCreate}
                                                     setFormData({ ...formData, selectedMeals: newMeals });
                                                 }}
                                                 className={`
-                                                    px-4 py-2 rounded-full border text-sm font-medium transition-all duration-200
+                                                    px-4 py-2 rounded-full border text-sm font-medium transition-all duration-200 cursor-pointer
                                                     ${isSelected 
                                                         ? 'bg-blue-brand border-blue-brand text-white shadow-sm scale-105' 
                                                         : 'bg-white border-gray-200 text-gray-500 hover:border-blue-brand/50 hover:text-blue-brand'}
