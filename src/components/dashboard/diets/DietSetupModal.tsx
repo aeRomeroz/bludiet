@@ -10,6 +10,7 @@ import { FireIcon } from "@heroicons/react/24/solid";
 import * as Slider from "@radix-ui/react-slider";
 import * as Progress from '@radix-ui/react-progress';
 import { MacroCard } from "./MacroCard";
+import { DEFAULT_MEALS } from "../../../constants/diet";
 
 interface DietSetupModalProps {
     isOpen: boolean;
@@ -28,6 +29,8 @@ export default function DietSetupModal({isOpen, onClose, patients, onDietCreate}
         macros: { protein: 25, fats: 35, carbs: 40 },
         startDate: new Date()
     };
+
+    
 
     const [step, setStep] = useState<SetupStep>(1);
     const [formData, setFormData] = useState<DietSetupData>(INITIAL_DIET_DATA);
@@ -181,16 +184,38 @@ export default function DietSetupModal({isOpen, onClose, patients, onDietCreate}
                                 />
                             </div>
                         </div>
+
+                        {/*COMIDAS*/}
                         <div>
                             <div className="flex flex-col gap-1">
                                 <label className="text-xs font-bold text-black-primary uppercase">Comidas</label>
-                                <input 
-                                    type="text"
-                                    placeholder="Ej. Definición Verano / Volumen Limpio"
-                                    className="bg-white border border-primary-30 p-2.5 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-brand/20"
-                                    value={formData.dietName}
-                                    onChange={(e) => setFormData({...formData, dietName: e.target.value})}
-                                />
+                                <div className="flex flex-wrap gap-2">
+                                    {DEFAULT_MEALS.map((meal) => {
+                                        const isSelected = formData.selectedMeals.includes(meal.id);
+                                        
+                                        return (
+                                            <button
+                                                key={meal.id}
+                                                type="button" // Evita el submit accidental
+                                                onClick={() => {
+                                                    const newMeals = isSelected
+                                                        ? formData.selectedMeals.filter(id => id !== meal.id)
+                                                        : [...formData.selectedMeals, meal.id];
+                                                    
+                                                    setFormData({ ...formData, selectedMeals: newMeals });
+                                                }}
+                                                className={`
+                                                    px-4 py-2 rounded-full border text-sm font-medium transition-all duration-200
+                                                    ${isSelected 
+                                                        ? 'bg-blue-brand border-blue-brand text-white shadow-sm scale-105' 
+                                                        : 'bg-white border-gray-200 text-gray-500 hover:border-blue-brand/50 hover:text-blue-brand'}
+                                                `}
+                                            >
+                                                {meal.label}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </div>
 
