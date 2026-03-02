@@ -8,6 +8,7 @@ import MacronutrientDistributionSlider from "./MacronutrientDistributionSlider";
 import { calculateGramsFromKcalPercentage, KCAL_PER_GRAM } from "../../../utils/diets/dietMath";
 import { FireIcon } from "@heroicons/react/24/solid";
 import * as Slider from "@radix-ui/react-slider";
+import { MacroCard } from "./MacroCard";
 
 interface DietSetupModalProps {
     isOpen: boolean;
@@ -20,9 +21,9 @@ export default function DietSetupModal({isOpen, onClose, patients, onDietCreate}
     const INITIAL_DIET_DATA: DietSetupData = {
         patientId: '',
         dietName: '',
-        durationDays: 30,
+        durationDays: 7,
         selectedMeals: [],
-        targetKcal: 2000,
+        targetKcal: 1800,
         macros: { protein: 25, fats: 35, carbs: 40 },
         startDate: new Date()
     };
@@ -42,14 +43,24 @@ export default function DietSetupModal({isOpen, onClose, patients, onDietCreate}
     }, [isOpen]);
 
     const handleNext = () => {
-        if (!formData.patientId || !formData.dietName) {
-            toast.error("Por favor completa los datos básicos");
+        if (!formData.patientId || formData.patientId === '') {
+            toast.error("Por favor selecciona un paciente para continuar");
             return;
         }
         setStep(2);
     };
 
     const handleSubmit = () => {
+        if (!formData.dietName || formData.dietName.trim() === '') {
+            toast.error("El nombre de la dieta no puede estar vacío");
+            return;
+        }
+        
+        if (formData.durationDays <= 0) {
+            toast.error("La duración de la dieta debe ser mayor a 0 días");
+            return;
+        }
+
         // Validación rápida de macros (opcional: que sumen algo lógico)
         if (formData.targetKcal <= 0) {
             toast.error("Las calorías deben ser mayores a 0");
@@ -110,31 +121,53 @@ export default function DietSetupModal({isOpen, onClose, patients, onDietCreate}
                             </select>
                         </div>
 
-                        {/* Nombre de la Dieta */}
-                        <div className="flex flex-col gap-1">
-                            <label className="text-xs font-bold text-gray-primary uppercase">Nombre del Plan</label>
-                            <input 
-                                type="text"
-                                placeholder="Ej. Definición Verano / Volumen Limpio"
-                                className="bg-white border border-primary-30 p-2.5 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-brand/20"
-                                value={formData.dietName}
-                                onChange={(e) => setFormData({...formData, dietName: e.target.value})}
-                            />
-                        </div>
+                        
 
-                        {/* Duración */}
-                        <div className="flex flex-col gap-1">
-                            <label className="text-xs font-bold text-gray-primary uppercase">Duración (Días)</label>
-                            <input 
-                                type="number"
-                                className="bg-white border border-primary-30 p-2.5 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-brand/20"
-                                value={formData.durationDays}
-                                onChange={(e) => setFormData({...formData, durationDays: Number(e.target.value)})}
-                            />
-                        </div>
+                        
                     </div>
                 ) : (
                     <div className="space-y-6">
+                        {/*SECCION CARACTERÍSTICAS*/}
+                        <div className="text-xl font-bold">Características<hr className="border-gray-300" /></div>
+                        <div className="flex gap-6">
+                            {/* Nombre de la Dieta */}
+                            <div className="flex flex-col gap-1 w-3/5">
+                                <label className="text-xs font-bold text-black-primary">Nombre de la Dieta</label>
+                                <input 
+                                    type="text"
+                                    placeholder="Ej. Definición Verano / Volumen Limpio"
+                                    className="bg-white border border-primary-30 p-2.5 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-brand/20"
+                                    value={formData.dietName}
+                                    onChange={(e) => setFormData({...formData, dietName: e.target.value})}
+                                />
+                            </div>
+                            {/* Duración */}
+                            <div className="flex flex-col gap-1 w-2/5">
+                                <label className="text-xs font-bold text-black-primary">Duración (Días)</label>
+                                <input 
+                                    type="number"
+                                    min="1"
+                                    className="bg-white border border-primary-30 p-2.5 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-brand/20"
+                                    value={formData.durationDays}
+                                    onChange={(e) => setFormData({...formData, durationDays: Number(e.target.value)})}
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <div className="flex flex-col gap-1">
+                                <label className="text-xs font-bold text-black-primary uppercase">Comidas</label>
+                                <input 
+                                    type="text"
+                                    placeholder="Ej. Definición Verano / Volumen Limpio"
+                                    className="bg-white border border-primary-30 p-2.5 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-brand/20"
+                                    value={formData.dietName}
+                                    onChange={(e) => setFormData({...formData, dietName: e.target.value})}
+                                />
+                            </div>
+                        </div>
+
+                        {/*SECCION INGESTA DIARIA*/}
+                        <div className="text-xl font-bold">Ingesta Diaria<hr className="border-gray-300" /></div>
                         {/* Target Calorías */}
                         <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
                                 
@@ -186,24 +219,21 @@ export default function DietSetupModal({isOpen, onClose, patients, onDietCreate}
 
                         {/* DESGLOSE EN GRAMOS (Visualización de resultados) */}
                         <div className="grid grid-cols-3 gap-3">
-                            <div className="bg-white border border-primary-30 p-3 rounded-xl text-center shadow-sm">
-                                <p className="text-[10px] font-bold text-blue-brand uppercase mb-1">Proteínas</p>
-                                <p className="text-xl font-bold text-black-primary">
-                                    {calculateGramsFromKcalPercentage(formData.macros.protein, KCAL_PER_GRAM.PROTEIN, formData.targetKcal)}<span className="text-xs ml-0.5 text-gray-secondary">g</span>
-                                </p>
-                            </div>
-                            <div className="bg-white border border-primary-30 p-3 rounded-xl text-center shadow-sm">
-                                <p className="text-[10px] font-bold text-green-brand uppercase mb-1">Grasas</p>
-                                <p className="text-xl font-bold text-black-primary">
-                                    {calculateGramsFromKcalPercentage(formData.macros.fats, KCAL_PER_GRAM.FATS, formData.targetKcal)}<span className="text-xs ml-0.5 text-gray-secondary">g</span>
-                                </p>
-                            </div>
-                            <div className="bg-white border border-primary-30 p-3 rounded-xl text-center shadow-sm">
-                                <p className="text-[10px] font-bold text-yellow-warning uppercase mb-1">Carbos</p>
-                                <p className="text-xl font-bold text-black-primary">
-                                    {calculateGramsFromKcalPercentage(formData.macros.carbs, KCAL_PER_GRAM.CARBS, formData.targetKcal)}<span className="text-xs ml-0.5 text-gray-secondary">g</span>
-                                </p>
-                            </div>
+                            <MacroCard 
+                                label="Proteínas" 
+                                color="text-blue-brand" 
+                                grams={calculateGramsFromKcalPercentage(formData.macros.protein, KCAL_PER_GRAM.PROTEIN, formData.targetKcal)} 
+                            />
+                            <MacroCard 
+                                label="Grasas" 
+                                color="text-green-brand" 
+                                grams={calculateGramsFromKcalPercentage(formData.macros.fats, KCAL_PER_GRAM.FATS, formData.targetKcal)} 
+                            />
+                            <MacroCard 
+                                label="Carbos" 
+                                color="text-yellow-warning" 
+                                grams={calculateGramsFromKcalPercentage(formData.macros.carbs, KCAL_PER_GRAM.CARBS, formData.targetKcal)} 
+                            />
                         </div>
 
                     </div>
