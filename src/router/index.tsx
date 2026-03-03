@@ -3,6 +3,7 @@ import Layout from '../components/layout/Layout';
 import Home from '../pages/Home';
 import PatientsList from '../pages/PatientsList';
 import Contact from '../pages/Contact';
+import PatientDetail from '../pages/PatientDetail';
 import '../index.css';
 
 /**
@@ -29,6 +30,10 @@ export const router = createBrowserRouter([
         element: <Home />,
       },
       {
+        path: 'patients/:id',
+        element: <PatientDetail/>,
+      },
+      {
         path: 'patients',
         element: <PatientsList/>,
       },
@@ -36,6 +41,10 @@ export const router = createBrowserRouter([
         path: 'diets',
         element: <Home/>,
       },
+      // {
+      //     path: 'patients/:id',
+      //     element: <PatientDetail/>,  // ← añadir
+      // },
       // Agregar más rutas aquí
     ],
   },

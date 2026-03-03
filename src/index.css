@@ -25,6 +25,9 @@ body {
   color: var(--color-black-primary);
 }
 
+.rt-TableCell {
+    vertical-align: middle;
+}
 
 @layer utilities {
   .border-primary-30 {

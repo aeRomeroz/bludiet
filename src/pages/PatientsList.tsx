@@ -1,32 +1,67 @@
-/**
- * About Page
- * 
- * Ejemplo de cómo crear múltiples páginas en tu aplicación
- */
+import { useState } from "react";
+import { PlusIcon } from "@heroicons/react/24/outline";
+import Button from "../components/ui/Button";
+import PatientsTable from "../components/dashboard/patients/PatientsTable";
+import PatientsToolbar from "../components/dashboard/patients/PatientsToolbar";
+import PatientCreateModal from "../components/dashboard/patients/PatientCreateModal";
+import { usePatients } from "../context/PatientsContext";
+import type { Patient, Status } from "../types/patients";
 
 export default function PatientsList() {
-  return (
-    <div className="space-y-8">
-      <h1 className="text-4xl font-bold">Lista de Pacientes</h1>
-      
-      <section className="space-y-4">
-        <h2 className="text-2xl font-bold">Nuestra Misión</h2>
-        <p className="text-gray-700 leading-relaxed">
-          BluDiet es una plataforma dedicada a ayudarte a alcanzar 
-          tus objetivos de salud y bienestar a través de planes 
-          de nutrición personalizados.
-        </p>
-      </section>
+    console.log('PatientsList montado');
+    const { patients, addPatient } = usePatients();
+    const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
+    const [search, setSearch] = useState('');
+    const [statusFilter, setStatusFilter] = useState<Status | 'ALL'>('ALL');
 
-      <section className="space-y-4">
-        <h2 className="text-2xl font-bold">¿Por qué elegirnos?</h2>
-        <ul className="list-disc list-inside space-y-2 text-gray-700">
-          <li>Planes personalizados según tus necesidades</li>
-          <li>Seguimiento detallado de progreso</li>
-          <li>Comunidad activa y solidaria</li>
-          <li>Soporte profesional disponible</li>
-        </ul>
-      </section>
-    </div>
-  );
+    const filteredPatients = patients.filter((p) => {
+        const matchesSearch = `${p.firstName} ${p.lastName}`
+            .toLowerCase()
+            .includes(search.toLowerCase());
+        const matchesStatus = statusFilter === 'ALL' || p.status === statusFilter;
+        return matchesSearch && matchesStatus;
+    });
+
+    const handleAddPatient = (newPatient: Patient) => {
+        addPatient(newPatient);
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className="flex justify-between items-center">
+                <div>
+                    <h1 className="text-black-primary font-serif text-4xl font-bold">Pacientes</h1>
+                    <span className="text-gray-primary">Gestiona y consulta el listado completo de tus pacientes</span>
+                </div>
+                <Button
+                    variant="primary"
+                    className="flex items-center gap-3"
+                    onClick={() => setIsPatientModalOpen(true)}
+                >
+                    <PlusIcon className="text-green-brand h-5 w-5" />
+                    Paciente
+                </Button>
+            </div>
+
+            <PatientsToolbar
+                search={search}
+                onSearchChange={setSearch}
+                statusFilter={statusFilter}
+                onStatusFilterChange={setStatusFilter}
+            />
+
+            <PatientsTable
+                patients={filteredPatients}
+                onEdit={(patient) => console.log('Editar:', patient)}
+                onDelete={(patient) => console.log('Eliminar:', patient)}
+                onCreateDiet={(patient) => console.log('Crear dieta:', patient)}
+            />
+
+            <PatientCreateModal
+                isOpen={isPatientModalOpen}
+                onClose={() => setIsPatientModalOpen(false)}
+                onPatientCreate={handleAddPatient}
+            />
+        </div>
+    );
 }
