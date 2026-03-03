@@ -1,8 +1,9 @@
 import { createBrowserRouter } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import Home from '../pages/Home';
-import About from '../pages/About';
-import Contact from '../pages/Contact';
+import PatientsList from '../pages/PatientsList';
+import PatientDetail from '../pages/PatientDetail';
+import '../index.css';
 
 /**
  * Configuración de rutas
@@ -28,13 +29,21 @@ export const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: 'about',
-        element: <About />,
+        path: 'patients/:id',
+        element: <PatientDetail/>,
       },
       {
-        path: 'contact',
-        element: <Contact />,
+        path: 'patients',
+        element: <PatientsList/>,
       },
+      {
+        path: 'diets',
+        element: <Home/>,
+      },
+      // {
+      //     path: 'patients/:id',
+      //     element: <PatientDetail/>,  // ← añadir
+      // },
       // Agregar más rutas aquí
     ],
   },

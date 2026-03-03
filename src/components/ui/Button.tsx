@@ -16,20 +16,24 @@ interface ButtonProps {
   onClick?: () => void;
   disabled?: boolean;
   className?: string;
+  type?: 'button' | 'submit' | 'reset';
+  form?: string; 
 }
 
 export default function Button({
   children,
-  variant = 'primary',
+  variant,
   size = 'medium',
   onClick,
   disabled = false,
   className = '',
+  type = 'button', 
+  form
 }: ButtonProps) {
-  const baseStyles = 'font-bold rounded-lg transition cursor-pointer';
+  const baseStyles = 'rounded-lg transition cursor-pointer';
 
   const variantStyles = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700',
+    primary: 'bg-white text-black-primary border-[0.5px] border-primary-30 hover:bg-gray-300/20',
     secondary: 'bg-gray-300 text-gray-800 hover:bg-gray-400',
     danger: 'bg-red-600 text-white hover:bg-red-700',
   };
@@ -42,10 +46,12 @@ export default function Button({
 
   const disabled_style = disabled ? 'opacity-50 cursor-not-allowed' : '';
 
-  const finalClassName = `${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${disabled_style} ${className}`;
+  const finalClassName = `${baseStyles} ${variant ? variantStyles[variant] : ''} ${sizeStyles[size]} ${disabled_style} ${className}`;
 
   return (
     <button
+      type={type}
+      form={form}
       className={finalClassName}
       onClick={onClick}
       disabled={disabled}

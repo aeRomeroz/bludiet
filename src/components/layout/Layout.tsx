@@ -17,8 +17,8 @@ import logo from '../../assets/bludiet_logo.svg';
 export default function Layout() {
   const navLinks = [
     { name: 'Inicio', path: '/' },
-    { name: 'Pacientes', path: '/about' },
-    { name: 'Dietas', path: '/contact' },
+    { name: 'Pacientes', path: '/patients' },
+    { name: 'Dietas', path: '/diets' },
   ];
 
   const linkStyles = ({ isActive }: { isActive: boolean }) => 
@@ -52,7 +52,7 @@ export default function Layout() {
         </div>
       </nav>
 
-      <main className="flex-1 container mx-auto p-4">
+      <main className="flex-1 w-full px-12 py-12 bg-primary">
         <Outlet />
       </main>
 

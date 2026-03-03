@@ -1,7 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,600;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import "@radix-ui/themes/styles.css";
 @import "tailwindcss";
+
+@theme {
+  --color-primary: #F8FAFC;
+  --color-black-primary: #191919;
+  --color-border-primary: #BFBFBF;
+  --color-green-brand: #80BF3A;
+  --color-blue-brand: #396DB0;
+  --color-gray-primary: #606060;
+  --color-gray-secondary: #B0B0B0;
+  --color-yellow-warning: #E2C000;
+  --color-green-active: #349E1F;
+  --color-red-error: #E0000F;
+  --color-fire: #FF7700;
+}
+
+:root {
+  font-family: "Lato", sans-serif;
+}
+
+body {
+  background-color: var(--color-primary);
+  color: var(--color-black-primary);
+}
+
+.rt-TableCell {
+    vertical-align: middle;
+}
 
 @layer utilities {
   .border-primary-30 {
-    border-color: rgba(191, 191, 191, 0.3);
+    border-color: color-mix(in srgb, var(--color-border-primary), transparent 70%);
   }
 }
