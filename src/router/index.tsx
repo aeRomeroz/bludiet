@@ -2,7 +2,6 @@ import { createBrowserRouter } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import Home from '../pages/Home';
 import PatientsList from '../pages/PatientsList';
-import Contact from '../pages/Contact';
 import PatientDetail from '../pages/PatientDetail';
 import '../index.css';
 
