@@ -107,7 +107,7 @@ export default function Home() {
         </div>
       </section>
 
-      <TableComponent title="Actividad de Pacientes Reciente" buttonText="Ver todos" buttonRoute="/pacientes" headers={headers} data={patients} limit={5}/>
+      <TableComponent title="Actividad de Pacientes Reciente" buttonText="Ver todos" buttonRoute="/patients" headers={headers} data={patients} limit={5}/>
       <PatientCreateModal 
         isOpen={isPatientModalOpen} 
         onClose={() => setIsPatientModalOpen(false)}
@@ -120,18 +120,6 @@ export default function Home() {
         patients={patients}
         onDietCreate={handleCreateDiet}
       />
-
-      {/* SECCIÓN CTA */}
-      <section className="text-center py-12 bg-gray-100 rounded-lg">
-        <h2 className="text-2xl font-bold mb-4">¿Listo para transformar tu vida?</h2>
-        <p className="text-gray-600 mb-6">
-          Únete a miles de personas que ya están mejorando su salud
-        </p>
-        <div className="flex gap-4 justify-center flex-wrap">
-          <Button variant="primary">Crear Cuenta</Button>
-          <Button variant="secondary">Aprender Más</Button>
-        </div>
-      </section>
     </div>
   );
 }

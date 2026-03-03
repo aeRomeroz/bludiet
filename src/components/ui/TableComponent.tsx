@@ -58,7 +58,7 @@
                 <Table.Row className="bg-gray-secondary/30">
                     {headers.map((header, index) => (
                       <Table.ColumnHeaderCell key={index} className="p-0">
-                        <div className="text-gray-primary font-medium uppercase tracking-wider py-4 px-6 text-xs text-center">
+                        <div className="text-gray-primary font-medium uppercase tracking-wider py-4 px-6 text-xs text-left">
                           {header}
                         </div>
                       </Table.ColumnHeaderCell>
@@ -75,12 +75,19 @@
                   className="cursor-pointer hover:bg-gray-50 transition-colors"
                   onClick={() => toggleRow(index)}
                 >
-                  <Table.Cell className="p-0 text-center">
-                    <div className="font-medium text-black-primary py-4 px-6">
-                      {item.firstName} {item.lastName}
+                  <Table.Cell className="p-0 text-left">
+                    <div className="py-3 px-6 font-medium text-black-primary flex items-center gap-3">
+                        {item.avatarUrl ? (
+                            <img src={item.avatarUrl} className="w-8 h-8 rounded-full object-cover" />
+                        ) : (
+                            <div className="w-8 h-8 rounded-full bg-blue-brand/20 flex items-center justify-center text-blue-brand text-xs font-bold">
+                                {item.firstName[0]}{item.lastName[0]}
+                            </div>
+                        )}
+                        {item.firstName} {item.lastName}
                     </div>
                   </Table.Cell>
-                  <Table.Cell className="p-0 text-center">
+                  <Table.Cell className="p-0 text-left">
                     <div className="text-gray-primary py-4 px-6">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[item.status]} tracking-wide uppercase`}>
                         {PATIENT_STATUS[item.status]}
@@ -89,8 +96,8 @@
                   </Table.Cell>
                   
                   {/* ULTIMA ACCIÓN (Mapeado a motivo por ahora) */}
-                  <Table.Cell className="p-0 text-center">
-                    <div className="font-medium text-black-primary py-4 px-6">
+                  <Table.Cell className="p-0 text-left">
+                    <div className="font-medium text-black-primary py-4 px-6 text-sm">
                       {item.consultationReason.length > 20 
                       ? `${item.consultationReason.substring(0, 20)}...` 
                       : item.consultationReason}
@@ -98,8 +105,8 @@
                   </Table.Cell>
 
                   {/* FECHA (Usando birthDate como placeholder) */}
-                  <Table.Cell className="p-0 text-center">
-                    <div className="lining-nums py-4 px-6">
+                  <Table.Cell className="p-0 text-left">
+                    <div className="lining-nums py-4 px-6 text-sm">
                       {item.birthDate}
                     </div>
                   </Table.Cell>
