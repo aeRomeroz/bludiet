@@ -10,6 +10,7 @@
       buttonRoute?: string;
       headers: string[];
       data: Patient[];
+      limit: number;
   }
 
   const statusStyles: Record<Status, string> = {
@@ -23,13 +24,16 @@
     buttonText,
     buttonRoute,
     headers,
-    data
+    data,
+    limit
   }: TableComponentProps) {
       const [expandedRow, setExpandedRow] = useState<number | null>(null);
 
       const toggleRow = (index: number) => {
         setExpandedRow(expandedRow === index ? null : index);
       };
+
+      const displayedData = limit ? data.slice(0, limit) : data; 
 
       return (
         <div className="bg-white border-[0.5px] border-primary-30 rounded-lg overflow-hidden w-full">
@@ -64,7 +68,7 @@
             </Table.Header>
 
             <Table.Body>
-              {data.map((item, index) => (
+              {displayedData.map((item, index) => (
               <React.Fragment key={item.id}>
                 {/* Fila Principal */}
                 <Table.Row 

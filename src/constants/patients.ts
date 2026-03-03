@@ -68,7 +68,7 @@ export const dummyPatients: Patient[] = [
     medicalHistory: {
       chronicDiseases: { hasCondition: true, observation: 'Hipotiroidismo controlado con Levotiroxina' },
       previousSurgeries: { hasCondition: true, observation: 'Cesárea en 2023' },
-      allergies: { hasCondition: true, observation: 'Alergia al mariscos' },
+      allergies: { hasCondition: true, observation: 'Alergia a los mariscos' },
       medications: { hasCondition: true, observation: 'Levotiroxina 50mcg diaria' },
       smokes: { hasCondition: false, observation: '' },
       drinksAlcohol: { hasCondition: false, observation: '' }
@@ -181,9 +181,287 @@ export const dummyPatients: Patient[] = [
       chronicDiseases: { hasCondition: true, observation: 'Anemia ferropénica recurrente' },
       previousSurgeries: { hasCondition: false, observation: '' },
       allergies: { hasCondition: false, observation: '' },
-      medications: { hasCondition: true, observation: 'Suplemento de hierro bisglicianato 25mg' },
+      medications: { hasCondition: true, observation: 'Suplemento de hierro bisglicinato 25mg' },
       smokes: { hasCondition: false, observation: '' },
       drinksAlcohol: { hasCondition: false, observation: '' }
+    }
+  },
+  {
+    id: '11',
+    firstName: 'Diego',
+    lastName: 'Morales',
+    birthDate: '1988-03-22',
+    gender: 'Male',
+    occupation: 'Bombero',
+    consultationReason: 'Optimización de rendimiento físico y dieta alta en proteínas',
+    status: 'ACTIVE',
+    avatarUrl: 'https://randomuser.me/api/portraits/men/45.jpg',
+    medicalHistory: {
+      chronicDiseases: { hasCondition: false, observation: '' },
+      previousSurgeries: { hasCondition: true, observation: 'Operación de menisco izquierdo en 2021' },
+      allergies: { hasCondition: false, observation: '' },
+      medications: { hasCondition: false, observation: '' },
+      smokes: { hasCondition: false, observation: '' },
+      drinksAlcohol: { hasCondition: true, observation: 'Ocasional, una vez al mes' }
+    }
+  },
+  {
+    id: '12',
+    firstName: 'Camila',
+    lastName: 'Vega',
+    birthDate: '2002-08-14',
+    gender: 'Female',
+    occupation: 'Estudiante de medicina',
+    consultationReason: 'Control de hábitos alimenticios durante guardia hospitalaria',
+    status: 'PENDING',
+    medicalHistory: {
+      chronicDiseases: { hasCondition: false, observation: '' },
+      previousSurgeries: { hasCondition: false, observation: '' },
+      allergies: { hasCondition: false, observation: '' },
+      medications: { hasCondition: false, observation: '' },
+      smokes: { hasCondition: false, observation: '' },
+      drinksAlcohol: { hasCondition: false, observation: '' }
+    }
+  },
+  {
+    id: '13',
+    firstName: 'Fernando',
+    lastName: 'Castro',
+    birthDate: '1975-11-30',
+    gender: 'Male',
+    occupation: 'Chef profesional',
+    consultationReason: 'Paradójicamente con sobrepeso, busca reeducar sus hábitos alimenticios',
+    status: 'REVIEW',
+    avatarUrl: 'https://randomuser.me/api/portraits/men/58.jpg',
+    medicalHistory: {
+      chronicDiseases: { hasCondition: true, observation: 'Hígado graso grado II' },
+      previousSurgeries: { hasCondition: false, observation: '' },
+      allergies: { hasCondition: false, observation: '' },
+      medications: { hasCondition: false, observation: '' },
+      smokes: { hasCondition: true, observation: 'Fumador habitual, 5-10 cigarrillos diarios' },
+      drinksAlcohol: { hasCondition: true, observation: 'Frecuente por entorno laboral' }
+    }
+  },
+  {
+    id: '14',
+    firstName: 'Natalia',
+    lastName: 'Jiménez',
+    birthDate: '1991-04-05',
+    gender: 'Female',
+    occupation: 'Psicóloga',
+    consultationReason: 'Alimentación consciente y manejo de alimentación emocional',
+    status: 'ACTIVE',
+    avatarUrl: 'https://randomuser.me/api/portraits/women/33.jpg',
+    medicalHistory: {
+      chronicDiseases: { hasCondition: false, observation: '' },
+      previousSurgeries: { hasCondition: false, observation: '' },
+      allergies: { hasCondition: true, observation: 'Intolerancia a la fructosa' },
+      medications: { hasCondition: false, observation: '' },
+      smokes: { hasCondition: false, observation: '' },
+      drinksAlcohol: { hasCondition: false, observation: '' }
+    }
+  },
+  {
+    id: '15',
+    firstName: 'Pablo',
+    lastName: 'Mendoza',
+    birthDate: '1983-07-19',
+    gender: 'Male',
+    occupation: 'Abogado',
+    consultationReason: 'Pérdida de peso antes de boda, dieta sostenible a largo plazo',
+    status: 'ACTIVE',
+    medicalHistory: {
+      chronicDiseases: { hasCondition: false, observation: '' },
+      previousSurgeries: { hasCondition: false, observation: '' },
+      allergies: { hasCondition: false, observation: '' },
+      medications: { hasCondition: false, observation: '' },
+      smokes: { hasCondition: false, observation: '' },
+      drinksAlcohol: { hasCondition: true, observation: 'Social, fines de semana' }
+    }
+  },
+  {
+    id: '16',
+    firstName: 'Lucía',
+    lastName: 'Romero',
+    birthDate: '1996-01-28',
+    gender: 'Female',
+    occupation: 'Fisioterapeuta',
+    consultationReason: 'Nutrición antiinflamatoria para recuperación de lesiones deportivas',
+    status: 'ACTIVE',
+    avatarUrl: 'https://randomuser.me/api/portraits/women/68.jpg',
+    medicalHistory: {
+      chronicDiseases: { hasCondition: false, observation: '' },
+      previousSurgeries: { hasCondition: true, observation: 'Ligamento cruzado anterior en 2022' },
+      allergies: { hasCondition: false, observation: '' },
+      medications: { hasCondition: false, observation: '' },
+      smokes: { hasCondition: false, observation: '' },
+      drinksAlcohol: { hasCondition: false, observation: '' }
+    }
+  },
+  {
+    id: '17',
+    firstName: 'Héctor',
+    lastName: 'Navarro',
+    birthDate: '1969-09-11',
+    gender: 'Male',
+    occupation: 'Camionero',
+    consultationReason: 'Mejora de alimentación en viajes largos y control de tensión arterial',
+    status: 'PENDING',
+    medicalHistory: {
+      chronicDiseases: { hasCondition: true, observation: 'Hipertensión arterial grado I' },
+      previousSurgeries: { hasCondition: false, observation: '' },
+      allergies: { hasCondition: false, observation: '' },
+      medications: { hasCondition: true, observation: 'Amlodipino 5mg diario' },
+      smokes: { hasCondition: true, observation: 'Fumador habitual desde hace 20 años' },
+      drinksAlcohol: { hasCondition: true, observation: 'Cerveza ocasional en paradas' }
+    }
+  },
+  {
+    id: '18',
+    firstName: 'Ana',
+    lastName: 'Guerrero',
+    birthDate: '1987-05-03',
+    gender: 'Female',
+    occupation: 'Arquitecta',
+    consultationReason: 'Dieta para mejorar concentración y energía en jornadas largas de trabajo',
+    status: 'REVIEW',
+    avatarUrl: 'https://randomuser.me/api/portraits/women/12.jpg',
+    medicalHistory: {
+      chronicDiseases: { hasCondition: false, observation: '' },
+      previousSurgeries: { hasCondition: false, observation: '' },
+      allergies: { hasCondition: true, observation: 'Alergia a los frutos secos' },
+      medications: { hasCondition: false, observation: '' },
+      smokes: { hasCondition: false, observation: '' },
+      drinksAlcohol: { hasCondition: false, observation: '' }
+    }
+  },
+  {
+    id: '19',
+    firstName: 'Tomás',
+    lastName: 'Ibáñez',
+    birthDate: '2001-02-17',
+    gender: 'Male',
+    occupation: 'Jugador de fútbol semiprofesional',
+    consultationReason: 'Plan de nutrición para pretemporada y aumento de masa muscular',
+    status: 'ACTIVE',
+    medicalHistory: {
+      chronicDiseases: { hasCondition: false, observation: '' },
+      previousSurgeries: { hasCondition: false, observation: '' },
+      allergies: { hasCondition: false, observation: '' },
+      medications: { hasCondition: false, observation: '' },
+      smokes: { hasCondition: false, observation: '' },
+      drinksAlcohol: { hasCondition: false, observation: '' }
+    }
+  },
+  {
+    id: '20',
+    firstName: 'Elena',
+    lastName: 'Paredes',
+    birthDate: '1979-12-01',
+    gender: 'Female',
+    occupation: 'Médica de familia',
+    consultationReason: 'Menopausia precoz, ajuste nutricional hormonal y control de peso',
+    status: 'PENDING',
+    avatarUrl: 'https://randomuser.me/api/portraits/women/79.jpg',
+    medicalHistory: {
+      chronicDiseases: { hasCondition: true, observation: 'Osteopenia incipiente' },
+      previousSurgeries: { hasCondition: false, observation: '' },
+      allergies: { hasCondition: false, observation: '' },
+      medications: { hasCondition: true, observation: 'Calcio + Vitamina D3 diario' },
+      smokes: { hasCondition: false, observation: '' },
+      drinksAlcohol: { hasCondition: false, observation: '' }
+    }
+  },
+  {
+    id: '21',
+    firstName: 'Sergio',
+    lastName: 'Delgado',
+    birthDate: '1994-06-08',
+    gender: 'Male',
+    occupation: 'Programador freelance',
+    consultationReason: 'Sedentarismo y malos hábitos alimenticios por trabajo remoto',
+    status: 'REVIEW',
+    medicalHistory: {
+      chronicDiseases: { hasCondition: false, observation: '' },
+      previousSurgeries: { hasCondition: false, observation: '' },
+      allergies: { hasCondition: false, observation: '' },
+      medications: { hasCondition: false, observation: '' },
+      smokes: { hasCondition: false, observation: '' },
+      drinksAlcohol: { hasCondition: true, observation: 'Cerveza frecuente mientras trabaja' }
+    }
+  },
+  {
+    id: '22',
+    firstName: 'Patricia',
+    lastName: 'Molina',
+    birthDate: '1982-10-15',
+    gender: 'Female',
+    occupation: 'Comercial',
+    consultationReason: 'Control de síndrome de ovario poliquístico mediante dieta',
+    status: 'ACTIVE',
+    avatarUrl: 'https://randomuser.me/api/portraits/women/41.jpg',
+    medicalHistory: {
+      chronicDiseases: { hasCondition: true, observation: 'Síndrome de ovario poliquístico (SOP)' },
+      previousSurgeries: { hasCondition: false, observation: '' },
+      allergies: { hasCondition: false, observation: '' },
+      medications: { hasCondition: true, observation: 'Metformina 500mg e inositol' },
+      smokes: { hasCondition: false, observation: '' },
+      drinksAlcohol: { hasCondition: false, observation: '' }
+    }
+  },
+  {
+    id: '23',
+    firstName: 'Javier',
+    lastName: 'Ortega',
+    birthDate: '1971-08-23',
+    gender: 'Male',
+    occupation: 'Profesor universitario',
+    consultationReason: 'Dieta mediterránea supervisada por historial familiar cardiovascular',
+    status: 'ACTIVE',
+    medicalHistory: {
+      chronicDiseases: { hasCondition: false, observation: '' },
+      previousSurgeries: { hasCondition: false, observation: '' },
+      allergies: { hasCondition: false, observation: '' },
+      medications: { hasCondition: false, observation: '' },
+      smokes: { hasCondition: false, observation: '' },
+      drinksAlcohol: { hasCondition: true, observation: 'Copa de vino tinto diaria' }
+    }
+  },
+  {
+    id: '24',
+    firstName: 'Marta',
+    lastName: 'Cabrera',
+    birthDate: '1999-03-30',
+    gender: 'Female',
+    occupation: 'Influencer de fitness',
+    consultationReason: 'Supervisión profesional de dieta para contenido de redes sociales',
+    status: 'REVIEW',
+    avatarUrl: 'https://randomuser.me/api/portraits/women/26.jpg',
+    medicalHistory: {
+      chronicDiseases: { hasCondition: false, observation: '' },
+      previousSurgeries: { hasCondition: false, observation: '' },
+      allergies: { hasCondition: false, observation: '' },
+      medications: { hasCondition: false, observation: '' },
+      smokes: { hasCondition: false, observation: '' },
+      drinksAlcohol: { hasCondition: false, observation: '' }
+    }
+  },
+  {
+    id: '25',
+    firstName: 'Raúl',
+    lastName: 'Fuentes',
+    birthDate: '1967-01-14',
+    gender: 'Male',
+    occupation: 'Agricultor',
+    consultationReason: 'Revisión nutricional anual y control de glucemia en límite',
+    status: 'PENDING',
+    medicalHistory: {
+      chronicDiseases: { hasCondition: true, observation: 'Prediabetes, glucemia en ayunas 108 mg/dL' },
+      previousSurgeries: { hasCondition: false, observation: '' },
+      allergies: { hasCondition: false, observation: '' },
+      medications: { hasCondition: false, observation: '' },
+      smokes: { hasCondition: true, observation: 'Fumador de pipa ocasional' },
+      drinksAlcohol: { hasCondition: true, observation: 'Vino en comidas, diario' }
     }
   }
 ];
