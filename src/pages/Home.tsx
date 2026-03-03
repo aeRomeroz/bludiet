@@ -5,11 +5,11 @@ import { PlusIcon } from '@heroicons/react/24/outline';
 import { ExclamationCircleIcon, UserGroupIcon } from '@heroicons/react/24/solid';
 import { UtensilsCrossedIcon } from 'lucide-react';
 import TableComponent from '../components/ui/TableComponent';
-import { dummyPatients } from '../constants/patients';
 import type { Patient } from '../types/patients';
 import type { DietSetupData } from '../types/diet';
 import PatientCreateModal from '../components/dashboard/patients/PatientCreateModal';
 import DietSetupModal from '../components/dashboard/diets/DietSetupModal';
+import { usePatients } from '../context/PatientsContext';
 
 /**
  * Home Page - Página de inicio
@@ -20,17 +20,18 @@ import DietSetupModal from '../components/dashboard/diets/DietSetupModal';
 
 export default function Home() {
   const [name] = useState('Dietista');
-  const [patients, setPatients] = useState<Patient[]>(dummyPatients);
   const [diets, setDiets] = useState<DietSetupData[]>([]);
 
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
   const [isDietModalOpen, setIsDietModalOpen] = useState(false);
   
+  const { patients, addPatient } = usePatients();
+
   const headers = ['PACIENTE', 'ESTADO', 'ULTIMA ACCIÓN', 'FECHA'];
 
   
   const handleAddPatient = (newPatient: Patient) => {
-    setPatients((prev) => [newPatient, ...prev]);
+    addPatient(newPatient);
   };
 
   const handleCreateDiet = (newDiet: DietSetupData) => {
