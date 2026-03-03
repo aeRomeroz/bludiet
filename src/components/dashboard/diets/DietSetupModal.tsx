@@ -11,6 +11,7 @@ import * as Slider from "@radix-ui/react-slider";
 import * as Progress from '@radix-ui/react-progress';
 import { MacroCard } from "./MacroCard";
 import { DEFAULT_MEALS } from "../../../constants/diet";
+import { PatientSearchList } from "../patients/PatientSearchList";
 
 interface DietSetupModalProps {
     isOpen: boolean;
@@ -137,24 +138,11 @@ export default function DietSetupModal({isOpen, onClose, patients, onDietCreate}
             <div className="space-y-6">
                 {step === 1 ? (
                     <div className="space-y-4">
-                        {/* Selección de Paciente */}
-                        <div className="flex flex-col gap-1">
-                            <label className="text-xs font-bold text-gray-primary uppercase">Paciente</label>
-                            <select 
-                                className="bg-white border border-primary-30 p-2.5 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-brand/20"
-                                value={formData.patientId}
-                                onChange={(e) => setFormData({...formData, patientId: e.target.value})}
-                            >
-                                <option value="">Selecciona un paciente...</option>
-                                {patients.map(p => (
-                                    <option key={p.id} value={p.id}>{p.firstName} {p.lastName}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        
-
-                        
+                        <PatientSearchList 
+                            patients={patients}
+                            selectedId={formData.patientId}
+                            onSelect={(id) => setFormData({...formData, patientId: id})}
+                        />
                     </div>
                 ) : (
                     <div className="space-y-6">
