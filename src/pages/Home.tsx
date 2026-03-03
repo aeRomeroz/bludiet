@@ -94,14 +94,6 @@ export default function Home() {
           {features.map((feature) => (
             <Card key={feature.title} title={feature.title} value={feature.value} icon={feature.icon}>
               <p className="text-gray-secondary">{feature.description}</p>
-              <Button
-                variant="primary"
-                size="small"
-                className="mt-4 w-full"
-                onClick={() => alert(`Clicked: ${feature.title}`)}
-              >
-                Saber más
-              </Button>
             </Card>
           ))}
         </div>
