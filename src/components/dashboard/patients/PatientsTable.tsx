@@ -21,6 +21,8 @@ const statusStyles: Record<Status, string> = {
     REVIEW: 'bg-blue-100 text-blue-700',
 };
 
+const headers = ['Paciente', 'Edad', 'Motivo de Consulta', 'Estado', 'Última Acción'];
+
 function calculateAge(birthDate: string): number {
     const birth = new Date(birthDate);
     const today = new Date();
@@ -43,7 +45,7 @@ export default function PatientsTable({ patients, onEdit, onDelete, onCreateDiet
                 <Table.Root variant="ghost" className="w-full">
                     <Table.Header>
                         <Table.Row className="bg-gray-secondary/30">
-                            {['Paciente', 'Edad', 'Motivo de Consulta', 'Estado', 'Última Acción'].map((header) => (
+                            {headers.map((header) => (
                                 <Table.ColumnHeaderCell key={header} className="p-0">
                                     <div className="text-gray-primary font-medium uppercase tracking-wider py-4 px-6 text-xs">
                                         {header}

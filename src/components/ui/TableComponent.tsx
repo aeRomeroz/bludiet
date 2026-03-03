@@ -58,7 +58,7 @@
                 <Table.Row className="bg-gray-secondary/30">
                     {headers.map((header, index) => (
                       <Table.ColumnHeaderCell key={index} className="p-0">
-                        <div className="text-gray-primary font-medium uppercase tracking-wider py-4 px-6 text-center">
+                        <div className="text-gray-primary font-medium uppercase tracking-wider py-4 px-6 text-xs text-center">
                           {header}
                         </div>
                       </Table.ColumnHeaderCell>
