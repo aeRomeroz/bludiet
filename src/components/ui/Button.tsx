@@ -17,6 +17,7 @@ interface ButtonProps {
   disabled?: boolean;
   className?: string;
   type?: 'button' | 'submit' | 'reset';
+  form?: string; 
 }
 
 export default function Button({
@@ -26,7 +27,8 @@ export default function Button({
   onClick,
   disabled = false,
   className = '',
-  type = 'button'
+  type = 'button', 
+  form
 }: ButtonProps) {
   const baseStyles = 'rounded-lg transition cursor-pointer';
 
@@ -44,11 +46,12 @@ export default function Button({
 
   const disabled_style = disabled ? 'opacity-50 cursor-not-allowed' : '';
 
-  const finalClassName = `${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${disabled_style} ${className}`;
+  const finalClassName = `${baseStyles} ${variant ? variantStyles[variant] : ''} ${sizeStyles[size]} ${disabled_style} ${className}`;
 
   return (
     <button
       type={type}
+      form={form}
       className={finalClassName}
       onClick={onClick}
       disabled={disabled}

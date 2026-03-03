@@ -87,6 +87,7 @@ export default function PatientCreateModal({
                     </Button>
                     <Button 
                         type="submit"
+                        form="patient-form"
                         className="flex-1 bg-blue-brand text-white hover:bg-blue-brand/90"
                     >
                         Guardar Paciente
@@ -94,7 +95,7 @@ export default function PatientCreateModal({
                 </>
             }
         >
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form id="patient-form" onSubmit={handleSubmit} className="space-y-5">
                 {/* Sección: Información Personal */}
                 <div className="space-y-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
