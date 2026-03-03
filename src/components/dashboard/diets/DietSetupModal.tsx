@@ -138,11 +138,6 @@ export default function DietSetupModal({isOpen, onClose, patients, onDietCreate}
             <div className="space-y-6">
                 {step === 1 ? (
                     <div className="space-y-4">
-                        {/* Etiqueta opcional arriba de la lista */}
-                        <label className="text-xs font-bold text-gray-primary uppercase tracking-widest block mb-2">
-                            Paciente seleccionado
-                        </label>
-                        
                         <PatientSearchList 
                             patients={patients}
                             selectedId={formData.patientId}
