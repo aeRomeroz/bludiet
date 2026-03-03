@@ -28,5 +28,6 @@ export interface Patient {
     smokes: MedicalRecord;
     drinksAlcohol: MedicalRecord;
   };
-  status: Status; 
+  status: Status;
+  avatarUrl?: string; 
 }
