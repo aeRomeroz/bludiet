@@ -35,7 +35,7 @@ export default function App() {
           },
         }}
       />
-      <RouterProvider router={router} />);
+      <RouterProvider router={router} />
     </>
   );
 }

@@ -42,7 +42,7 @@ export default function DietForm() {
                         {diet.name}
                     </h1>
                     <span className="text-gray-primary text-sm">
-                        {patient.firstName} {patient.lastName} · {diet.durationDays} días · {diet.targetKcalPerDay} kcal/día
+                        {patient.firstName} {patient.lastName} · {diet.durationDays} días 
                     </span>
                 </div>
             </div>
