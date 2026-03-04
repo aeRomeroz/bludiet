@@ -18,23 +18,23 @@ interface DietSetupModalProps {
     onClose: () => void;
     patients: Patient[];
     onDietCreate: (data: DietSetupData) => void;
+    initialPatientId?: string; 
+    initialStep?: SetupStep;
 }
 
-export default function DietSetupModal({isOpen, onClose, patients, onDietCreate}: DietSetupModalProps) {
-    const INITIAL_DIET_DATA: DietSetupData = {
-        patientId: '',
-        dietName: '',
-        durationDays: 7,
-        selectedMeals: [],
-        targetKcal: 1800,
-        macros: { protein: 25, fats: 35, carbs: 40 },
-        startDate: new Date()
-    };
+const INITIAL_DIET_DATA: DietSetupData = {
+    patientId: '',
+    dietName: '',
+    durationDays: 7,
+    selectedMeals: [],
+    targetKcal: 1800,
+    macros: { protein: 25, fats: 35, carbs: 40 },
+    startDate: new Date()
+};
 
-    
-
-    const [step, setStep] = useState<SetupStep>(1);
-    const [formData, setFormData] = useState<DietSetupData>(INITIAL_DIET_DATA);
+export default function DietSetupModal({isOpen, onClose, patients, onDietCreate, initialPatientId, initialStep}: DietSetupModalProps) {
+    const [step, setStep] = useState<SetupStep>(initialStep ?? 1);
+    const [formData, setFormData] = useState<DietSetupData>({...INITIAL_DIET_DATA, patientId: initialPatientId ?? ''});
     const progressValue = (step / 2) * 100;
 
     const resetForm = () => {
@@ -43,10 +43,16 @@ export default function DietSetupModal({isOpen, onClose, patients, onDietCreate}
     };
 
     useEffect(() => {
-        if (!isOpen) {
+        if (isOpen) {
+            setStep(initialStep ?? 1);
+            setFormData({
+                ...INITIAL_DIET_DATA,
+                patientId: initialPatientId ?? '',
+            });
+        } else {
             resetForm();
         }
-    }, [isOpen]);
+    }, [isOpen, initialPatientId, initialStep]);
 
     const handleNext = () => {
         if (!formData.patientId || formData.patientId === '') {

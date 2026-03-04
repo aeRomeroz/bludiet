@@ -18,7 +18,7 @@ export default function Layout() {
   const navLinks = [
     { name: 'Inicio', path: '/' },
     { name: 'Pacientes', path: '/patients' },
-    { name: 'Dietas', path: '/diets' },
+    // { name: 'Dietas', path: '/diets' },
   ];
 
   const linkStyles = ({ isActive }: { isActive: boolean }) => 
