@@ -3,6 +3,7 @@ import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { useDiets } from "../context/DietsContext";
 import { usePatients } from "../context/PatientsContext";
 import DietGrid from "../components/dashboard/diets/form/DietGrid";
+import DietSidebar from "../components/dashboard/diets/form/DietSidebar";
 
 export default function DietForm() {
     const { patientId, dietId } = useParams();
@@ -47,12 +48,20 @@ export default function DietForm() {
                 </div>
             </div>
 
-            {/* Grid */}
-            <DietGrid
-                diet={diet}
-                onAddItem={(dayId, mealId) => console.log('Añadir item:', dayId, mealId)}
-                onRemoveItem={(dayId, mealId, itemId) => console.log('Eliminar item:', dayId, mealId, itemId)}
-            />
+            {/* Contenido principal */}
+            <div className="flex gap-6 items-start">
+                <div className="flex-1 min-w-0">
+                    <DietGrid
+                        diet={diet}
+                        onAddItem={(dayId, mealId) => console.log('Añadir item:', dayId, mealId)}
+                        onRemoveItem={(dayId, mealId, itemId) => console.log('Eliminar item:', dayId, mealId, itemId)}
+                    />
+                </div>
+                <DietSidebar
+                    targetKcal={diet.targetKcalPerDay}
+                    targetMacros={diet.targetMacros}
+                />
+            </div>
         </div>
     );
 }
