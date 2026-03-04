@@ -4,6 +4,7 @@ import type { Diet } from "../types/diet";
 interface DietsContextType {
   diets: Diet[];
   addDiet: (diet: Diet) => void;
+  updateDiet: (diet: Diet) => void;
   getDietsByPatient: (patientId: string) => Diet[];
 }
 
@@ -16,12 +17,16 @@ export function DietsProvider({ children }: { children: ReactNode }) {
     setDiets((prev) => [newDiet, ...prev]);
   };
 
+  const updateDiet = (updatedDiet: Diet) => {
+    setDiets(prev => prev.map(d => d.id === updatedDiet.id ? updatedDiet : d));
+  };
+
   const getDietsByPatient = (patientId: string) => {
     return diets.filter(d => d.patientId === patientId);
   };
 
   return (
-    <DietsContext.Provider value={{ diets, addDiet, getDietsByPatient }}>
+    <DietsContext.Provider value={{ diets, addDiet, updateDiet, getDietsByPatient }}>
       {children}
     </DietsContext.Provider>
   );
