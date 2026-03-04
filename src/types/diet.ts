@@ -23,25 +23,30 @@ export interface FoodPortion {
   grams: number;
 }
 
+export interface FoodSlot {
+    id: string;           
+    items: (FoodPortion | null)[];
+}
+
 export interface MealEntry {
-  id: string;
-  name: string;
-  items: FoodPortion[];
+    id: string;
+    name: string;
+    slots: FoodSlot[];    
 }
 
 export interface DietDay {
-  id: string;
-  dayNumber: number;
-  meals: MealEntry[];
+    id: string;
+    dayNumber: number;
 }
 
 export interface Diet {
-  id: string;
-  patientId: string;
-  name: string;
-  durationDays: number;
-  targetKcalPerDay: number;
-  targetMacros: SetupMacros;
-  days: DietDay[];
-  startDate: Date;
+    id: string;
+    patientId: string;
+    name: string;
+    durationDays: number;
+    targetKcalPerDay: number;
+    targetMacros: SetupMacros;
+    startDate: Date;
+    days: DietDay[];
+    meals: MealEntry[];  
 }

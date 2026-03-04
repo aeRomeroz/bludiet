@@ -15,8 +15,9 @@ export default function DietForm() {
     const { patients } = usePatients();
 
     const [isAddFoodOpen, setIsAddFoodOpen] = useState(false);
-    const [activeDayId, setActiveDayId] = useState<string | null>(null);
     const [activeMealId, setActiveMealId] = useState<string | null>(null);
+    const [activeSlotIndex, setActiveSlotIndex] = useState<number | null>(null);
+    const [activeDayIndex, setActiveDayIndex] = useState<number | null>(null);
 
     const diet = diets.find(d => d.id === dietId);
     const patient = patients.find(p => p.id === patientId);
@@ -35,35 +36,87 @@ export default function DietForm() {
         );
     }
 
-    const activeMealName = diet.days
-        .find(d => d.id === activeDayId)
-        ?.meals.find(m => m.id === activeMealId)
-        ?.name;
+    const activeMealName = diet.meals.find(m => m.id === activeMealId)?.name;
 
-    const handleAddItem = (dayId: string, mealId: string) => {
-        setActiveDayId(dayId);
+    const handleAddItem = (mealId: string, slotIndex: number, dayIndex: number) => {
         setActiveMealId(mealId);
+        setActiveSlotIndex(slotIndex);
+        setActiveDayIndex(dayIndex);
         setIsAddFoodOpen(true);
     };
 
     const handleFoodAdded = (item: FoodPortion) => {
-        if (!activeDayId || !activeMealId) return;
+        if (!activeMealId || activeSlotIndex === null || activeDayIndex === null) return;
 
         const updatedDiet = {
             ...diet,
-            days: diet.days.map(day =>
-                day.id !== activeDayId ? day : {
-                    ...day,
-                    meals: day.meals.map(meal =>
-                        meal.id !== activeMealId ? meal : {
-                            ...meal,
-                            items: [...meal.items, item]
+            meals: diet.meals.map(meal =>
+                meal.id !== activeMealId ? meal : {
+                    ...meal,
+                    slots: meal.slots.map((slot, si) =>
+                        si !== activeSlotIndex ? slot : {
+                            ...slot,
+                            items: slot.items.map((existing, di) =>
+                                di !== activeDayIndex ? existing : item
+                            )
                         }
                     )
                 }
             )
         };
 
+        updateDiet(updatedDiet);
+    };
+
+    const handleAddSlot = (mealId: string) => {
+        const updatedDiet = {
+            ...diet,
+            meals: diet.meals.map(meal =>
+                meal.id !== mealId ? meal : {
+                    ...meal,
+                    slots: [
+                        ...meal.slots,
+                        {
+                            id: crypto.randomUUID(),
+                            items: Array(diet.durationDays).fill(null),
+                        }
+                    ]
+                }
+            )
+        };
+        updateDiet(updatedDiet);
+    };
+
+    const handleRemoveSlot = (mealId: string) => {
+        const updatedDiet = {
+            ...diet,
+            meals: diet.meals.map(meal =>
+                meal.id !== mealId ? meal : {
+                    ...meal,
+                    slots: meal.slots.slice(0, -1)
+                }
+            )
+        };
+        updateDiet(updatedDiet);
+    };
+
+    const handleRemoveItem = (mealId: string, slotIndex: number, dayIndex: number) => {
+        const updatedDiet = {
+            ...diet,
+            meals: diet.meals.map(meal =>
+                meal.id !== mealId ? meal : {
+                    ...meal,
+                    slots: meal.slots.map((slot, si) =>
+                        si !== slotIndex ? slot : {
+                            ...slot,
+                            items: slot.items.map((existing, di) =>
+                                di !== dayIndex ? existing : null
+                            )
+                        }
+                    )
+                }
+            )
+        };
         updateDiet(updatedDiet);
     };
 
@@ -92,8 +145,10 @@ export default function DietForm() {
                 <div className="flex-1 min-w-0">
                     <DietGrid
                         diet={diet}
+                        onAddSlot={handleAddSlot}
+                        onRemoveSlot={handleRemoveSlot}
                         onAddItem={handleAddItem}
-                        onRemoveItem={(dayId, mealId, itemId) => console.log('Eliminar item:', dayId, mealId, itemId)}
+                        onRemoveItem={handleRemoveItem}
                     />
                 </div>
                 <DietSidebar

@@ -8,20 +8,22 @@ export const calculateGramsFromKcalPercentage = (percentage: number, kcalPerGram
     }
 
 export const buildDietFromSetup = (setup: DietSetupData, dietId: string): Diet => {
-    const days: DietDay[] = Array.from({ length: setup.durationDays }, (_, i) => {
-        const meals: MealEntry[] = setup.selectedMeals.map((mealId) => {
-            const meal = DEFAULT_MEALS.find(m => m.id === mealId);
-            return {
-                id: crypto.randomUUID(),
-                name: meal?.label ?? mealId,
-                items: [],
-            }
-        });
+    const days: DietDay[] = Array.from({ length: setup.durationDays }, (_, i) => ({
+        id: crypto.randomUUID(),
+        dayNumber: i + 1,
+    }));
 
+    const meals: MealEntry[] = setup.selectedMeals.map((mealId) => {
+        const meal = DEFAULT_MEALS.find(m => m.id === mealId);
         return {
             id: crypto.randomUUID(),
-            dayNumber: i + 1,
-            meals,
+            name: meal?.label ?? mealId,
+            slots: [
+                {
+                    id: crypto.randomUUID(),
+                    items: Array(setup.durationDays).fill(null),
+                }
+            ],
         };
     });
 
@@ -34,5 +36,6 @@ export const buildDietFromSetup = (setup: DietSetupData, dietId: string): Diet =
         targetMacros: setup.macros,
         startDate: setup.startDate,
         days,
+        meals,
     };
 };
