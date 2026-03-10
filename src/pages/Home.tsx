@@ -10,6 +10,9 @@ import type { DietSetupData } from '../types/diet';
 import PatientCreateModal from '../components/dashboard/patients/PatientCreateModal';
 import DietSetupModal from '../components/dashboard/diets/DietSetupModal';
 import { usePatients } from '../context/PatientsContext';
+import { useNavigate } from 'react-router-dom';
+import { useDiets } from '../context/DietsContext';
+import { buildDietFromSetup } from '../utils/diets/dietMath';
 
 /**
  * Home Page - Página de inicio
@@ -20,7 +23,9 @@ import { usePatients } from '../context/PatientsContext';
 
 export default function Home() {
   const [name] = useState('Dietista');
-  const [diets, setDiets] = useState<DietSetupData[]>([]);
+  
+  const navigate = useNavigate();
+  const { diets, addDiet } = useDiets();
 
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
   const [isDietModalOpen, setIsDietModalOpen] = useState(false);
@@ -34,12 +39,12 @@ export default function Home() {
     addPatient(newPatient);
   };
 
-  const handleCreateDiet = (newDiet: DietSetupData) => {
-    setDiets((prev) => [newDiet, ...prev]);
-    // fetch a la API en un futuro
-    console.log("Dieta guardada en el estado:", newDiet);
+  const handleCreateDiet = (setup: DietSetupData) => {
+    const dietId = crypto.randomUUID();
+    const newDiet = buildDietFromSetup(setup, dietId);
+    addDiet(newDiet);
+    navigate(`/patients/${setup.patientId}/diets/${dietId}`);
   };
-
   const features = [
     {
       title: 'Pacientes totales',

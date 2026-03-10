@@ -1,16 +1,25 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom"; 
 import { PlusIcon } from "@heroicons/react/24/outline";
 import Button from "../components/ui/Button";
 import PatientsTable from "../components/dashboard/patients/PatientsTable";
 import PatientsToolbar from "../components/dashboard/patients/PatientsToolbar";
 import PatientCreateModal from "../components/dashboard/patients/PatientCreateModal";
+import DietSetupModal from "../components/dashboard/diets/DietSetupModal";
 import { usePatients } from "../context/PatientsContext";
+import { useDiets } from "../context/DietsContext";
+import { buildDietFromSetup } from "../utils/diets/dietMath";
 import type { Patient, Status } from "../types/patients";
+import type { DietSetupData } from "../types/diet";
 
 export default function PatientsList() {
-    console.log('PatientsList montado');
     const { patients, addPatient } = usePatients();
+    const { addDiet } = useDiets();
+    const navigate = useNavigate();
+
     const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
+    const [isDietModalOpen, setIsDietModalOpen] = useState(false);
+    const [selectedPatientId, setSelectedPatientId] = useState<string | undefined>(undefined);
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState<Status | 'ALL'>('ALL');
 
@@ -24,6 +33,18 @@ export default function PatientsList() {
 
     const handleAddPatient = (newPatient: Patient) => {
         addPatient(newPatient);
+    };
+
+    const handleCreateDietForPatient = (patient: Patient) => {
+        setSelectedPatientId(patient.id);
+        setIsDietModalOpen(true);
+    };
+
+    const handleCreateDiet = (setup: DietSetupData) => {
+        const dietId = crypto.randomUUID();
+        const newDiet = buildDietFromSetup(setup, dietId);
+        addDiet(newDiet);
+        navigate(`/patients/${setup.patientId}/diets/${dietId}`);
     };
 
     return (
@@ -54,13 +75,25 @@ export default function PatientsList() {
                 patients={filteredPatients}
                 onEdit={(patient) => console.log('Editar:', patient)}
                 onDelete={(patient) => console.log('Eliminar:', patient)}
-                onCreateDiet={(patient) => console.log('Crear dieta:', patient)}
+                onCreateDiet={handleCreateDietForPatient}
             />
 
             <PatientCreateModal
                 isOpen={isPatientModalOpen}
                 onClose={() => setIsPatientModalOpen(false)}
                 onPatientCreate={handleAddPatient}
+            />
+
+            <DietSetupModal
+                isOpen={isDietModalOpen}
+                onClose={() => {
+                    setIsDietModalOpen(false);
+                    setSelectedPatientId(undefined);
+                }}
+                patients={patients}
+                onDietCreate={handleCreateDiet}
+                initialPatientId={selectedPatientId}
+                initialStep={2}
             />
         </div>
     );

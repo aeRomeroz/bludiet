@@ -3,6 +3,7 @@ import Layout from '../components/layout/Layout';
 import Home from '../pages/Home';
 import PatientsList from '../pages/PatientsList';
 import PatientDetail from '../pages/PatientDetail';
+import DietForm from '../pages/DietForm';
 import '../index.css';
 
 /**
@@ -29,16 +30,16 @@ export const router = createBrowserRouter([
         element: <Home />,
       },
       {
+        path: 'patients/:patientId/diets/:dietId',
+        element: <DietForm/>,
+      },
+      {
         path: 'patients/:id',
         element: <PatientDetail/>,
       },
       {
         path: 'patients',
         element: <PatientsList/>,
-      },
-      {
-        path: 'diets',
-        element: <Home/>,
       },
       // {
       //     path: 'patients/:id',
