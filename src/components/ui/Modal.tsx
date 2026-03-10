@@ -28,9 +28,9 @@ export default function Modal({ isOpen, onClose, title, description, children, f
         <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300 z-50" />
         
         {/*CONTENIDO*/}
-        <Dialog.Content className={`fixed left-1/2 top-1/2 w-full ${sizeClasses[size || 'md']} -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white shadow-xl animate-in zoom-in-95 duration-300 z-50 overflow-hidden`}>
+        <Dialog.Content className={`fixed left-1/2 top-1/2 w-full ${sizeClasses[size || 'md']} -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white shadow-xl animate-in zoom-in-95 duration-300 z-50`}>
           {/*HEADER*/}
-          <div className="bg-white border-b border-primary-30 shrink-0">
+          <div className="bg-white border-b border-primary-30 shrink-0 rounded-t-xl overflow-hidden">
             <div className='px-6 py-4 flex items-center justify-between'>
               {title && (
                 <Dialog.Title className="text-xl font-serif font-bold text-black-primary">
@@ -62,12 +62,12 @@ export default function Modal({ isOpen, onClose, title, description, children, f
           )}
 
           {/*CONTENIDO*/}
-          <div className='bg-primary p-6 overflow-y-auto max-h-[70vh]'>
+          <div className='bg-primary p-6 overflow-visible max-h-[70vh]'>
             {children}
           </div>
 
           {footer && (
-            <div className='bg-white px-6 py-4 border-t border-primary-30 flex gap-3 shrink-0'>
+            <div className='bg-white px-6 py-4 border-t border-primary-30 flex gap-3 shrink-0 rounded-b-xl overflow-hidden'>
               {footer}
             </div>
           )}
