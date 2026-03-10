@@ -21,6 +21,7 @@ export interface FoodPortion {
   id: string;
   name: string;
   grams: number;
+  bedcaId?: string;
 }
 
 export interface FoodSlot {

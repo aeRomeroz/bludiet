@@ -13,7 +13,7 @@ export default function DietSidebar({ targetKcal, targetMacros }: DietSidebarPro
                 <p className="text-xs font-bold text-gray-primary uppercase tracking-wider text-center">
                     Distribución Objetivo
                 </p>
-                <MacroPieChart targetKcal={targetKcal} targetMacros={targetMacros} />
+                <MacroPieChart targetKcal={targetKcal} targetMacros={targetMacros} showLegend={true} size="md" />
             </div>
 
             <div className="bg-white rounded-xl border border-primary-30 p-4 text-center">

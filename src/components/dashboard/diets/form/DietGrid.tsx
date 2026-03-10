@@ -2,6 +2,8 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import type { Diet } from "../../../../types/diet";
 import DietMealCell from "./DietMealCell";
+import { calculateDayMacros } from "../../../../utils/diets/dietMath";
+import MacroPieChart from "./MacroPieChart";
 
 interface DietGridProps {
     diet: Diet;
@@ -26,7 +28,7 @@ export default function DietGrid({ diet, onAddSlot, onRemoveSlot, onAddItem, onR
     return (
         <div className="flex flex-col gap-4">
             {/* Navegación de semanas */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-end gap-5">
                 <p className="text-xs font-semibold text-gray-secondary uppercase tracking-wider">
                     Semana {weekOffset + 1} de {totalWeeks}
                 </p>
@@ -58,13 +60,22 @@ export default function DietGrid({ diet, onAddSlot, onRemoveSlot, onAddItem, onR
                 >
                     {/* Header row - días */}
                     <div />
-                    {visibleDays.map((day) => (
-                        <div key={day.id} className="bg-white rounded-xl border border-primary-30 px-3 py-2 text-center">
-                            <p className="text-xs font-bold text-black-primary uppercase tracking-wider">
-                                Día {day.dayNumber}
-                            </p>
-                        </div>
-                    ))}
+                    {visibleDays.map((day, visibleIndex) => {
+                        const dayIndex = dayOffset + visibleIndex;
+                        const dayMacros = calculateDayMacros(diet, dayIndex);
+                        return (
+                            <div key={day.id} className="bg-white rounded-xl border border-primary-30 px-3 py-2 flex flex-col items-center gap-1">
+                                <p className="text-xs font-bold text-black-primary uppercase tracking-wider">
+                                    Día {day.dayNumber}
+                                </p>
+                                <MacroPieChart
+                                    data={{...dayMacros, targetKcal: diet.targetKcalPerDay}}
+                                    showLegend={false}
+                                    size="sm"
+                                />
+                            </div>
+                        );
+                    })}
 
                     {/* Filas por ingesta */}
                     {diet.meals.map((meal) => (

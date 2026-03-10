@@ -1,5 +1,6 @@
 import type { Diet, DietDay, MealEntry, DietSetupData } from "../../types/diet"; 
 import { DEFAULT_MEALS } from "../../constants/diet";     
+import { BEDCA_FOODS } from "./bedca";
 
 export const KCAL_PER_GRAM = { PROTEIN: 4, CARBS: 4, FATS: 9 };
 
@@ -37,5 +38,39 @@ export const buildDietFromSetup = (setup: DietSetupData, dietId: string): Diet =
         startDate: setup.startDate,
         days,
         meals,
+    };
+};
+
+export interface DayMacros {
+    protein: number;
+    fats: number;
+    carbs: number;
+    kcal: number;
+}
+
+export const calculateDayMacros = (diet: Diet, dayIndex: number): DayMacros => {
+    let protein = 0, fats = 0, carbs = 0, kcal = 0;
+
+    diet.meals.forEach(meal => {
+        meal.slots.forEach(slot => {
+            const item = slot.items[dayIndex];
+            if (!item?.bedcaId) return;
+
+            const food = BEDCA_FOODS.find(f => f.id === item.bedcaId);
+            if (!food) return;
+
+            const factor = item.grams / 100;
+            protein += food.protein * factor;
+            fats += food.fats * factor;
+            carbs += food.carbs * factor;
+            kcal += food.kcal * factor;
+        });
+    });
+
+    return {
+        protein: Math.round(protein),
+        fats: Math.round(fats),
+        carbs: Math.round(carbs),
+        kcal: Math.round(kcal),
     };
 };

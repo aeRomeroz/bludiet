@@ -42,6 +42,7 @@ export default function AddFoodItemModal({ isOpen, onClose, onAdd, mealName }: A
             id: crypto.randomUUID(),
             name: selected.name,
             grams,
+            bedcaId: selected.id,
         });
 
         handleClose();
