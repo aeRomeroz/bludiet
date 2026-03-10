@@ -20,7 +20,7 @@ export default function AddFoodItemModal({ isOpen, onClose, onAdd, mealName }: A
     const [grams, setGrams] = useState(100);
 
     const results = search.trim().length >= 2
-        ? BEDCA_FOODS.filter(f => f.name.toLowerCase().includes(search.toLowerCase())).slice(0, 8)
+        ? BEDCA_FOODS.filter(f => f.name.toLowerCase().includes(search.toLowerCase())).slice(0, 30)
         : [];
 
     const handleSelect = (food: BedcaFood) => {
@@ -98,7 +98,7 @@ export default function AddFoodItemModal({ isOpen, onClose, onAdd, mealName }: A
 
                     {/* Resultados */}
                     {results.length > 0 && !selected && (
-                        <div className="absolute top-full mt-1 left-0 right-0 bg-white border border-primary-30 rounded-xl shadow-lg z-[200] overflow-hidden">
+                        <div className="absolute top-full mt-1 left-0 right-0 bg-white border border-primary-30 rounded-xl shadow-lg z-[200] h-80 overflow-y-auto">
                             {results.map(food => (
                                 <button
                                     key={food.id}
