@@ -23,7 +23,9 @@ export default function PatientCreateModal({
         gender: 'Male' as Gender,
         occupation: '',
         consultationReason: '',
-        status: 'PENDING' as Status
+        status: 'PENDING' as Status,
+        weight: '' as number | '',
+        height: '' as number | '',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -45,7 +47,14 @@ export default function PatientCreateModal({
                 medications: { hasCondition: false, observation: '' },
                 smokes: { hasCondition: false, observation: '' },
                 drinksAlcohol: { hasCondition: false, observation: '' },
-            }
+            },
+            ...(formData.weight && formData.height ? {
+                initialMeasurement: {
+                    date: new Date().toISOString(),
+                    weight: Number(formData.weight),
+                    height: Number(formData.height),
+                }
+            } : {})
             };
 
             // 4. Llamamos a la función que viene por props
@@ -65,7 +74,9 @@ export default function PatientCreateModal({
         gender: 'Male',
         occupation: '',
         consultationReason: '',
-        status: 'PENDING'
+        status: 'PENDING',
+        weight: '',
+        height: '',
         });
     };
 
@@ -145,6 +156,34 @@ export default function PatientCreateModal({
                                 <option value="Male">Masculino</option>
                                 <option value="Female">Femenino</option>
                             </select>
+                        </div>
+                    </div>
+
+                    {/* Medición inicial */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-1">
+                            <label className="text-xs font-bold text-gray-primary uppercase tracking-wider">Peso (kg)</label>
+                            <input
+                                type="number"
+                                min="1"
+                                step="0.1"
+                                placeholder="Ej. 75.5"
+                                className="bg-white border-[0.5px] border-primary-30 p-2.5 rounded-lg text-sm outline-none focus:border-blue-brand transition-colors"
+                                value={formData.weight}
+                                onChange={e => setFormData({ ...formData, weight: e.target.value === '' ? '' : Number(e.target.value) })}
+                            />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <label className="text-xs font-bold text-gray-primary uppercase tracking-wider">Talla (cm)</label>
+                            <input
+                                type="number"
+                                min="1"
+                                step="0.1"
+                                placeholder="Ej. 175"
+                                className="bg-white border-[0.5px] border-primary-30 p-2.5 rounded-lg text-sm outline-none focus:border-blue-brand transition-colors"
+                                value={formData.height}
+                                onChange={e => setFormData({ ...formData, height: e.target.value === '' ? '' : Number(e.target.value) })}
+                            />
                         </div>
                     </div>
 
