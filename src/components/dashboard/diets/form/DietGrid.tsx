@@ -11,11 +11,12 @@ interface DietGridProps {
     onRemoveSlot?: (mealId: string) => void;
     onAddItem?: (mealId: string, slotIndex: number, dayIndex: number) => void;
     onRemoveItem?: (mealId: string, slotIndex: number, dayIndex: number) => void;
+    onUpdateGrams?: (mealId: string, slotIndex: number, dayIndex: number, grams: number) => void;
 }
 
 const DAYS_PER_PAGE = 7;
 
-export default function DietGrid({ diet, onAddSlot, onRemoveSlot, onAddItem, onRemoveItem }: DietGridProps) {
+export default function DietGrid({ diet, onAddSlot, onRemoveSlot, onAddItem, onRemoveItem, onUpdateGrams }: DietGridProps) {
     const [weekOffset, setWeekOffset] = useState(0);
 
     const totalWeeks = Math.ceil(diet.days.length / DAYS_PER_PAGE);
@@ -133,6 +134,7 @@ export default function DietGrid({ diet, onAddSlot, onRemoveSlot, onAddItem, onR
                                                 item={item}
                                                 onAdd={() => onAddItem?.(meal.id, slotIndex, dayIndex)}
                                                 onRemove={() => onRemoveItem?.(meal.id, slotIndex, dayIndex)}
+                                                onUpdateGrams={(grams) => onUpdateGrams?.(meal.id, slotIndex, dayIndex, grams)}
                                             />
                                         );
                                     })}

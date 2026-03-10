@@ -120,6 +120,27 @@ export default function DietForm() {
         updateDiet(updatedDiet);
     };
 
+    const handleUpdateGrams = (mealId: string, slotIndex: number, dayIndex: number, grams: number) => {
+        if (grams <= 0) return;
+        const updatedDiet = {
+            ...diet,
+            meals: diet.meals.map(meal =>
+                meal.id !== mealId ? meal : {
+                    ...meal,
+                    slots: meal.slots.map((slot, si) =>
+                        si !== slotIndex ? slot : {
+                            ...slot,
+                            items: slot.items.map((item, di) =>
+                                di !== dayIndex || !item ? item : { ...item, grams }
+                            )
+                        }
+                    )
+                }
+            )
+        };
+        updateDiet(updatedDiet);
+    };
+
     return (
         <div className="space-y-8">
             {/* Header */}
@@ -149,6 +170,7 @@ export default function DietForm() {
                         onRemoveSlot={handleRemoveSlot}
                         onAddItem={handleAddItem}
                         onRemoveItem={handleRemoveItem}
+                        onUpdateGrams={handleUpdateGrams}
                     />
                 </div>
                 <DietSidebar

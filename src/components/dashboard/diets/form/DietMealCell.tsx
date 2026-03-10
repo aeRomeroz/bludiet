@@ -5,15 +5,20 @@ interface DietMealCellProps {
     item: FoodPortion | null;
     onAdd?: () => void;
     onRemove?: () => void;
+    onUpdateGrams?: (grams: number) => void;
+
 }
 
-export default function DietMealCell({ item, onAdd, onRemove }: DietMealCellProps) {
+export default function DietMealCell({ item, onAdd, onRemove, onUpdateGrams }: DietMealCellProps) {
     if (item) {
         return (
             <div className="group flex items-center justify-between bg-white rounded-lg px-3 py-2 border border-primary-30 hover:border-blue-brand/30 transition-all min-h-[40px]">
                 <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-xs font-semibold text-blue-brand shrink-0">{item.grams}g</span>
-                    <span className="text-xs text-black-primary truncate">{item.name}</span>
+                    <div className="inline-flex gap-0">
+                        <input type="text" inputMode="numeric" pattern="[0-9]*" value={item.grams} onChange={(e) => onUpdateGrams?.(Number(e.target.value))} onFocus={(e) => e.target.select()} className="text-xs font-semibold text-blue-brand shrink-0 w-7 bg-transparent outline-none focus:bg-blue-50 rounded"/>
+                        <span className="text-xs font-semibold text-blue-brand shrink-0">g</span>
+                    </div>
+                    <span className="text-xs text-black-primary">{item.name}</span>
                 </div>
                 {onRemove && (
                     <button
