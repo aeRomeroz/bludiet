@@ -195,8 +195,11 @@ export default function DietSetupModal({isOpen, onClose, patients, onDietCreate,
                                                     const newMeals = isSelected
                                                         ? formData.selectedMeals.filter(id => id !== meal.id)
                                                         : [...formData.selectedMeals, meal.id];
-                                                    
-                                                    setFormData({ ...formData, selectedMeals: newMeals });
+                                                    const orderedMeals = DEFAULT_MEALS
+                                                        .map(m => m.id)
+                                                        .filter(id => newMeals.includes(id));
+                                                        
+                                                    setFormData({ ...formData, selectedMeals: orderedMeals });
                                                 }}
                                                 className={`
                                                     px-4 py-2 rounded-full border text-sm font-medium transition-all duration-200 cursor-pointer
