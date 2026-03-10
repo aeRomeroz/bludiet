@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { useDiets } from "../context/DietsContext";
@@ -7,6 +7,7 @@ import DietGrid from "../components/dashboard/diets/form/DietGrid";
 import DietSidebar from "../components/dashboard/diets/form/DietSidebar";
 import AddFoodItemModal from "../components/dashboard/diets/form/AddFoodItemModal";
 import type { FoodPortion } from "../types/diet";
+import toast from "react-hot-toast";
 
 export default function DietForm() {
     const { patientId, dietId } = useParams();
@@ -19,6 +20,10 @@ export default function DietForm() {
     const [activeSlotIndex, setActiveSlotIndex] = useState<number | null>(null);
     const [activeDayIndex, setActiveDayIndex] = useState<number | null>(null);
 
+    // Funcionalidad Copy-Paste
+    const [selectedSlot, setSelectedSlot] = useState<{ mealId: string, slotIndex: number } | null>(null);
+    const [copiedSlot, setCopiedSlot] = useState<(FoodPortion | null)[] | null>(null);
+    
     const diet = diets.find(d => d.id === dietId);
     const patient = patients.find(p => p.id === patientId);
 
@@ -141,6 +146,44 @@ export default function DietForm() {
         updateDiet(updatedDiet);
     };
 
+    // Funcionalidad Copy-Paste
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.target instanceof HTMLInputElement) return;
+
+            if (e.ctrlKey && e.key === 'c' && selectedSlot) {
+                const meal = diet.meals.find(m => m.id === selectedSlot.mealId);
+                const slot = meal?.slots[selectedSlot.slotIndex];
+                if (slot) {
+                    setCopiedSlot([...slot.items]);
+                    toast.success("Fila copiada");
+                }
+            }
+
+            if (e.ctrlKey && e.key === 'v' && copiedSlot && selectedSlot) {
+                const updatedDiet = {
+                    ...diet,
+                    meals: diet.meals.map(meal =>
+                        meal.id !== selectedSlot.mealId ? meal : {
+                            ...meal,
+                            slots: meal.slots.map((slot, si) =>
+                                si !== selectedSlot.slotIndex ? slot : {
+                                    ...slot,
+                                    items: copiedSlot.map(item => item ? { ...item, id: crypto.randomUUID() } : null)
+                                }
+                            )
+                        }
+                    )
+                };
+                updateDiet(updatedDiet);
+                toast.success("Fila pegada");
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [selectedSlot, copiedSlot, diet]);
+
     return (
         <div className="space-y-8">
             {/* Header */}
@@ -166,6 +209,8 @@ export default function DietForm() {
                 <div className="flex-1 min-w-0">
                     <DietGrid
                         diet={diet}
+                        selectedSlot={selectedSlot}
+                        onSelectSlot={setSelectedSlot}
                         onAddSlot={handleAddSlot}
                         onRemoveSlot={handleRemoveSlot}
                         onAddItem={handleAddItem}

@@ -7,6 +7,8 @@ import MacroPieChart from "./MacroPieChart";
 
 interface DietGridProps {
     diet: Diet;
+    selectedSlot?: { mealId: string, slotIndex: number } | null;
+    onSelectSlot?: (slot: { mealId: string, slotIndex: number } | null) => void;
     onAddSlot?: (mealId: string) => void;
     onRemoveSlot?: (mealId: string) => void;
     onAddItem?: (mealId: string, slotIndex: number, dayIndex: number) => void;
@@ -16,7 +18,7 @@ interface DietGridProps {
 
 const DAYS_PER_PAGE = 7;
 
-export default function DietGrid({ diet, onAddSlot, onRemoveSlot, onAddItem, onRemoveItem, onUpdateGrams }: DietGridProps) {
+export default function DietGrid({ diet, selectedSlot, onSelectSlot, onAddSlot, onRemoveSlot, onAddItem, onRemoveItem, onUpdateGrams }: DietGridProps) {
     const [weekOffset, setWeekOffset] = useState(0);
 
     const totalWeeks = Math.ceil(diet.days.length / DAYS_PER_PAGE);
@@ -85,7 +87,11 @@ export default function DietGrid({ diet, onAddSlot, onRemoveSlot, onAddItem, onR
                                 <>
                                     {slotIndex === 0 && meal.slots.length === 1 ? (
                                         // Un solo slot: nombre + (+)
-                                        <div key={`label-${meal.id}`} className="flex items-center justify-between px-2 py-1">
+                                        <div 
+                                            key={`label-${meal.id}`} 
+                                            onClick={() => onSelectSlot?.({ mealId: meal.id, slotIndex: 0 })}
+                                            className="flex items-center justify-between px-2 py-1 cursor-pointer hover:bg-blue-50/50 rounded-lg"
+                                        >
                                             <p className="text-xs font-bold text-gray-primary uppercase tracking-wider">
                                                 {meal.name}
                                             </p>
@@ -98,14 +104,22 @@ export default function DietGrid({ diet, onAddSlot, onRemoveSlot, onAddItem, onR
                                         </div>
                                     ) : slotIndex === 0 ? (
                                         // Primer slot con múltiples: solo nombre
-                                        <div key={`label-${meal.id}`} className="flex items-center px-2 py-1">
+                                        <div 
+                                            key={`label-${meal.id}`} 
+                                            onClick={() => onSelectSlot?.({ mealId: meal.id, slotIndex: 0 })}
+                                            className="flex items-center px-2 py-1 cursor-pointer hover:bg-blue-50/50 rounded-lg"
+                                        >
                                             <p className="text-xs font-bold text-gray-primary uppercase tracking-wider">
                                                 {meal.name}
                                             </p>
                                         </div>
                                     ) : slotIndex === meal.slots.length - 1 ? (
                                         // Último slot: (-)(+)
-                                        <div key={`label-${meal.id}-${slotIndex}`} className="flex items-center justify-end px-2 py-1 gap-1">
+                                        <div 
+                                            key={`label-${meal.id}-${slotIndex}`} 
+                                            onClick={() => onSelectSlot?.({ mealId: meal.id, slotIndex })}
+                                            className="flex items-center justify-end px-2 py-1 gap-1 cursor-pointer hover:bg-blue-50/50 rounded-lg"
+                                        >
                                             <button
                                                 onClick={() => onRemoveSlot?.(meal.id)}
                                                 className="w-5 h-5 rounded flex items-center justify-center text-gray-secondary hover:bg-red-50 hover:text-red-400 transition-colors text-sm font-bold"
@@ -121,7 +135,7 @@ export default function DietGrid({ diet, onAddSlot, onRemoveSlot, onAddItem, onR
                                         </div>
                                     ) : (
                                         // Slots intermedios: vacío
-                                        <div key={`empty-label-${meal.id}-${slotIndex}`} />
+                                        <div key={`empty-label-${meal.id}-${slotIndex}`} onClick={() => onSelectSlot?.({ mealId: meal.id, slotIndex })} className="cursor-pointer hover:bg-blue-50/50 rounded-lg cursor-pointer hover:bg-blue-50/50 rounded-lg"/>
                                     )}
 
                                     {/* Celdas por día */}
@@ -132,6 +146,7 @@ export default function DietGrid({ diet, onAddSlot, onRemoveSlot, onAddItem, onR
                                             <DietMealCell
                                                 key={`${slot.id}-${dayIndex}`}
                                                 item={item}
+                                                isSelected={selectedSlot?.mealId === meal.id && selectedSlot?.slotIndex === slotIndex}
                                                 onAdd={() => onAddItem?.(meal.id, slotIndex, dayIndex)}
                                                 onRemove={() => onRemoveItem?.(meal.id, slotIndex, dayIndex)}
                                                 onUpdateGrams={(grams) => onUpdateGrams?.(meal.id, slotIndex, dayIndex, grams)}
