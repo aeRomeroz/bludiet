@@ -3,20 +3,26 @@
  * @param birthDate string (YYYY-MM-DD)
  * @returns number
  */
-export const calculateAge = (birthDate: string): number => {
-    if (!birthDate) return 0;
-    
-    const today = new Date();
+export function calculateAge(birthDate: string): number {
     const birth = new Date(birthDate);
-    
+    const today = new Date();
     let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    
-    // Si el mes actual es menor al de nacimiento, 
-    // o es el mismo mes pero el día actual es menor, aún no cumple años.
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-        age--;
-    }
-    
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
     return age;
-};
+}
+
+export function calculateBMI(weight: number, height: number): number {
+    const heightM = height / 100;
+    return Math.round((weight / (heightM * heightM)) * 10) / 10;
+}
+
+export function getBMILabel(bmi: number): string {
+    if (bmi < 18.5) return 'Bajo peso';
+    if (bmi < 25) return 'Peso normal';
+    if (bmi < 30) return 'Sobrepeso';
+    if (bmi < 35) return 'Obesidad Clase 1';
+    if (bmi < 40) return 'Obesidad Clase 2';
+    return 'Obesidad Clase 3';
+}
+

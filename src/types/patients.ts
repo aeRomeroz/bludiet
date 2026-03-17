@@ -12,6 +12,12 @@ export interface MedicalRecord {
   observation: string;
 }
 
+export interface Measurement {
+    date: string; 
+    weight: number;  
+    height: number; 
+}
+
 export interface Patient {
   id: string; // Necesario para la UI y rutas
   firstName: string;
@@ -30,4 +36,5 @@ export interface Patient {
   };
   status: Status;
   avatarUrl?: string; 
+  initialMeasurement?: Measurement;
 }

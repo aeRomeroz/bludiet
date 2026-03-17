@@ -112,7 +112,7 @@ export default function Home() {
         </div>
       </section>
 
-      <TableComponent title="Actividad de Pacientes Reciente" buttonText="Ver todos" buttonRoute="/pacientes" headers={headers} data={patients} limit={5}/>
+      <TableComponent title="Actividad de Pacientes Reciente" buttonText="Ver todos" buttonRoute="/patients" headers={headers} data={patients} limit={5}/>
       <PatientCreateModal 
         isOpen={isPatientModalOpen} 
         onClose={() => setIsPatientModalOpen(false)}
