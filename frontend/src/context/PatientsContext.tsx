@@ -3,6 +3,31 @@ import type { Patient } from "../types/patients";
 import { patientService } from "../services/patientService";
 import toast from "react-hot-toast";
 
+const DEFAULT_TEST_PATIENT: Patient = {
+  id: 'test-patient',
+  firstName: 'Paciente',
+  lastName: 'Prueba',
+  birthDate: '1990-01-01',
+  gender: 'Male',
+  occupation: 'Estudiante',
+  consultationReason: 'Paciente de prueba para generar dietas y comprobar el flujo.',
+  status: 'ACTIVE',
+  avatarUrl: '',
+  initialMeasurement: {
+    date: new Date().toISOString(),
+    weight: 72,
+    height: 175,
+  },
+  medicalHistory: {
+    chronicDiseases: { hasCondition: false, observation: '' },
+    previousSurgeries: { hasCondition: false, observation: '' },
+    allergies: { hasCondition: false, observation: '' },
+    medications: { hasCondition: false, observation: '' },
+    smokes: { hasCondition: false, observation: '' },
+    drinksAlcohol: { hasCondition: false, observation: '' },
+  },
+};
+
 interface PatientsContextType {
   patients: Patient[];
   loading: boolean;
@@ -18,8 +43,17 @@ export function PatientsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
         patientService.getAll()
-            .then(setPatients)
-            .catch(() => toast.error('Error al cargar pacientes'))
+            .then((data) => {
+                if (data.length === 0) {
+                    setPatients([DEFAULT_TEST_PATIENT]);
+                } else {
+                    setPatients(data);
+                }
+            })
+            .catch(() => {
+                toast.error('Error al cargar pacientes. Se usará un paciente de prueba.');
+                setPatients([DEFAULT_TEST_PATIENT]);
+            })
             .finally(() => setLoading(false));
     }, []);
 
