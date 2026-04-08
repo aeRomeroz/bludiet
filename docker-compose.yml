@@ -1,0 +1,19 @@
+services:
+  backend:
+    build:
+      context: ./backend/BluDiet.API
+    ports:
+      - "5123:8080" # Mapea el puerto de tu API
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=aws-0-...pooler.supabase.com;Port=6543;... # O usa tu appsettings
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://localhost:5123
