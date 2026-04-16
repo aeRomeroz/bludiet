@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeftIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftIcon, PlusIcon, PencilIcon } from "@heroicons/react/24/outline";
 import { usePatients } from "../context/PatientsContext";
 import { useDiets } from "../context/DietsContext";
 import Button from "../components/ui/Button";
@@ -64,6 +64,15 @@ export default function PatientDetail() {
                         <span className="text-gray-primary text-sm">{patient.occupation}</span>
                     </div>
                 </div>
+                <div className="flex gap-5">
+                <Button
+                    variant="primary"
+                    className="flex items-center gap-3"
+                    onClick={()=> {}}
+                >
+                    <PencilIcon className="text-green-brand h-5 w-5" />
+                    Editar
+                </Button>
                 <Button
                     variant="primary"
                     className="flex items-center gap-3"
@@ -72,6 +81,7 @@ export default function PatientDetail() {
                     <PlusIcon className="text-blue-brand h-5 w-5" />
                     Nueva Dieta
                 </Button>
+                </div>
             </div>
 
             {/* Info card */}
