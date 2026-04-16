@@ -1,120 +1,115 @@
-import { supabase } from '../lib/supabase';
+import { apiClient } from '../lib/apiClient';
+import { apiRoutes } from './apiRoutes';
 import type { Patient } from '../types/patients';
 
 export const patientService = {
-    async getAll(): Promise<Patient[]> {
-        const { data, error } = await supabase
-            .from('patients')
-            .select(`
-                *,
-                measurements (*),
-                medical_history (*)
-            `)
-            .order('created_at', { ascending: false });
+  async getAll(): Promise<Patient[]> {
+    const { data } = await apiClient.get(apiRoutes.patients.index);
+    return data.map(mapToPatient);
+  },
 
-        if (error) throw error;
-        return data.map(mapToPatient);
-    },
+  async create(patient: Omit<Patient, 'id'>): Promise<Patient> {
+    const { data } = await apiClient.post(apiRoutes.patients.index, mapToCreateDto(patient));
+    return mapToPatient(data);
+  },
 
-    async create(patient: Omit<Patient, 'id'>): Promise<Patient> {
-        const { initialMeasurement, medicalHistory, ...rest } = patient;
-
-        // Insertar paciente
-        const { data: patientData, error: patientError } = await supabase
-            .from('patients')
-            .insert({
-                first_name: rest.firstName,
-                last_name: rest.lastName,
-                birth_date: rest.birthDate,
-                gender: rest.gender,
-                occupation: rest.occupation,
-                consultation_reason: rest.consultationReason,
-                status: rest.status,
-                avatar_url: rest.avatarUrl,
-            })
-            .select()
-            .single();
-
-        if (patientError) throw patientError;
-
-        // Insertar medición inicial si existe
-        if (initialMeasurement) {
-            const { error: measurementError } = await supabase
-                .from('measurements')
-                .insert({
-                    patient_id: patientData.id,
-                    weight: initialMeasurement.weight,
-                    height: initialMeasurement.height,
-                    date: initialMeasurement.date,
-                    is_initial: true,
-                });
-            if (measurementError) throw measurementError;
-        }
-
-        // Insertar historial médico
-        if (medicalHistory) {
-            const { error: historyError } = await supabase
-                .from('medical_history')
-                .insert({
-                    patient_id: patientData.id,
-                    chronic_diseases_has_condition: medicalHistory.chronicDiseases.hasCondition,
-                    chronic_diseases_observation: medicalHistory.chronicDiseases.observation,
-                    previous_surgeries_has_condition: medicalHistory.previousSurgeries.hasCondition,
-                    previous_surgeries_observation: medicalHistory.previousSurgeries.observation,
-                    allergies_has_condition: medicalHistory.allergies.hasCondition,
-                    allergies_observation: medicalHistory.allergies.observation,
-                    medications_has_condition: medicalHistory.medications.hasCondition,
-                    medications_observation: medicalHistory.medications.observation,
-                    smokes_has_condition: medicalHistory.smokes.hasCondition,
-                    smokes_observation: medicalHistory.smokes.observation,
-                    drinks_alcohol_has_condition: medicalHistory.drinksAlcohol.hasCondition,
-                    drinks_alcohol_observation: medicalHistory.drinksAlcohol.observation,
-                });
-            if (historyError) throw historyError;
-        }
-
-        return mapToPatient({ ...patientData, measurements: initialMeasurement ? [{ ...initialMeasurement, is_initial: true }] : [], medical_history: medicalHistory ? [medicalHistory] : [] });
-    },
-
-    async delete(id: string): Promise<void> {
-        const { error } = await supabase
-            .from('patients')
-            .delete()
-            .eq('id', id);
-        if (error) throw error;
-    },
+  async delete(id: string): Promise<void> {
+    await apiClient.delete(apiRoutes.patients.delete(id));
+  },
 };
 
 function mapToPatient(row: any): Patient {
-    const initialMeasurement = row.measurements?.find((m: any) => m.is_initial);
-    const mh = row.medical_history?.[0];
+  const initialMeasurement = row.initialMeasurement;
+  const mh = row.medicalHistory;
 
-    return {
-        id: row.id,
-        firstName: row.first_name,
-        lastName: row.last_name,
-        birthDate: row.birth_date,
-        gender: row.gender,
-        occupation: row.occupation,
-        consultationReason: row.consultation_reason,
-        status: row.status,
-        avatarUrl: row.avatar_url,
-        ...(initialMeasurement ? {
-            initialMeasurement: {
-                date: initialMeasurement.date,
-                weight: initialMeasurement.weight,
-                height: initialMeasurement.height,
-            }
-        } : {}),
-        ...(mh ? {
-            medicalHistory: {
-                chronicDiseases: { hasCondition: mh.chronic_diseases_has_condition, observation: mh.chronic_diseases_observation ?? '' },
-                previousSurgeries: { hasCondition: mh.previous_surgeries_has_condition, observation: mh.previous_surgeries_observation ?? '' },
-                allergies: { hasCondition: mh.allergies_has_condition, observation: mh.allergies_observation ?? '' },
-                medications: { hasCondition: mh.medications_has_condition, observation: mh.medications_observation ?? '' },
-                smokes: { hasCondition: mh.smokes_has_condition, observation: mh.smokes_observation ?? '' },
-                drinksAlcohol: { hasCondition: mh.drinks_alcohol_has_condition, observation: mh.drinks_alcohol_observation ?? '' },
-            }
-        } : {}),
-    };
+  return {
+    id: row.id,
+    firstName: row.firstName,
+    lastName: row.lastName,
+    birthDate: row.birthDate,
+    gender: row.gender,
+    occupation: row.occupation,
+    consultationReason: row.consultationReason,
+    status: row.status,
+    avatarUrl: row.avatarUrl,
+    ...(initialMeasurement ? {
+      initialMeasurement: {
+        date: initialMeasurement.date,
+        weight: initialMeasurement.weight,
+        height: initialMeasurement.height,
+      },
+    } : {}),
+    ...(mh ? {
+      medicalHistory: {
+        chronicDiseases: {
+          hasCondition: mh.chronicDiseases.hasCondition,
+          observation: mh.chronicDiseases.observation,
+        },
+        previousSurgeries: {
+          hasCondition: mh.previousSurgeries.hasCondition,
+          observation: mh.previousSurgeries.observation,
+        },
+        allergies: {
+          hasCondition: mh.allergies.hasCondition,
+          observation: mh.allergies.observation,
+        },
+        medications: {
+          hasCondition: mh.medications.hasCondition,
+          observation: mh.medications.observation,
+        },
+        smokes: {
+          hasCondition: mh.smokes.hasCondition,
+          observation: mh.smokes.observation,
+        },
+        drinksAlcohol: {
+          hasCondition: mh.drinksAlcohol.hasCondition,
+          observation: mh.drinksAlcohol.observation,
+        },
+      },
+    } : {}),
+  };
+}
+
+function mapToCreateDto(patient: Omit<Patient, 'id'>) {
+  return {
+    firstName: patient.firstName,
+    lastName: patient.lastName,
+    birthDate: patient.birthDate,
+    gender: patient.gender,
+    occupation: patient.occupation,
+    consultationReason: patient.consultationReason,
+    status: patient.status,
+    avatarUrl: patient.avatarUrl,
+    initialMeasurement: patient.initialMeasurement ? {
+      weight: patient.initialMeasurement.weight,
+      height: patient.initialMeasurement.height,
+      date: patient.initialMeasurement.date,
+    } : null,
+    medicalHistory: patient.medicalHistory ? {
+      chronicDiseases: {
+        hasCondition: patient.medicalHistory.chronicDiseases.hasCondition,
+        observation: patient.medicalHistory.chronicDiseases.observation,
+      },
+      previousSurgeries: {
+        hasCondition: patient.medicalHistory.previousSurgeries.hasCondition,
+        observation: patient.medicalHistory.previousSurgeries.observation,
+      },
+      allergies: {
+        hasCondition: patient.medicalHistory.allergies.hasCondition,
+        observation: patient.medicalHistory.allergies.observation,
+      },
+      medications: {
+        hasCondition: patient.medicalHistory.medications.hasCondition,
+        observation: patient.medicalHistory.medications.observation,
+      },
+      smokes: {
+        hasCondition: patient.medicalHistory.smokes.hasCondition,
+        observation: patient.medicalHistory.smokes.observation,
+      },
+      drinksAlcohol: {
+        hasCondition: patient.medicalHistory.drinksAlcohol.hasCondition,
+        observation: patient.medicalHistory.drinksAlcohol.observation,
+      },
+    } : null,
+  };
 }
