@@ -15,15 +15,114 @@ function formatDate(dateStr: string): string {
 
 interface PatientInfoCardProps {
     patient: Patient;
+    isEditing?: boolean;
 }
 
-export default function PatientInfoCard({ patient }: PatientInfoCardProps) {
+const inputClasses = "w-full bg-white border border-primary-30 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-brand/20 focus:border-blue-brand outline-none transition-all font-sans font-normal text-black-primary";
+
+export default function PatientInfoCard({ patient, isEditing, }: PatientInfoCardProps) {
     const age = calculateAge(patient.birthDate);
     const medicalHistory = patient.medicalHistory;
-
     const measurement = patient.initialMeasurement;
     const bmi = measurement ? calculateBMI(measurement.weight, measurement.height) : null;
 
+    if (isEditing) {
+        return (
+            <form id="edit-patient-form" className="bg-white border-2 border-blue-brand/30 rounded-2xl p-6 space-y-6 shadow-sm">
+                <div className="flex flex-col gap-6">
+                    {/* Sección Identidad Edición */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-gray-primary uppercase">Nombre</label>
+                            <input name="firstName" defaultValue={patient.firstName} className={inputClasses} />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-gray-primary uppercase">Apellidos</label>
+                            <input name="lastName" defaultValue={patient.lastName} className={inputClasses} />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-gray-primary uppercase">Ocupación</label>
+                            <input name="occupation" defaultValue={patient.occupation} className={inputClasses} />
+                        </div>
+                    </div>
+
+                    {/* Datos Rápidos Edición */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-primary/50 p-4 rounded-xl">
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-gray-primary uppercase">Nacimiento</label>
+                            <input type="date" name="birthDate" defaultValue={patient.birthDate} className={inputClasses} />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-gray-primary uppercase">Género</label>
+                            <select name="gender" defaultValue={patient.gender} className={inputClasses}>
+                                <option value="Male text-black">Masculino</option>
+                                <option value="Female">Femenino</option>
+                            </select>
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-gray-primary uppercase">Estado</label>
+                            <select name="status" defaultValue={patient.status} className={inputClasses}>
+                                <option value="ACTIVE text-black">Activo</option>
+                                <option value="PENDING">Pendiente</option>
+                                <option value="REVIEW">Revisión</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    {/* Motivo de consulta Edición */}
+                    <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-gray-primary uppercase">Motivo de consulta</label>
+                        <textarea
+                            name="consultationReason"
+                            defaultValue={patient.consultationReason}
+                            rows={3}
+                            className={`${inputClasses} resize-none`}
+                        />
+                    </div>
+
+                    {/* Historial Médico Edición */}
+                    <div className="space-y-3">
+                        <p className="text-xs font-bold text-gray-primary uppercase tracking-wider">Historial médico</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {[
+                                { id: 'chronicDiseases', label: 'Enfermedades crónicas' },
+                                { id: 'previousSurgeries', label: 'Cirugías previas' },
+                                { id: 'allergies', label: 'Alergias' },
+                                { id: 'medications', label: 'Medicamentos' },
+                                { id: 'smokes', label: 'Tabaco' },
+                                { id: 'drinksAlcohol', label: 'Alcohol' },
+                            ].map((item) => {
+                                const data = (medicalHistory as any)?.[item.id];
+                                return (
+                                    <div key={item.id} className="p-3 border border-primary-30 rounded-xl bg-primary/30 space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <label className="text-xs font-semibold text-black-primary">{item.label}</label>
+                                            <input
+                                                type="checkbox"
+                                                name={`${item.id}.hasCondition`}
+                                                defaultChecked={data?.hasCondition}
+                                                className="w-4 h-4 text-blue-brand rounded border-gray-300 focus:ring-blue-brand"
+                                            />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            name={`${item.id}.observation`}
+                                            defaultValue={data?.observation}
+                                            placeholder="Observaciones..."
+                                            className="w-full bg-white border border-primary-30 rounded-md px-2 py-1 text-xs outline-none focus:border-blue-brand"
+                                        />
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+                <p className="text-[10px] text-blue-brand italic font-medium">* Edición de historial médico disponible en ajustes avanzados.</p>
+            </form>
+        );
+    }
+
+    // --- MODO VISTA  ---
     const quickStats = [
         { label: 'Fecha de nacimiento', value: formatDate(patient.birthDate) },
         { label: 'Edad', value: `${age} años` },
@@ -47,7 +146,6 @@ export default function PatientInfoCard({ patient }: PatientInfoCardProps) {
 
     return (
         <div className="bg-white border border-primary-30 rounded-2xl p-6 space-y-6">
-            {/* Identidad */}
             <div className="flex items-center gap-4">
                 {patient.avatarUrl ? (
                     <img src={patient.avatarUrl} className="w-16 h-16 rounded-full object-cover" />
@@ -69,7 +167,6 @@ export default function PatientInfoCard({ patient }: PatientInfoCardProps) {
                 </div>
             </div>
 
-            {/* Datos rápidos */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {quickStats.map(({ label, value }) => (
                     <div key={label} className="bg-primary rounded-xl px-4 py-3">
@@ -79,13 +176,11 @@ export default function PatientInfoCard({ patient }: PatientInfoCardProps) {
                 ))}
             </div>
 
-            {/* Motivo de consulta */}
             <div>
                 <p className="text-xs font-bold text-gray-primary uppercase tracking-wider mb-2">Motivo de consulta</p>
                 <p className="text-sm text-black-primary leading-relaxed">{patient.consultationReason}</p>
             </div>
 
-            {/* Historial médico */}
             {medicalHistory && (
                 <div>
                     <p className="text-xs font-bold text-gray-primary uppercase tracking-wider mb-3">Historial médico</p>

@@ -4,9 +4,9 @@ services:
       context: ./backend/BluDiet.API
     ports:
       - "5123:8080"
-    volumes:
-      - ./backend/BluDiet.API:/app # Mapea el código
-      - ~/.aspnet/https:/https:ro   # (Opcional) para certificados SSL
+    # volumes:
+    #   - ./backend/BluDiet.API:/app # Mapea el código
+    #   - ~/.aspnet/https:/https:ro   # (Opcional) para certificados SSL
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - DOTNET_USE_POLLING_FILE_WATCHER=1 # Ayuda a .NET a detectar cambios en Docker

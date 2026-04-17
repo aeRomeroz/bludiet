@@ -9,6 +9,7 @@ import PatientDietsTab from "../components/dashboard/patients/PatientDietsTab";
 import DietSetupModal from "../components/dashboard/diets/DietSetupModal";
 import { buildDietFromSetup } from "../utils/diets/dietMath";
 import type { DietSetupData } from "../types/diet";
+import EditPatientInfoCard from "../components/dashboard/patients/EditPatientInfoCard";
 
 type Tab = 'dietas';
 
@@ -24,6 +25,40 @@ export default function PatientDetail() {
 
     const [activeTab, setActiveTab] = useState<Tab>('dietas');
     const [isDietModalOpen, setIsDietModalOpen] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+
+    const handleSave = () => {
+        if (!patient) return;
+        const form = document.getElementById('edit-patient-form') as HTMLFormElement;
+        const formData = new FormData(form);
+
+        // Objeto base con los datos planos
+        const updatedPatient: any = {
+            ...patient,
+            firstName: formData.get('firstName'),
+            lastName: formData.get('lastName'),
+            occupation: formData.get('occupation'),
+            birthDate: formData.get('birthDate'),
+            gender: formData.get('gender'),
+            status: formData.get('status'),
+            consultationReason: formData.get('consultationReason'),
+            medicalHistory: { ...patient.medicalHistory }
+        };
+
+        // Procesamos dinámicamente los campos del historial
+        const historyKeys = ['chronicDiseases', 'previousSurgeries', 'allergies', 'medications', 'smokes', 'drinksAlcohol'];
+
+        historyKeys.forEach(key => {
+            updatedPatient.medicalHistory[key] = {
+                hasCondition: formData.get(`${key}.hasCondition`) === 'on', // Los checkboxes devuelven 'on' si están marcados
+                observation: formData.get(`${key}.observation`)
+            };
+        });
+
+        console.log("Paciente listo para API:", updatedPatient);
+        // updatePatient(id, updatedPatient);
+        setIsEditing(false);
+    };
 
     const patient = patients.find(p => p.id === id);
     const patientDiets = diets.filter(d => d.patientId === id);
@@ -64,28 +99,38 @@ export default function PatientDetail() {
                         <span className="text-gray-primary text-sm">{patient.occupation}</span>
                     </div>
                 </div>
-                <div className="flex gap-5">
-                <Button
-                    variant="primary"
-                    className="flex items-center gap-3"
-                    onClick={()=> {}}
-                >
-                    <PencilIcon className="text-green-brand h-5 w-5" />
-                    Editar
-                </Button>
-                <Button
-                    variant="primary"
-                    className="flex items-center gap-3"
-                    onClick={() => setIsDietModalOpen(true)}
-                >
-                    <PlusIcon className="text-blue-brand h-5 w-5" />
-                    Nueva Dieta
-                </Button>
+                <div className="flex gap-3">
+                    {isEditing ? (
+                        <>
+                            <Button variant="secondary" onClick={() => setIsEditing(false)}>
+                                Cancelar
+                            </Button>
+                            <Button
+                                variant="primary"
+                                className="bg-green-600 hover:bg-green-700"
+                                onClick={handleSave} // <--- Llamamos directamente a la función
+                            >
+                                Guardar Cambios
+                            </Button>
+                        </>
+                    ) : (
+                        <Button
+                            variant="primary"
+                            className="flex items-center gap-3"
+                            onClick={() => setIsEditing(true)}
+                        >
+                            <PencilIcon className="text-white h-5 w-5" />
+                            Editar Perfil
+                        </Button>
+                    )}
                 </div>
             </div>
 
-            {/* Info card */}
-            <PatientInfoCard patient={patient} />
+            {isEditing ? (
+                <EditPatientInfoCard patient={patient} />
+            ) : (
+                <PatientInfoCard patient={patient} />
+            )}
 
             {/* Tabs */}
             <div className="flex flex-col gap-4">
