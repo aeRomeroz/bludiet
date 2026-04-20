@@ -33,11 +33,30 @@ export default function PatientDetail() {
     const patient = patients.find(p => p.id === id);
     const patientDiets = diets.filter(d => d.patientId === id);
 
-    const handleCreateDiet = (setup: DietSetupData) => {
-        const dietId = crypto.randomUUID();
-        const newDiet = buildDietFromSetup(setup, dietId);
-        addDiet(newDiet);
-        navigate(`/patients/${id}/diets/${dietId}`);
+    const handleCreateDiet = async (setup: DietSetupData) => {
+        try {
+            const dietId = crypto.randomUUID();
+            // buildDietFromSetup es tu lógica de cálculos que ya tienes
+            const newDiet = buildDietFromSetup(setup, dietId);
+
+            // Asignamos el ID del paciente actual
+            newDiet.patientId = id;
+
+            // 1. Guardamos en la BDD a través del contexto
+            await addDiet(newDiet);
+
+            // 2. Si el paciente estaba PENDING, lo pasamos a ACTIVE
+            if (patient.status !== 'ACTIVE') {
+                await updatePatient(patient.id, { ...patient, status: 'ACTIVE' });
+            }
+
+            // 3. Cerramos modal y navegamos a la edición de la dieta
+            setIsDietModalOpen(false);
+            navigate(`/patients/${id}/diets/${dietId}`);
+
+        } catch (error) {
+            alert("Error al crear la dieta en el servidor.");
+        }
     };
 
     const handleSave = async () => {
