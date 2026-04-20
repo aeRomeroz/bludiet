@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeftIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftIcon, PlusIcon, PencilIcon } from "@heroicons/react/24/outline";
 import { usePatients } from "../context/PatientsContext";
 import { useDiets } from "../context/DietsContext";
 import Button from "../components/ui/Button";
@@ -9,6 +9,8 @@ import PatientDietsTab from "../components/dashboard/patients/PatientDietsTab";
 import DietSetupModal from "../components/dashboard/diets/DietSetupModal";
 import { buildDietFromSetup } from "../utils/diets/dietMath";
 import type { DietSetupData } from "../types/diet";
+import EditPatientInfoCard from "../components/dashboard/patients/EditPatientInfoCard";
+import type { Patient } from "../types/patients";
 
 type Tab = 'dietas';
 
@@ -19,14 +21,68 @@ const TABS: { id: Tab; label: string }[] = [
 export default function PatientDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { patients } = usePatients();
+    const { patients, updatePatient } = usePatients();
     const { diets, addDiet } = useDiets();
 
+    // --- HOOKS ---
     const [activeTab, setActiveTab] = useState<Tab>('dietas');
     const [isDietModalOpen, setIsDietModalOpen] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
     const patient = patients.find(p => p.id === id);
     const patientDiets = diets.filter(d => d.patientId === id);
+
+    const handleCreateDiet = (setup: DietSetupData) => {
+        const dietId = crypto.randomUUID();
+        const newDiet = buildDietFromSetup(setup, dietId);
+        addDiet(newDiet);
+        navigate(`/patients/${id}/diets/${dietId}`);
+    };
+
+    const handleSave = async () => {
+        if (!patient || isSaving) return;
+        setIsSaving(true);
+        const form = document.getElementById('edit-patient-form') as HTMLFormElement;
+        const formData = new FormData(form);
+
+        const medicalHistory = { ...patient.medicalHistory };
+        const dynamicHistoryKeys = Object.keys(medicalHistory) as (keyof typeof medicalHistory)[];
+
+        dynamicHistoryKeys.forEach(key => {
+            const hasConditionValue = formData.get(`${key}.hasCondition`);
+            const observationValue = formData.get(`${key}.observation`);
+
+            medicalHistory[key] = {
+                hasCondition: hasConditionValue === 'on',
+                observation: observationValue as string || ""
+            };
+
+        });
+
+        const updatedPatient: any = {
+            ...patient,
+            firstName: formData.get('firstName'),
+            lastName: formData.get('lastName'),
+            occupation: formData.get('occupation'),
+            birthDate: formData.get('birthDate'),
+            gender: formData.get('gender'),
+            status: patientDiets.length > 0 ? 'ACTIVE' : 'PENDING',
+            consultationReason: formData.get('consultationReason'),
+            medicalHistory: medicalHistory
+        };
+
+        console.log("Paciente listo para API:", updatedPatient);
+        try {
+            await updatePatient(patient.id, updatedPatient);
+            setIsEditing(false);
+        } catch (error) {
+            console.error("Error al guardar:", error);
+            alert("No se pudieron guardar los cambios. Revisa la consola.");
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     if (!patient) {
         return (
@@ -38,13 +94,6 @@ export default function PatientDetail() {
             </div>
         );
     }
-
-    const handleCreateDiet = (setup: DietSetupData) => {
-        const dietId = crypto.randomUUID();
-        const newDiet = buildDietFromSetup(setup, dietId);
-        addDiet(newDiet);
-        navigate(`/patients/${id}/diets/${dietId}`);
-    };
 
     return (
         <div className="space-y-6">
@@ -64,18 +113,38 @@ export default function PatientDetail() {
                         <span className="text-gray-primary text-sm">{patient.occupation}</span>
                     </div>
                 </div>
-                <Button
-                    variant="primary"
-                    className="flex items-center gap-3"
-                    onClick={() => setIsDietModalOpen(true)}
-                >
-                    <PlusIcon className="text-blue-brand h-5 w-5" />
-                    Nueva Dieta
-                </Button>
+                <div className="flex gap-3">
+                    {isEditing ? (
+                        <>
+                            <Button variant="secondary" onClick={() => setIsEditing(false)}>
+                                Cancelar
+                            </Button>
+                            <Button
+                                variant="primary"
+                                className="bg-green-600 hover:bg-green-700"
+                                onClick={handleSave} // <--- Llamamos directamente a la función
+                            >
+                                Guardar Cambios
+                            </Button>
+                        </>
+                    ) : (
+                        <Button
+                            variant="primary"
+                            className="flex items-center gap-3"
+                            onClick={() => setIsEditing(true)}
+                        >
+                            <PencilIcon className="text-white h-5 w-5" />
+                            Editar Perfil
+                        </Button>
+                    )}
+                </div>
             </div>
 
-            {/* Info card */}
-            <PatientInfoCard patient={patient} />
+            {isEditing ? (
+                <EditPatientInfoCard patient={patient} />
+            ) : (
+                <PatientInfoCard patient={patient} />
+            )}
 
             {/* Tabs */}
             <div className="flex flex-col gap-4">

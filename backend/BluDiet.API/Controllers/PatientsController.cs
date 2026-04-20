@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using BluDiet.API.Data;
 using BluDiet.API.Models;
 using BluDiet.API.DTOs;
+using AutoMapper;
 
 namespace BluDiet.API.Controllers;
 
@@ -11,10 +12,12 @@ namespace BluDiet.API.Controllers;
 public class PatientsController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IMapper _mapper;
 
-    public PatientsController(AppDbContext context)
+    public PatientsController(AppDbContext context, IMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
     }
 
     [HttpGet]
@@ -92,6 +95,29 @@ public class PatientsController : ControllerBase
         await _context.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetPatient), new { id = patient.Id }, MapToResponseDto(patient));
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdatePatient(Guid id, [FromBody] UpdatePatientDto dto)
+    {
+        var patient = await _context.Patients
+            .Include(p => p.MedicalHistory)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (patient == null) return NotFound();
+
+        _mapper.Map(dto, patient); 
+
+        try
+    {
+        await _context.SaveChangesAsync();
+        return NoContent(); // 204
+    }
+    catch (DbUpdateException ex)
+    {
+        // Log the actual error here
+        return StatusCode(500, "Database update failed");
+    }
     }
 
     [HttpDelete("{id}")]
