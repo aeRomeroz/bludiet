@@ -65,11 +65,14 @@ export function PatientsProvider({ children }: { children: ReactNode }) {
 
   const updatePatient = async (id: string, data: Partial<Patient>) => {
     try {
-      const updated = await patientService.update(id, data);
-      setPatients(prev => prev.map(p => p.id === id ? updated : p));
+      await patientService.update(id, data);
+
+      setPatients(prev => prev.map(p => 
+        p.id === id ? { ...p, ...data } : p
+      ));
     } catch (error) {
       console.error("Error al actualizar paciente:", error);
-      // Aquí podrías disparar una notificación de error
+      throw error;
     }
   };
 

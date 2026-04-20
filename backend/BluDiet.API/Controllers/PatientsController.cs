@@ -108,8 +108,16 @@ public class PatientsController : ControllerBase
 
         _mapper.Map(dto, patient); 
 
+        try
+    {
         await _context.SaveChangesAsync();
-        return NoContent();
+        return NoContent(); // 204
+    }
+    catch (DbUpdateException ex)
+    {
+        // Log the actual error here
+        return StatusCode(500, "Database update failed");
+    }
     }
 
     [HttpDelete("{id}")]

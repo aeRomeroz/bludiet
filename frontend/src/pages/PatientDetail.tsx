@@ -10,6 +10,7 @@ import DietSetupModal from "../components/dashboard/diets/DietSetupModal";
 import { buildDietFromSetup } from "../utils/diets/dietMath";
 import type { DietSetupData } from "../types/diet";
 import EditPatientInfoCard from "../components/dashboard/patients/EditPatientInfoCard";
+import type { Patient } from "../types/patients";
 
 type Tab = 'dietas';
 
@@ -27,29 +28,10 @@ export default function PatientDetail() {
     const [activeTab, setActiveTab] = useState<Tab>('dietas');
     const [isDietModalOpen, setIsDietModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
     const patient = patients.find(p => p.id === id);
     const patientDiets = diets.filter(d => d.patientId === id);
-
-    useEffect(() => {
-        if (!patient) return;
-        
-        const targetStatus = patientDiets.length > 0 ? 'ACTIVE' : 'PENDING';
-
-        // 3. CRUCIAL: Solo disparamos la actualización si el estado actual es DIFERENTE al deseado
-        if (patient.status !== targetStatus) {
-            console.log(`Cambiando estado de ${patient.status} a ${targetStatus}`);
-            
-            // Creamos el objeto actualizado
-            const updatedPatient = { 
-                ...patient, 
-                status: targetStatus 
-            };
-
-            // Actualizamos (asegúrate de que updatePatient sea una función estable del context)
-            updatePatient(patient.id, updatedPatient);
-        }
-    }, [patientDiets.length, patient?.status, updatePatient]);
 
     const handleCreateDiet = (setup: DietSetupData) => {
         const dietId = crypto.randomUUID();
@@ -59,7 +41,8 @@ export default function PatientDetail() {
     };
 
     const handleSave = async () => {
-        if (!patient) return;
+        if (!patient || isSaving) return;
+        setIsSaving(true);
         const form = document.getElementById('edit-patient-form') as HTMLFormElement;
         const formData = new FormData(form);
 
@@ -96,6 +79,8 @@ export default function PatientDetail() {
         } catch (error) {
             console.error("Error al guardar:", error);
             alert("No se pudieron guardar los cambios. Revisa la consola.");
+        } finally {
+            setIsSaving(false);
         }
     };
 

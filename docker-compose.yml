@@ -7,6 +7,8 @@ services:
     # volumes:
     #   - ./backend/BluDiet.API:/app # Mapea el código
     #   - ~/.aspnet/https:/https:ro   # (Opcional) para certificados SSL
+    env_file:
+      - ./backend/.env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - DOTNET_USE_POLLING_FILE_WATCHER=1 # Ayuda a .NET a detectar cambios en Docker
