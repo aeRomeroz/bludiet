@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeftIcon, PlusIcon, PencilIcon } from "@heroicons/react/24/outline";
 import { usePatients } from "../context/PatientsContext";
@@ -20,19 +20,63 @@ const TABS: { id: Tab; label: string }[] = [
 export default function PatientDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { patients } = usePatients();
+    const { patients, updatePatient } = usePatients();
     const { diets, addDiet } = useDiets();
 
+    // --- HOOKS ---
     const [activeTab, setActiveTab] = useState<Tab>('dietas');
     const [isDietModalOpen, setIsDietModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
 
-    const handleSave = () => {
+    const patient = patients.find(p => p.id === id);
+    const patientDiets = diets.filter(d => d.patientId === id);
+
+    useEffect(() => {
+        if (!patient) return;
+        
+        const targetStatus = patientDiets.length > 0 ? 'ACTIVE' : 'PENDING';
+
+        // 3. CRUCIAL: Solo disparamos la actualización si el estado actual es DIFERENTE al deseado
+        if (patient.status !== targetStatus) {
+            console.log(`Cambiando estado de ${patient.status} a ${targetStatus}`);
+            
+            // Creamos el objeto actualizado
+            const updatedPatient = { 
+                ...patient, 
+                status: targetStatus 
+            };
+
+            // Actualizamos (asegúrate de que updatePatient sea una función estable del context)
+            updatePatient(patient.id, updatedPatient);
+        }
+    }, [patientDiets.length, patient?.status, updatePatient]);
+
+    const handleCreateDiet = (setup: DietSetupData) => {
+        const dietId = crypto.randomUUID();
+        const newDiet = buildDietFromSetup(setup, dietId);
+        addDiet(newDiet);
+        navigate(`/patients/${id}/diets/${dietId}`);
+    };
+
+    const handleSave = async () => {
         if (!patient) return;
         const form = document.getElementById('edit-patient-form') as HTMLFormElement;
         const formData = new FormData(form);
 
-        // Objeto base con los datos planos
+        const medicalHistory = { ...patient.medicalHistory };
+        const dynamicHistoryKeys = Object.keys(medicalHistory) as (keyof typeof medicalHistory)[];
+
+        dynamicHistoryKeys.forEach(key => {
+            const hasConditionValue = formData.get(`${key}.hasCondition`);
+            const observationValue = formData.get(`${key}.observation`);
+
+            medicalHistory[key] = {
+                hasCondition: hasConditionValue === 'on',
+                observation: observationValue as string || ""
+            };
+
+        });
+
         const updatedPatient: any = {
             ...patient,
             firstName: formData.get('firstName'),
@@ -40,28 +84,20 @@ export default function PatientDetail() {
             occupation: formData.get('occupation'),
             birthDate: formData.get('birthDate'),
             gender: formData.get('gender'),
-            status: formData.get('status'),
+            status: patientDiets.length > 0 ? 'ACTIVE' : 'PENDING',
             consultationReason: formData.get('consultationReason'),
-            medicalHistory: { ...patient.medicalHistory }
+            medicalHistory: medicalHistory
         };
 
-        // Procesamos dinámicamente los campos del historial
-        const historyKeys = ['chronicDiseases', 'previousSurgeries', 'allergies', 'medications', 'smokes', 'drinksAlcohol'];
-
-        historyKeys.forEach(key => {
-            updatedPatient.medicalHistory[key] = {
-                hasCondition: formData.get(`${key}.hasCondition`) === 'on', // Los checkboxes devuelven 'on' si están marcados
-                observation: formData.get(`${key}.observation`)
-            };
-        });
-
         console.log("Paciente listo para API:", updatedPatient);
-        // updatePatient(id, updatedPatient);
-        setIsEditing(false);
+        try {
+            await updatePatient(patient.id, updatedPatient);
+            setIsEditing(false);
+        } catch (error) {
+            console.error("Error al guardar:", error);
+            alert("No se pudieron guardar los cambios. Revisa la consola.");
+        }
     };
-
-    const patient = patients.find(p => p.id === id);
-    const patientDiets = diets.filter(d => d.patientId === id);
 
     if (!patient) {
         return (
@@ -73,13 +109,6 @@ export default function PatientDetail() {
             </div>
         );
     }
-
-    const handleCreateDiet = (setup: DietSetupData) => {
-        const dietId = crypto.randomUUID();
-        const newDiet = buildDietFromSetup(setup, dietId);
-        addDiet(newDiet);
-        navigate(`/patients/${id}/diets/${dietId}`);
-    };
 
     return (
         <div className="space-y-6">

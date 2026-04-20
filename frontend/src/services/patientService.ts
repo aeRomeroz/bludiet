@@ -9,7 +9,12 @@ export const patientService = {
   },
 
   async create(patient: Omit<Patient, 'id'>): Promise<Patient> {
-    const { data } = await apiClient.post(apiRoutes.patients.index, mapToCreateDto(patient));
+    const { data } = await apiClient.post(apiRoutes.patients.index, mapToDto(patient));
+    return mapToPatient(data);
+  },
+
+  async update(id: string, patient: Partial<Patient>): Promise<Patient> {
+    const { data } = await apiClient.put(apiRoutes.patients.update(id), mapToDto(patient));
     return mapToPatient(data);
   },
 
@@ -19,58 +24,19 @@ export const patientService = {
 };
 
 function mapToPatient(row: any): Patient {
-  const initialMeasurement = row.initialMeasurement;
-  const mh = row.medicalHistory;
-
   return {
-    id: row.id,
-    firstName: row.firstName,
-    lastName: row.lastName,
-    birthDate: row.birthDate,
-    gender: row.gender,
-    occupation: row.occupation,
-    consultationReason: row.consultationReason,
-    status: row.status,
-    avatarUrl: row.avatarUrl,
-    ...(initialMeasurement ? {
-      initialMeasurement: {
-        date: initialMeasurement.date,
-        weight: initialMeasurement.weight,
-        height: initialMeasurement.height,
-      },
-    } : {}),
-    ...(mh ? {
-      medicalHistory: {
-        chronicDiseases: {
-          hasCondition: mh.chronicDiseases.hasCondition,
-          observation: mh.chronicDiseases.observation,
-        },
-        previousSurgeries: {
-          hasCondition: mh.previousSurgeries.hasCondition,
-          observation: mh.previousSurgeries.observation,
-        },
-        allergies: {
-          hasCondition: mh.allergies.hasCondition,
-          observation: mh.allergies.observation,
-        },
-        medications: {
-          hasCondition: mh.medications.hasCondition,
-          observation: mh.medications.observation,
-        },
-        smokes: {
-          hasCondition: mh.smokes.hasCondition,
-          observation: mh.smokes.observation,
-        },
-        drinksAlcohol: {
-          hasCondition: mh.drinksAlcohol.hasCondition,
-          observation: mh.drinksAlcohol.observation,
-        },
-      },
-    } : {}),
+    ...row, // Mantenemos campos planos (id, names, dates)
+    initialMeasurement: row.initialMeasurement ? {
+      date: row.initialMeasurement.date,
+      weight: row.initialMeasurement.weight,
+      height: row.initialMeasurement.height,
+    } : undefined,
+    // El historial se mapea dinámicamente si existe
+    medicalHistory: row.medicalHistory ? mapMedicalHistory(row.medicalHistory) : undefined
   };
 }
 
-function mapToCreateDto(patient: Omit<Patient, 'id'>) {
+function mapToDto(patient: Partial<Patient>) {
   return {
     firstName: patient.firstName,
     lastName: patient.lastName,
@@ -80,36 +46,18 @@ function mapToCreateDto(patient: Omit<Patient, 'id'>) {
     consultationReason: patient.consultationReason,
     status: patient.status,
     avatarUrl: patient.avatarUrl,
-    initialMeasurement: patient.initialMeasurement ? {
-      weight: patient.initialMeasurement.weight,
-      height: patient.initialMeasurement.height,
-      date: patient.initialMeasurement.date,
-    } : null,
-    medicalHistory: patient.medicalHistory ? {
-      chronicDiseases: {
-        hasCondition: patient.medicalHistory.chronicDiseases.hasCondition,
-        observation: patient.medicalHistory.chronicDiseases.observation,
-      },
-      previousSurgeries: {
-        hasCondition: patient.medicalHistory.previousSurgeries.hasCondition,
-        observation: patient.medicalHistory.previousSurgeries.observation,
-      },
-      allergies: {
-        hasCondition: patient.medicalHistory.allergies.hasCondition,
-        observation: patient.medicalHistory.allergies.observation,
-      },
-      medications: {
-        hasCondition: patient.medicalHistory.medications.hasCondition,
-        observation: patient.medicalHistory.medications.observation,
-      },
-      smokes: {
-        hasCondition: patient.medicalHistory.smokes.hasCondition,
-        observation: patient.medicalHistory.smokes.observation,
-      },
-      drinksAlcohol: {
-        hasCondition: patient.medicalHistory.drinksAlcohol.hasCondition,
-        observation: patient.medicalHistory.drinksAlcohol.observation,
-      },
-    } : null,
+    initialMeasurement: patient.initialMeasurement || null,
+    medicalHistory: patient.medicalHistory ? mapMedicalHistory(patient.medicalHistory) : null,
   };
+}
+
+function mapMedicalHistory(mh: any) {
+  const result: any = {};
+  Object.keys(mh).forEach(key => {
+    result[key] = {
+      hasCondition: mh[key].hasCondition,
+      observation: mh[key].observation || ""
+    };
+  });
+  return result;
 }

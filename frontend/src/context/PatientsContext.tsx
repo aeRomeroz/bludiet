@@ -33,6 +33,7 @@ interface PatientsContextType {
   loading: boolean;
   addPatient: (patient: Patient) => Promise<void>;
   deletePatient: (id: string) => Promise<void>;
+  updatePatient: (id: string, data: Partial<Patient>) => Promise<void>;
 }
 
 const PatientsContext = createContext<PatientsContextType | null>(null);
@@ -42,33 +43,43 @@ export function PatientsProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-        patientService.getAll()
-            .then((data) => {
-                if (data.length === 0) {
-                    setPatients([DEFAULT_TEST_PATIENT]);
-                } else {
-                    setPatients(data);
-                }
-            })
-            .catch(() => {
-                toast.error('Error al cargar pacientes. Se usará un paciente de prueba.');
-                setPatients([DEFAULT_TEST_PATIENT]);
-            })
-            .finally(() => setLoading(false));
-    }, []);
+    patientService.getAll()
+      .then((data) => {
+        if (data.length === 0) {
+          setPatients([DEFAULT_TEST_PATIENT]);
+        } else {
+          setPatients(data);
+        }
+      })
+      .catch(() => {
+        toast.error('Error al cargar pacientes. Se usará un paciente de prueba.');
+        setPatients([DEFAULT_TEST_PATIENT]);
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   const addPatient = async (patient: Patient) => {
-        const created = await patientService.create(patient);
-        setPatients(prev => [created, ...prev]);
-    };
+    const created = await patientService.create(patient);
+    setPatients(prev => [created, ...prev]);
+  };
+
+  const updatePatient = async (id: string, data: Partial<Patient>) => {
+    try {
+      const updated = await patientService.update(id, data);
+      setPatients(prev => prev.map(p => p.id === id ? updated : p));
+    } catch (error) {
+      console.error("Error al actualizar paciente:", error);
+      // Aquí podrías disparar una notificación de error
+    }
+  };
 
   const deletePatient = async (id: string) => {
-        await patientService.delete(id);
-        setPatients(prev => prev.filter(p => p.id !== id));
+    await patientService.delete(id);
+    setPatients(prev => prev.filter(p => p.id !== id));
   };
 
   return (
-    <PatientsContext.Provider value={{ patients, loading, addPatient, deletePatient }}>
+    <PatientsContext.Provider value={{ patients, loading, addPatient, deletePatient, updatePatient }}>
       {children}
     </PatientsContext.Provider>
   );

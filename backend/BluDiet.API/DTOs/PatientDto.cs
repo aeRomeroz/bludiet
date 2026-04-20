@@ -51,3 +51,7 @@ public class CreatePatientDto
     public MeasurementDto? InitialMeasurement { get; set; }
     public MedicalHistoryDto? MedicalHistory { get; set; }
 }
+
+public class UpdatePatientDto : CreatePatientDto 
+{
+}

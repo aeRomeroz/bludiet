@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using BluDiet.API.Data;
+using AutoMapper;
+using BluDiet.API.DTOs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
         npgsqlOptions => npgsqlOptions.CommandTimeout(30)));
+
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 // CORS
 builder.Services.AddCors(options =>

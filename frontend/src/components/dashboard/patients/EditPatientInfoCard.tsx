@@ -49,14 +49,6 @@ export default function EditPatientInfoCard({ patient }: EditPatientInfoCardProp
                     </select>
                 </div>
                 <div className="bg-primary rounded-xl px-4 py-3">
-                    <label className={labelClasses}>Estado</label>
-                    <select name="status" defaultValue={patient.status} className={inputClasses}>
-                        <option value="ACTIVE">Activo</option>
-                        <option value="PENDING">Pendiente</option>
-                        <option value="REVIEW">Revisión</option>
-                    </select>
-                </div>
-                <div className="bg-primary rounded-xl px-4 py-3">
                     <label className={labelClasses}>Ocupación</label>
                     <input name="occupation" defaultValue={patient.occupation} className={inputClasses} />
                 </div>
