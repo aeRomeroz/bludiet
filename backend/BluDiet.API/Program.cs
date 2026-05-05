@@ -12,8 +12,11 @@ builder.Services.AddSwaggerGen();
 
 // Base de datos
 builder.Services.AddDbContext<AppDbContext>(options =>
+{
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
-        npgsqlOptions => npgsqlOptions.CommandTimeout(30)));
+        npgsqlOptions => npgsqlOptions.CommandTimeout(30))
+    .UseSnakeCaseNamingConvention();
+});
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 

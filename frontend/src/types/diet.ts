@@ -25,13 +25,15 @@ export interface FoodPortion {
 }
 
 export interface FoodSlot {
-    id: string;           
+    id: string;
+    slotIndex: number;           
     items: (FoodPortion | null)[];
 }
 
 export interface MealEntry {
     id: string;
     name: string;
+    orderIndex: number;
     slots: FoodSlot[];    
 }
 

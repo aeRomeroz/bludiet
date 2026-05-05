@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import { type Diet } from "../types/diet";
 import { dietService } from "../services/dietService";
 import toast from "react-hot-toast";
@@ -6,9 +6,10 @@ import toast from "react-hot-toast";
 interface DietsContextType {
   diets: Diet[];
   loading: boolean;
-  addDiet: (diet: Diet) => Promise<void>;
-  updateDiet: (id: string, data: Partial<Diet>) => Promise<void>;
+  refreshDiets: () => Promise<void>;
+  addDiet: (diet: Diet) => Promise<Diet>;
   deleteDiet: (id: string) => Promise<void>;
+  updateDiet: (diet: Diet) => Promise<void>;
 }
 
 const DietsContext = createContext<DietsContextType | null>(null);
@@ -17,39 +18,74 @@ export function DietsProvider({ children }: { children: ReactNode }) {
   const [diets, setDiets] = useState<Diet[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Cargar todas las dietas al arrancar
   useEffect(() => {
-    dietService.getAll()
-      .then(setDiets)
-      .catch(() => toast.error('Error al cargar las dietas'))
-      .finally(() => setLoading(false));
+    const fetchDiets = async () => {
+        try {
+            const data = await dietService.getAll(); // Tu llamada al backend
+            setDiets(data);
+        } catch (error) {
+            console.error("Error cargando dietas:", error);
+        }
+    };
+    fetchDiets();
+}, []);
+
+  const refreshDiets = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await dietService.getAll();
+      setDiets(data);
+    } catch (error) {
+      console.error("Error fetching diets:", error);
+      // No mostramos toast aquí para no molestar al usuario en cada carga, 
+      // pero el error queda logueado.
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const addDiet = async (diet: Diet) => {
+  useEffect(() => {
+    refreshDiets();
+  }, [refreshDiets]);
+
+  const addDiet = useCallback(async (diet: Diet) => {
     try {
       const created = await dietService.create(diet);
-      // Si el back devuelve 201 Created con el objeto, usamos 'created'.
-      // Si devuelve 204 No Content, usamos el objeto 'diet' que ya tenemos.
-      setDiets(prev => [created || diet, ...prev]);
-      toast.success('Dieta guardada correctamente');
+      setDiets(prev => [created, ...prev]);
+      toast.success('Dieta creada con éxito');
+      return created;
     } catch (error) {
-      toast.error('No se pudo guardar la dieta');
+      toast.error('Error al guardar la dieta');
       throw error;
     }
-  };
+  }, []);
 
-  const updateDiet = async (id: string, data: Partial<Diet>) => {
-    await dietService.update(id, data);
-    setDiets(prev => prev.map(d => d.id === id ? { ...d, ...data } : d));
-  };
+  const deleteDiet = useCallback(async (id: string) => {
+    try {
+      await dietService.delete(id);
+      setDiets(prev => prev.filter(d => d.id !== id));
+      toast.success('Dieta eliminada');
+    } catch (error) {
+      toast.error('No se pudo eliminar la dieta');
+    }
+  }, []);
 
-  const deleteDiet = async (id: string) => {
-    await dietService.delete(id);
-    setDiets(prev => prev.filter(d => d.id !== id));
-  };
+  const updateDiet = useCallback(async (updatedDiet: Diet) => {
+    try {
+        // Guardamos optimistamente en el estado local para que la UI sea fluida
+        setDiets(prev => prev.map(d => d.id === updatedDiet.id ? updatedDiet : d));
+        
+        // Enviamos al servidor
+        await dietService.update(updatedDiet.id, updatedDiet);
+    } catch (error) {
+        toast.error('Error al sincronizar los cambios');
+        // Si falla, podrías recargar las dietas para volver al estado real
+        refreshDiets(); 
+    }
+}, [refreshDiets]);
 
   return (
-    <DietsContext.Provider value={{ diets, loading, addDiet, updateDiet, deleteDiet }}>
+    <DietsContext.Provider value={{ diets, loading, refreshDiets, addDiet, deleteDiet, updateDiet }}>
       {children}
     </DietsContext.Provider>
   );
