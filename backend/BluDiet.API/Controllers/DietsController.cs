@@ -52,24 +52,35 @@ public async Task<ActionResult<Diet>> CreateDiet(CreateDietDto dto)
             PatientId = dto.PatientId,
             Name = dto.Name,
             DurationDays = dto.DurationDays,
-            
-            // CORRECCIÓN 1: Cast de decimal a int si el modelo es int
             TargetKcalPerDay = (int)dto.TargetKcalPerDay, 
-            
             TargetProtein = dto.TargetProtein,
             TargetFats = dto.TargetFats,
             TargetCarbs = dto.TargetCarbs,
-
-            // CORRECCIÓN 2: Conversión a DateOnly
             StartDate = DateOnly.FromDateTime(dto.StartDate), 
-            
             CreatedAt = DateTime.UtcNow,
-            // ... resto del mapeo de Meals ...
+
+            // GENERACIÓN DE ESTRUCTURA AUTOMÁTICA
+            Meals = dto.SelectedMealNames.Select((mealName, index) => new DietMeal
+            {
+                Id = Guid.NewGuid(),
+                DietId = dietId,
+                Name = mealName,
+                OrderIndex = index,
+                Slots = new List<DietSlot>
+                {
+                    new DietSlot
+                    {
+                        Id = Guid.NewGuid(),
+                        SlotIndex = 0,
+                        Items = new List<DietSlotItem>() // Lista vacía lista para recibir alimentos
+                    }
+                }
+            }).ToList()
         };
 
         _context.Diets.Add(diet);
         await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetById), new { id = diet.Id }, diet);
+        return await GetById(diet.Id);
     }
     catch (Exception ex)
 {

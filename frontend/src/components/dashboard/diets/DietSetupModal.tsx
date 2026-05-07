@@ -90,40 +90,27 @@ export default function DietSetupModal({ isOpen, onClose, patients, onDietCreate
             return;
         }
 
-        try {
-            // 2. Mapeo de los datos del Modal al formato que espera la API
-            // Nota: Creamos la estructura básica que el Backend guardará en cascada
-            const dietPayload: any = {
-                patientId: formData.patientId,
-                name: formData.dietName,
-                durationDays: formData.durationDays,
-                targetKcalPerDay: formData.targetKcal,
-                targetMacros: formData.macros,
-                startDate: formData.startDate.toISOString().split('T')[0],
-                // Enviamos las comidas seleccionadas para que el Back las cree
-                meals: formData.selectedMeals.map((mealId, index) => ({
-                    name: mealId.charAt(0).toUpperCase() + mealId.slice(1), // Capitaliza
-                    orderIndex: index,
-                    slots: [{ slotIndex: 0, items: [] }] // Un slot vacío por defecto
-                }))
-            };
+        const dietPayload = {
+        patientId: formData.patientId,
+        name: formData.dietName,
+        durationDays: formData.durationDays,
+        targetKcalPerDay: formData.targetKcal,
+        targetProtein: formData.macros.protein,
+        targetFats: formData.macros.fats,
+        targetCarbs: formData.macros.carbs,
+        startDate: formData.startDate.toISOString(),
+        // Enviamos solo los strings capitalizados
+        selectedMealNames: formData.selectedMeals.map(m => m.charAt(0).toUpperCase() + m.slice(1))
+    };
 
-            // 3. Llamada al Contexto (API)
-            const createdDiet = await addDiet(dietPayload);
-
-            // 4. Éxito y navegación
-            toast.success("¡Dieta creada con éxito!");
-            onClose();
-            resetForm();
-
-            // Redirigimos al usuario al Planner de la dieta recién creada
-            goToDietForm(createdDiet.id, formData.patientId);
-
-        } catch (error) {
-            // El error ya lo suele manejar el Context con un toast, 
-            // pero aquí puedes poner logs adicionales
-            console.error("Error al crear la dieta:", error);
-        }
+    try {
+        const createdDiet = await addDiet(dietPayload);
+        onClose();
+        resetForm();
+        goToDietForm(createdDiet.id, formData.patientId);
+    } catch (error) {
+        console.error("Error:", error);
+    }
     };
 
     return (

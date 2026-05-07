@@ -54,6 +54,7 @@ public class CreateDietDto
     public decimal TargetCarbs { get; set; }
     public DateTime StartDate { get; set; }
     
-    // Aquí recibimos la estructura inicial de comidas y slots vacíos
-    public List<DietMealDto> Meals { get; set; } = new();
+    // Cambiamos la lista de DTOs complejos por una lista de nombres simples
+    // Ejemplo: ["Desayuno", "Comida", "Cena"]
+    public List<string> SelectedMealNames { get; set; } = new();
 }

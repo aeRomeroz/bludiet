@@ -23,9 +23,39 @@ export default function DietForm() {
     // Funcionalidad Copy-Paste
     const [selectedSlot, setSelectedSlot] = useState<{ mealId: string, slotIndex: number } | null>(null);
     const [copiedSlot, setCopiedSlot] = useState<(FoodPortion | null)[] | null>(null);
-    
+
     const diet = diets.find(d => d.id === dietId);
     const patient = patients.find(p => p.id === patientId);
+
+    useEffect(() => {
+    // Solo actuamos si la dieta existe y tiene comidas, pero no tiene slots
+    if (diet && diet.meals.length > 0) {
+        const hasNoSlots = diet.meals.every(m => !m.slots || m.slots.length === 0);
+        
+        if (hasNoSlots) {
+            console.log("Generando estructura inicial de slots...");
+            
+            const initializedDiet = {
+                ...diet,
+                // Mapeamos cada comida (Desayuno, Comida, etc.) para que tenga su primer slot
+                meals: diet.meals.map(meal => ({
+                    ...meal,
+                    slots: [
+                        {
+                            id: crypto.randomUUID(),
+                            slotIndex: 0,
+                            // Importante: creamos el array con el tamaño de la duración elegida
+                            items: Array(diet.durationDays).fill(null),
+                        }
+                    ]
+                }))
+            };
+
+            // Esto actualiza el contexto y hace que el Grid se renderice con las filas
+            updateDiet(initializedDiet);
+        }
+    }
+}, [diet?.id, diet?.durationDays]);
 
     if (!diet || !patient) {
         return (
@@ -83,6 +113,7 @@ export default function DietForm() {
                         ...meal.slots,
                         {
                             id: crypto.randomUUID(),
+                            slotIndex: meal.slots.length,
                             items: Array(diet.durationDays).fill(null),
                         }
                     ]
@@ -184,6 +215,10 @@ export default function DietForm() {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [selectedSlot, copiedSlot, diet]);
 
+    console.log("DEBUG - Dieta completa:", diet);
+console.log("DEBUG - Comidas:", diet.meals);
+console.log("DEBUG - Días de la dieta:", diet.days);
+
     return (
         <div className="space-y-8">
             {/* Header */}
@@ -199,7 +234,7 @@ export default function DietForm() {
                         {diet.name}
                     </h1>
                     <span className="text-gray-primary text-sm">
-                        {patient.firstName} {patient.lastName} · {diet.durationDays} días 
+                        {patient.firstName} {patient.lastName} · {diet.durationDays} días
                     </span>
                 </div>
             </div>

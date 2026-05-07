@@ -72,13 +72,25 @@ export default function DietGrid({ diet, selectedSlot, onSelectSlot, onAddSlot, 
                                     Día {day.dayNumber}
                                 </p>
                                 <MacroPieChart
-                                    data={{...dayMacros, targetKcal: diet.targetKcalPerDay}}
+                                    data={{ ...dayMacros, targetKcal: diet.targetKcalPerDay }}
                                     showLegend={false}
                                     size="sm"
                                 />
                             </div>
                         );
                     })}
+
+                    {/* Mensaje de estado vacío */}
+                    {diet.meals.length === 0 && (
+                        <div
+                            className="col-span-full bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl p-12 text-center"
+                            style={{ gridColumn: `1 / span ${visibleDays.length + 1}` }}
+                        >
+                            <p className="text-gray-secondary font-medium">
+                                No hay ingestas configuradas en esta dieta.
+                            </p>
+                        </div>
+                    )}
 
                     {/* Filas por ingesta */}
                     {diet.meals.map((meal) => (
@@ -87,8 +99,8 @@ export default function DietGrid({ diet, selectedSlot, onSelectSlot, onAddSlot, 
                                 <>
                                     {slotIndex === 0 && meal.slots.length === 1 ? (
                                         // Un solo slot: nombre + (+)
-                                        <div 
-                                            key={`label-${meal.id}`} 
+                                        <div
+                                            key={`label-${meal.id}`}
                                             onClick={() => onSelectSlot?.({ mealId: meal.id, slotIndex: 0 })}
                                             className="flex items-center justify-between px-2 py-1 cursor-pointer hover:bg-blue-50/50 rounded-lg"
                                         >
@@ -104,8 +116,8 @@ export default function DietGrid({ diet, selectedSlot, onSelectSlot, onAddSlot, 
                                         </div>
                                     ) : slotIndex === 0 ? (
                                         // Primer slot con múltiples: solo nombre
-                                        <div 
-                                            key={`label-${meal.id}`} 
+                                        <div
+                                            key={`label-${meal.id}`}
                                             onClick={() => onSelectSlot?.({ mealId: meal.id, slotIndex: 0 })}
                                             className="flex items-center px-2 py-1 cursor-pointer hover:bg-blue-50/50 rounded-lg"
                                         >
@@ -115,8 +127,8 @@ export default function DietGrid({ diet, selectedSlot, onSelectSlot, onAddSlot, 
                                         </div>
                                     ) : slotIndex === meal.slots.length - 1 ? (
                                         // Último slot: (-)(+)
-                                        <div 
-                                            key={`label-${meal.id}-${slotIndex}`} 
+                                        <div
+                                            key={`label-${meal.id}-${slotIndex}`}
                                             onClick={() => onSelectSlot?.({ mealId: meal.id, slotIndex })}
                                             className="flex items-center justify-end px-2 py-1 gap-1 cursor-pointer hover:bg-blue-50/50 rounded-lg"
                                         >
@@ -135,7 +147,7 @@ export default function DietGrid({ diet, selectedSlot, onSelectSlot, onAddSlot, 
                                         </div>
                                     ) : (
                                         // Slots intermedios: vacío
-                                        <div key={`empty-label-${meal.id}-${slotIndex}`} onClick={() => onSelectSlot?.({ mealId: meal.id, slotIndex })} className="cursor-pointer hover:bg-blue-50/50 rounded-lg cursor-pointer hover:bg-blue-50/50 rounded-lg"/>
+                                        <div key={`empty-label-${meal.id}-${slotIndex}`} onClick={() => onSelectSlot?.({ mealId: meal.id, slotIndex })} className="cursor-pointer hover:bg-blue-50/50 rounded-lg cursor-pointer hover:bg-blue-50/50 rounded-lg" />
                                     )}
 
                                     {/* Celdas por día */}
