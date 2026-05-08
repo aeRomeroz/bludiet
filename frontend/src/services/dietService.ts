@@ -1,6 +1,6 @@
 import { apiClient } from '../lib/apiClient';
 import { apiRoutes } from './apiRoutes';
-import { type Diet, type FoodSlot, type MealEntry, type FoodPortion } from '../types/diet';
+import { type Diet, type FoodSlot, type MealEntry, type FoodPortion, type CreateDietRequest } from '../types/diet';
 
 export const dietService = {
   async getAll(): Promise<Diet[]> {
@@ -13,9 +13,12 @@ export const dietService = {
     return data.map(mapToDiet);
   },
 
-  async create(diet: Diet): Promise<Diet> {
-    // Usamos mapToDto para aplanar los macros antes de enviar
-    const { data } = await apiClient.post(apiRoutes.diets.index, mapToDto(diet));
+  async create(request: CreateDietRequest): Promise<Diet> {
+    // El backend devuelve la dieta con estructura completa (meals, slots, items)
+    const { data } = await apiClient.post(
+      apiRoutes.diets.index, request
+    );
+
     return mapToDiet(data);
   },
 

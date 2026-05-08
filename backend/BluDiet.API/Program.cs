@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using BluDiet.API.Data;
 using AutoMapper;
 using BluDiet.API.DTOs;
+using BluDiet.API;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,9 @@ builder.Services.AddCors(options =>
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
+// En la sección de servicios (antes del builder.Build())
+builder.Services.AddScoped<BedcaSeederService>();
+
 var app = builder.Build();
 
 // Pipeline
@@ -45,5 +49,12 @@ if (app.Environment.IsDevelopment())
 app.UseCors("FrontendPolicy");
 app.UseAuthorization();
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var seeder = scope.ServiceProvider.GetRequiredService<BedcaSeederService>();
+    // Al estar en la misma carpeta que el código, la ruta es directa
+    await seeder.SeedAsync("BEDCA.json");
+}
 
 app.Run();

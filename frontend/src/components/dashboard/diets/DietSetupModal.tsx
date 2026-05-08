@@ -16,6 +16,14 @@ import { DEFAULT_MEALS } from "../../../constants/diet";
 import { PatientSearchList } from "../patients/PatientSearchList";
 import { useAppNavigation } from "../../../hooks/useAppNavigation";
 
+// Helper para mapear IDs de comidas a sus labels en español
+const getMealLabelsFromIds = (mealIds: string[]): string[] => {
+    return mealIds.map(id => {
+        const meal = DEFAULT_MEALS.find(m => m.id === id);
+        return meal?.label || id;
+    });
+};
+
 interface DietSetupModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -98,10 +106,9 @@ export default function DietSetupModal({ isOpen, onClose, patients, onDietCreate
         targetProtein: formData.macros.protein,
         targetFats: formData.macros.fats,
         targetCarbs: formData.macros.carbs,
-        startDate: formData.startDate.toISOString(),
-        // Enviamos solo los strings capitalizados
-        selectedMealNames: formData.selectedMeals.map(m => m.charAt(0).toUpperCase() + m.slice(1))
-    };
+        startDate: formData.startDate.toISOString().split('T')[0], 
+        selectedMealNames: getMealLabelsFromIds(formData.selectedMeals)    
+        };
 
     try {
         const createdDiet = await addDiet(dietPayload);
@@ -109,7 +116,8 @@ export default function DietSetupModal({ isOpen, onClose, patients, onDietCreate
         resetForm();
         goToDietForm(createdDiet.id, formData.patientId);
     } catch (error) {
-        console.error("Error:", error);
+        console.error("Error creating diet:", error);
+        toast.error("No se pudo crear la dieta. Por favor intenta de nuevo.");
     }
     };
 

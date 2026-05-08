@@ -39,6 +39,9 @@ public class DietResponseDto
     public decimal TargetFats { get; set; }
     public decimal TargetCarbs { get; set; }
     public DateTime StartDate { get; set; }
+    public DateTime CreatedAt { get; set; }
+    
+    // Aquí incluimos la estructura que el Back acaba de generar
     public List<DietMealDto> Meals { get; set; } = new();
 }
 

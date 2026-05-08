@@ -46,9 +46,11 @@ public async Task<ActionResult<Diet>> CreateDiet(CreateDietDto dto)
 {
     try
     {
+        var newDietId = Guid.NewGuid();
+
         var diet = new Diet
         {
-            Id = Guid.NewGuid(),
+            Id = newDietId,
             PatientId = dto.PatientId,
             Name = dto.Name,
             DurationDays = dto.DurationDays,
@@ -63,7 +65,7 @@ public async Task<ActionResult<Diet>> CreateDiet(CreateDietDto dto)
             Meals = dto.SelectedMealNames.Select((mealName, index) => new DietMeal
             {
                 Id = Guid.NewGuid(),
-                DietId = dietId,
+                DietId = newDietId,
                 Name = mealName,
                 OrderIndex = index,
                 Slots = new List<DietSlot>

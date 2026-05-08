@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
-import { type Diet } from "../types/diet";
+import { type CreateDietRequest, type Diet } from "../types/diet";
 import { dietService } from "../services/dietService";
 import toast from "react-hot-toast";
 
@@ -7,7 +7,7 @@ interface DietsContextType {
   diets: Diet[];
   loading: boolean;
   refreshDiets: () => Promise<void>;
-  addDiet: (diet: Diet) => Promise<Diet>;
+  addDiet: (dietRequest: CreateDietRequest) => Promise<Diet>;
   deleteDiet: (id: string) => Promise<void>;
   updateDiet: (diet: Diet) => Promise<void>;
 }
@@ -48,12 +48,14 @@ export function DietsProvider({ children }: { children: ReactNode }) {
     refreshDiets();
   }, [refreshDiets]);
 
-  const addDiet = useCallback(async (diet: Diet) => {
+  const addDiet = useCallback(async (dietRequest: CreateDietRequest) => {
     try {
-      const created = await dietService.create(diet);
+      // Importante: Asegúrate de que dietService.create acepte este nuevo tipo también
+      const created = await dietService.create(dietRequest); 
+      
       setDiets(prev => [created, ...prev]);
       toast.success('Dieta creada con éxito');
-      return created;
+      return created; // Esto devuelve el objeto 'Diet' completo que viene del Back
     } catch (error) {
       toast.error('Error al guardar la dieta');
       throw error;

@@ -53,3 +53,15 @@ export interface Diet {
     days: DietDay[];
     meals: MealEntry[];  
 }
+
+export interface CreateDietRequest {
+    patientId: string;
+    name: string;
+    durationDays: number;
+    targetKcalPerDay: number;
+    targetProtein: number;
+    targetFats: number;
+    targetCarbs: number;
+    startDate: string;
+    selectedMealNames: string[];
+}

@@ -1,5 +1,8 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace BluDiet.API.Models;
 
+[Table("medical_history")]
 public class MedicalHistory
 {
     public Guid Id { get; set; }
