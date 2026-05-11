@@ -1,9 +1,11 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace BluDiet.API.Models;
 
-[Table("foods")]
 public class Food {
+    [Key]
     public Guid Id { get; set; }
     public string? ExternalId { get; set; }
     public string Source { get; set; } = "BEDCA";
@@ -11,7 +13,7 @@ public class Food {
     public string? NameEn { get; set; }
     public string? GroupName { get; set; }
     
-    [Column("kcal_per_100g")] // Revisa que tenga el _ antes de 100
+    [Column("kcal_per_100g")] 
     public decimal KcalPer100g { get; set; }
     
     [Column("protein_per_100g")]

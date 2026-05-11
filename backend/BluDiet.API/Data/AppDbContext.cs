@@ -57,10 +57,27 @@ public class AppDbContext : DbContext
         });
 
         modelBuilder.Entity<DietSlotItem>(e => {
-            // Relación con el Alimento (food_id)
-            e.HasOne<Food>().WithMany().HasForeignKey(i => i.FoodId);
-            // Relación con el Día (day_id)
-            e.HasOne<DietDay>().WithMany().HasForeignKey(i => i.DayId);
+            // Relación con el Slot (Usamos la propiedad 'Slot' del modelo)
+            e.HasOne(i => i.Slot)
+            .WithMany() // O WithMany(s => s.Items) si tienes la colección en DietSlot
+            .HasForeignKey(i => i.SlotId);
+
+            // Relación con el Alimento (Usamos la propiedad 'Food' del modelo)
+            e.HasOne(i => i.Food)
+            .WithMany() 
+            .HasForeignKey(i => i.FoodId);
+            
+            // Relación con el Día (Aquí es donde estaba el conflicto de day_id1)
+            e.HasOne(i => i.Day)
+            .WithMany()
+            .HasForeignKey(i => i.DayId);
+        });
+
+        modelBuilder.Entity<DietMeal>(e => {
+            e.ToTable("diet_meals");
+            e.HasOne<Diet>()
+            .WithMany() // O WithMany(d => d.Meals)
+            .HasForeignKey(m => m.DietId);
         });
     }
 }
