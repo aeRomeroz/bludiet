@@ -1,13 +1,14 @@
 namespace BluDiet.API.DTOs;
 
-// 1. El eslabón más pequeño: El ítem de alimento (opcional para la creación inicial)
+// 1. Representa el alimento específico asignado a un día
 public class DietSlotItemDto
 {
     public Guid? Id { get; set; }
-    public int DayIndex { get; set; }
+    public Guid FoodId { get; set; }
     public string FoodName { get; set; } = string.Empty;
     public decimal Grams { get; set; }
-    public string? ExternalFoodId { get; set; }
+    public int DayNumber { get; set; } // Referencia a qué día pertenece
+    public decimal Kcal { get; set; }
 }
 
 // 2. El hueco (Slot) que contiene alimentos
@@ -27,6 +28,14 @@ public class DietMealDto
     public List<DietSlotDto> Slots { get; set; } = new();
 }
 
+public class DietDayDto
+{
+    public Guid Id { get; set; }
+    public int DayNumber { get; set; }
+    public DateOnly Date { get; set; }
+    public string? Notes { get; set; }
+}
+
 // 4. La respuesta completa que enviamos al Frontend (incluye IDs)
 public class DietResponseDto
 {
@@ -34,11 +43,12 @@ public class DietResponseDto
     public Guid PatientId { get; set; }
     public string Name { get; set; } = string.Empty;
     public int DurationDays { get; set; }
+    public DateOnly StartDate { get; set; }
+    public List<DietDayDto> Days { get; set; } = new();
     public decimal TargetKcalPerDay { get; set; }
     public decimal TargetProtein { get; set; }
     public decimal TargetFats { get; set; }
     public decimal TargetCarbs { get; set; }
-    public DateTime StartDate { get; set; }
     public DateTime CreatedAt { get; set; }
     
     // Aquí incluimos la estructura que el Back acaba de generar
@@ -55,7 +65,7 @@ public class CreateDietDto
     public decimal TargetProtein { get; set; }
     public decimal TargetFats { get; set; }
     public decimal TargetCarbs { get; set; }
-    public DateTime StartDate { get; set; }
+    public DateOnly StartDate { get; set; }
     
     // Cambiamos la lista de DTOs complejos por una lista de nombres simples
     // Ejemplo: ["Desayuno", "Comida", "Cena"]
