@@ -10,6 +10,7 @@ interface AddFoodItemModalProps {
     onClose: () => void;
     onAdd: (item: FoodPortion) => void;
     mealName?: string;
+    dayNumber: number;
 }
 
 const INITIAL_FORM = { name: '', grams: 100 };
@@ -42,7 +43,8 @@ export default function AddFoodItemModal({ isOpen, onClose, onAdd, mealName }: A
             id: crypto.randomUUID(),
             name: selected.name,
             grams,
-            bedcaId: selected.id,
+            foodId: selected.id,
+            dayNumber: 1, 
         });
 
         handleClose();

@@ -9,6 +9,9 @@ public class DietSlotItemDto
     public decimal Grams { get; set; }
     public int DayNumber { get; set; } // Referencia a qué día pertenece
     public decimal Kcal { get; set; }
+    public decimal Protein { get; set; }
+    public decimal Fats { get; set; }
+    public decimal Carbs { get; set; }
 }
 
 // 2. El hueco (Slot) que contiene alimentos

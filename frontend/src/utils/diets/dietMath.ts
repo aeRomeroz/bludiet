@@ -14,14 +14,16 @@ export const buildDietFromSetup = (setup: DietSetupData, dietId: string): Diet =
         dayNumber: i + 1,
     }));
 
-    const meals: MealEntry[] = setup.selectedMeals.map((mealId) => {
+    const meals: MealEntry[] = setup.selectedMeals.map((mealId, i) => {
         const meal = DEFAULT_MEALS.find(m => m.id === mealId);
         return {
             id: crypto.randomUUID(),
             name: meal?.label ?? mealId,
+            orderIndex: i,
             slots: [
                 {
                     id: crypto.randomUUID(),
+                    slotIndex: 0,
                     items: Array(setup.durationDays).fill(null),
                 }
             ],
@@ -48,22 +50,20 @@ export interface DayMacros {
     kcal: number;
 }
 
-export const calculateDayMacros = (diet: Diet, dayIndex: number): DayMacros => {
+export const calculateDayMacros = (diet: Diet, dayNumber: number): DayMacros => {
     let protein = 0, fats = 0, carbs = 0, kcal = 0;
 
     diet.meals.forEach(meal => {
         meal.slots.forEach(slot => {
-            const item = slot.items[dayIndex];
-            if (!item?.bedcaId) return;
-
-            const food = BEDCA_FOODS.find(f => f.id === item.bedcaId);
-            if (!food) return;
-
-            const factor = item.grams / 100;
-            protein += food.protein * factor;
-            fats += food.fats * factor;
-            carbs += food.carbs * factor;
-            kcal += food.kcal * factor;
+            // Buscamos el ítem que corresponde a este día específico
+            const item = slot.items.find(i => i?.dayNumber === dayNumber);
+            
+            if (item) {
+                protein += item.protein || 0;
+                fats += item.fats || 0;
+                carbs += item.carbs || 0;
+                kcal += item.kcal || 0;
+            }
         });
     });
 

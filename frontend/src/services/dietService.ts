@@ -80,7 +80,12 @@ function mapItems(items: any[] = []): (FoodPortion | null)[] {
     id: item.id,
     name: item.foodName,
     grams: item.grams,
-    bedcaId: item.externalFoodId
+    foodId: item.foodId,
+    dayNumber: item.dayNumber, 
+    kcal: item.kcal,
+    protein: item.protein,
+    fats: item.fats,
+    carbs: item.carbs
   }));
 }
 
@@ -107,14 +112,14 @@ function mapToDto(diet: Partial<Diet>) {
       slots: meal.slots.map((slot, sIdx) => ({
         id: slot.id,
         slotIndex: slot.slotIndex ?? sIdx,
-        // IMPORTANTE: Mapeamos los items reales para que el UPDATE funcione
         items: slot.items
-          .filter((item): item is FoodPortion => item !== null) // Quitamos los huecos vacíos de la UI
+          .filter((item): item is FoodPortion => item !== null) 
           .map(item => ({
             id: item.id,
             foodName: item.name,
             grams: item.grams,
-            externalFoodId: item.bedcaId
+            foodId: item.foodId,
+            dayNumber: item.dayNumber
           }))
       }))
     }))
