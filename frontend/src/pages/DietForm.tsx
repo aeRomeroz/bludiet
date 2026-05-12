@@ -6,8 +6,9 @@ import { usePatients } from "../context/PatientsContext";
 import DietGrid from "../components/dashboard/diets/form/DietGrid";
 import DietSidebar from "../components/dashboard/diets/form/DietSidebar";
 import AddFoodItemModal from "../components/dashboard/diets/form/AddFoodItemModal";
-import type { FoodPortion } from "../types/diet";
+import type { FoodPortion, SetupMacros } from "../types/diet";
 import toast from "react-hot-toast";
+import DietSettingsModal from "../components/dashboard/diets/DietSettingsModal";
 
 export default function DietForm() {
     const { patientId, dietId } = useParams();
@@ -19,6 +20,7 @@ export default function DietForm() {
     const [activeMealId, setActiveMealId] = useState<string | null>(null);
     const [activeSlotIndex, setActiveSlotIndex] = useState<number | null>(null);
     const [activeDayIndex, setActiveDayIndex] = useState<number | null>(null);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     // Funcionalidad Copy-Paste
     const [selectedSlot, setSelectedSlot] = useState<{ mealId: string, slotIndex: number } | null>(null);
@@ -28,34 +30,34 @@ export default function DietForm() {
     const patient = patients.find(p => p.id === patientId);
 
     useEffect(() => {
-    // Solo actuamos si la dieta existe y tiene comidas, pero no tiene slots
-    if (diet && diet.meals.length > 0) {
-        const hasNoSlots = diet.meals.every(m => !m.slots || m.slots.length === 0);
-        
-        if (hasNoSlots) {
-            console.log("Generando estructura inicial de slots...");
-            
-            const initializedDiet = {
-                ...diet,
-                // Mapeamos cada comida (Desayuno, Comida, etc.) para que tenga su primer slot
-                meals: diet.meals.map(meal => ({
-                    ...meal,
-                    slots: [
-                        {
-                            id: crypto.randomUUID(),
-                            slotIndex: 0,
-                            // Importante: creamos el array con el tamaño de la duración elegida
-                            items: Array(diet.durationDays).fill(null),
-                        }
-                    ]
-                }))
-            };
+        // Solo actuamos si la dieta existe y tiene comidas, pero no tiene slots
+        if (diet && diet.meals.length > 0) {
+            const hasNoSlots = diet.meals.every(m => !m.slots || m.slots.length === 0);
 
-            // Esto actualiza el contexto y hace que el Grid se renderice con las filas
-            updateDiet(initializedDiet);
+            if (hasNoSlots) {
+                console.log("Generando estructura inicial de slots...");
+
+                const initializedDiet = {
+                    ...diet,
+                    // Mapeamos cada comida (Desayuno, Comida, etc.) para que tenga su primer slot
+                    meals: diet.meals.map(meal => ({
+                        ...meal,
+                        slots: [
+                            {
+                                id: crypto.randomUUID(),
+                                slotIndex: 0,
+                                // Importante: creamos el array con el tamaño de la duración elegida
+                                items: Array(diet.durationDays).fill(null),
+                            }
+                        ]
+                    }))
+                };
+
+                // Esto actualiza el contexto y hace que el Grid se renderice con las filas
+                updateDiet(initializedDiet);
+            }
         }
-    }
-}, [diet?.id, diet?.durationDays]);
+    }, [diet?.id, diet?.durationDays]);
 
     if (!diet || !patient) {
         return (
@@ -72,6 +74,16 @@ export default function DietForm() {
     }
 
     const activeMealName = diet.meals.find(m => m.id === activeMealId)?.name;
+
+    const handleUpdateSettings = (name: string, kcal: number, macros: SetupMacros) => {
+        const updatedDiet = {
+            ...diet,
+            name,
+            targetKcalPerDay: kcal,
+            targetMacros: macros
+        };
+        updateDiet(updatedDiet);
+    };
 
     const handleAddItem = (mealId: string, slotIndex: number, dayIndex: number) => {
         setActiveMealId(mealId);
@@ -216,8 +228,8 @@ export default function DietForm() {
     }, [selectedSlot, copiedSlot, diet]);
 
     console.log("DEBUG - Dieta completa:", diet);
-console.log("DEBUG - Comidas:", diet.meals);
-console.log("DEBUG - Días de la dieta:", diet.days);
+    console.log("DEBUG - Comidas:", diet.meals);
+    console.log("DEBUG - Días de la dieta:", diet.days);
 
     return (
         <div className="space-y-8">
@@ -254,8 +266,14 @@ console.log("DEBUG - Días de la dieta:", diet.days);
                     />
                 </div>
                 <DietSidebar
-                    targetKcal={diet.targetKcalPerDay}
-                    targetMacros={diet.targetMacros}
+                    diet={diet}
+                    onEditClick={() => setIsSettingsOpen(true)}
+                />
+                <DietSettingsModal
+                    isOpen={isSettingsOpen}
+                    onClose={() => setIsSettingsOpen(false)}
+                    diet={diet}
+                    onSave={handleUpdateSettings}
                 />
             </div>
 

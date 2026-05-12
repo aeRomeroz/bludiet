@@ -142,7 +142,7 @@ export default function PatientDetail() {
                             </Button>
                             <Button
                                 variant="primary"
-                                className="bg-green-600 hover:bg-green-700"
+                                className="bg-green-600 hover:bg-green-brand/40"
                                 onClick={handleSave} // <--- Llamamos directamente a la función
                             >
                                 Guardar Cambios
@@ -154,7 +154,7 @@ export default function PatientDetail() {
                             className="flex items-center gap-3"
                             onClick={() => setIsEditing(true)}
                         >
-                            <PencilIcon className="text-white h-5 w-5" />
+                            <PencilIcon className="text-green-brand h-5 w-5" />
                             Editar Perfil
                         </Button>
                     )}
