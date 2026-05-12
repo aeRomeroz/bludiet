@@ -19,25 +19,38 @@ public class DietsController : ControllerBase
 
     // 1. Obtener todas las dietas (Usado por el Contexto al inicio)
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Diet>>> GetDiets()
+    public async Task<ActionResult<IEnumerable<DietResponseDto>>> GetDiets()
     {
-        return await _context.Diets
+        var diets = await _context.Diets
+            .Include(d => d.Days)
             .Include(d => d.Meals)
                 .ThenInclude(m => m.Slots)
                     .ThenInclude(s => s.Items)
+                        .ThenInclude(i => i.Food)
             .OrderByDescending(d => d.CreatedAt)
             .ToListAsync();
+
+        var response = diets.Select(d => MapToResponseDto(d)).ToList();
+
+        return Ok(response);
     }
 
     // 2. Obtener dietas de un paciente específico
     [HttpGet("patient/{patientId}")]
-    public async Task<ActionResult<IEnumerable<Diet>>> GetByPatient(Guid patientId)
+    public async Task<ActionResult<IEnumerable<DietResponseDto>>> GetByPatient(Guid patientId)
     {
-        return await _context.Diets
+        var diet = await _context.Diets
             .Where(d => d.PatientId == patientId)
+            .Include(d => d.Days)
             .Include(d => d.Meals)
+                .ThenInclude(m => m.Slots)
+                    .ThenInclude(s => s.Items)
+                        .ThenInclude(i => i.Food)
             .OrderByDescending(d => d.CreatedAt)
             .ToListAsync();
+
+        var response = diet.Select(d => MapToResponseDto(d)).ToList();
+        return Ok(response);
     }
 
     // 3. CREAR DIETA (El corazón de tu Modal)
@@ -62,6 +75,8 @@ public class DietsController : ControllerBase
                 TargetFats = request.TargetFats,
                 TargetCarbs = request.TargetCarbs,
                 CreatedAt = DateTime.UtcNow,
+                Days = new List<DietDay>(), // Aseguramos inicialización
+                Meals = new List<DietMeal>()
             };
 
             for (int i = 1; i <= request.DurationDays; i++)
@@ -178,17 +193,20 @@ public class DietsController : ControllerBase
                     var targetDay = diet.Days.FirstOrDefault(d => d.DayNumber == itemDto.DayNumber);
 
                     if (targetDay != null)
-                {
-                    slotEntity.Items.Add(new DietSlotItem
                     {
-                        Id = Guid.NewGuid(),
-                        FoodId = itemDto.FoodId,
-                        QuantityGrams = itemDto.Grams,
-                        DayId = targetDay.Id, // <--- Crucial vincularlo al ID real de la DB
-                        SlotId = slotEntity.Id,
-                        CreatedAt = DateTime.UtcNow
-                    });
-                }
+                        var newItem = new DietSlotItem
+                        {
+                            Id = Guid.NewGuid(),
+                            FoodId = itemDto.FoodId,
+                            QuantityGrams = itemDto.Grams,
+                            DayId = targetDay.Id,
+                            SlotId = slotEntity.Id,
+                            CreatedAt = DateTime.UtcNow
+                        };
+
+                        // AGREGAR DIRECTAMENTE AL CONTEXTO
+                        _context.DietSlotItems.Add(newItem);
+                    }
                 }
             }
         }

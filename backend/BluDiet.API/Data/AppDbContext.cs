@@ -13,7 +13,7 @@ public class AppDbContext : DbContext
     public DbSet<MedicalHistory> MedicalHistories => Set<MedicalHistory>();
     public DbSet<Food> Foods => Set<Food>();
     public DbSet<Diet> Diets => Set<Diet>();
-    public DbSet<DietDay> DietDays => Set<DietDay>(); 
+    public DbSet<DietDay> DietDays => Set<DietDay>();
     public DbSet<DietMeal> DietMeals => Set<DietMeal>();
     public DbSet<DietSlot> DietSlots => Set<DietSlot>();
     public DbSet<DietSlotItem> DietSlotItems => Set<DietSlotItem>();
@@ -23,6 +23,26 @@ public class AppDbContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<MedicalHistory>().ToTable("medical_history");
+
+        modelBuilder.Entity<DietDay>()
+        .HasOne(d => d.Diet)
+        .WithMany(p => p.Days)
+        .HasForeignKey(d => d.DietId);
+
+        modelBuilder.Entity<DietMeal>()
+            .HasOne(m => m.Diet)
+            .WithMany(d => d.Meals)
+            .HasForeignKey(m => m.DietId);
+
+        modelBuilder.Entity<DietSlot>()
+            .HasOne(s => s.Meal)
+            .WithMany(m => m.Slots)
+            .HasForeignKey(s => s.MealId);
+
+        modelBuilder.Entity<DietSlotItem>()
+            .HasOne(i => i.Slot)
+            .WithMany(s => s.Items)
+            .HasForeignKey(i => i.SlotId);
 
         // 1. Relación 1:1 estricta (Es mejor dejarla aquí para asegurar que el ID sea único)
         modelBuilder.Entity<MedicalHistory>()

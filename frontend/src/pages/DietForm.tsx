@@ -95,6 +95,11 @@ export default function DietForm() {
     const handleFoodAdded = (item: FoodPortion) => {
         if (!activeMealId || activeSlotIndex === null || activeDayIndex === null) return;
 
+        const itemWithDay = {
+            ...item,
+            dayNumber: activeDayIndex + 1 // Los días en el array son 0-indexed, en DB son 1-indexed
+        };
+
         const updatedDiet = {
             ...diet,
             meals: diet.meals.map(meal =>
@@ -104,7 +109,7 @@ export default function DietForm() {
                         si !== activeSlotIndex ? slot : {
                             ...slot,
                             items: slot.items.map((existing, di) =>
-                                di !== activeDayIndex ? existing : item
+                                di !== activeDayIndex ? existing : itemWithDay
                             )
                         }
                     )
@@ -113,6 +118,7 @@ export default function DietForm() {
         };
 
         updateDiet(updatedDiet);
+        setIsAddFoodOpen(false);
     };
 
     const handleAddSlot = (mealId: string) => {
