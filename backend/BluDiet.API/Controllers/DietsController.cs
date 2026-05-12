@@ -109,9 +109,9 @@ public class DietsController : ControllerBase
         var diet = await _context.Diets
             .Include(d => d.Days)
             .Include(d => d.Meals)
-            .ThenInclude(m => m.Slots)
-                .ThenInclude(s => s.Items)
-                    .ThenInclude(i => i.Food)
+                .ThenInclude(m => m.Slots)
+                    .ThenInclude(s => s.Items)
+                        .ThenInclude(i => i.Food)
             .Include(d => d.Meals)
             .ThenInclude(m => m.Slots)
                 .ThenInclude(s => s.Items)
@@ -135,46 +135,75 @@ public class DietsController : ControllerBase
         return NoContent();
     }
 
+    // PUT: api/diets/{id}
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateDiet(Guid id, Diet diet)
+    public async Task<IActionResult> UpdateDiet(Guid id, DietResponseDto request)
     {
-        if (id != diet.Id) return BadRequest();
+        if (id != request.Id) return BadRequest("ID mismatch");
 
-        // 1. Buscamos la dieta existente con todos sus hijos
-        var existingDiet = await _context.Diets
-            .Include(d => d.Meals)
-                .ThenInclude(m => m.Slots)
-                    .ThenInclude(s => s.Items)
-            .FirstOrDefaultAsync(d => d.Id == id);
+        // 1. Cargar la dieta con TODA su estructura para poder comparar
+        var diet = await _context.Diets
+        .Include(d => d.Days)
+        .Include(d => d.Meals)
+            .ThenInclude(m => m.Slots)
+                .ThenInclude(s => s.Items)
+        .FirstOrDefaultAsync(d => d.Id == id);
 
-        if (existingDiet == null) return NotFound();
+        if (diet == null) return NotFound();
 
-        // 2. Actualizamos campos básicos
-        existingDiet.Name = diet.Name;
-        existingDiet.TargetKcalPerDay = diet.TargetKcalPerDay;
-        existingDiet.TargetProtein = diet.TargetProtein;
-        existingDiet.TargetFats = diet.TargetFats;
-        existingDiet.TargetCarbs = diet.TargetCarbs;
+        // 2. Actualizar datos básicos
+        diet.Name = request.Name;
+        diet.TargetKcalPerDay = (int)request.TargetKcalPerDay;
+        diet.TargetProtein = request.TargetProtein;
+        diet.TargetFats = request.TargetFats;
+        diet.TargetCarbs = request.TargetCarbs;
 
-        // 3. Manejo de la estructura compleja
-        // La forma más robusta para evitar conflictos de tracking es remover los hijos
-        // y dejar que EF los vuelva a insertar (siempre que el volumen de datos sea manejable)
-        _context.DietMeals.RemoveRange(existingDiet.Meals);
+        // 3. Sincronizar Alimentos (La parte clave)
+        // Para simplificar esta versión, vamos a actualizar los ítems de los slots
+        foreach (var mealDto in request.Meals)
+        {
+            var mealEntity = diet.Meals.FirstOrDefault(m => m.Id == mealDto.Id);
+            if (mealEntity == null) continue;
 
-        // Asignamos las nuevas comidas (asegúrate de que los IDs sean nuevos o manejados)
-        existingDiet.Meals = diet.Meals;
+            foreach (var slotDto in mealDto.Slots)
+            {
+                var slotEntity = mealEntity.Slots.FirstOrDefault(s => s.Id == slotDto.Id);
+                if (slotEntity == null) continue;
+
+                _context.DietSlotItems.RemoveRange(slotEntity.Items);
+                slotEntity.Items.Clear();
+
+                foreach (var itemDto in slotDto.Items)
+                {
+                    var targetDay = diet.Days.FirstOrDefault(d => d.DayNumber == itemDto.DayNumber);
+
+                    if (targetDay != null)
+                {
+                    slotEntity.Items.Add(new DietSlotItem
+                    {
+                        Id = Guid.NewGuid(),
+                        FoodId = itemDto.FoodId,
+                        QuantityGrams = itemDto.Grams,
+                        DayId = targetDay.Id, // <--- Crucial vincularlo al ID real de la DB
+                        SlotId = slotEntity.Id,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                }
+                }
+            }
+        }
 
         try
         {
             await _context.SaveChangesAsync();
+            return NoContent();
         }
-        catch (DbUpdateConcurrencyException)
+        catch (Exception ex)
         {
-            if (!DietExists(id)) return NotFound();
-            throw;
+            // Esto te ayudará a ver en la consola de Docker si hay un error de clave foránea
+            Console.WriteLine($"Error actualizando dieta: {ex.Message}");
+            return StatusCode(500, "Internal server error during save");
         }
-
-        return NoContent();
     }
 
     private bool DietExists(Guid id) => _context.Diets.Any(e => e.Id == id);

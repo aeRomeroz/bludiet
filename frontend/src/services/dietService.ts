@@ -34,6 +34,7 @@ export const dietService = {
 
 // Convierte de la base de datos (Backend) -> Interfaz de TS (Frontend)
 function mapToDiet(row: any): Diet {
+  const duration = row.durationDays;
   return {
     id: row.id,
     patientId: row.patientId,
@@ -46,47 +47,62 @@ function mapToDiet(row: any): Diet {
       carbs: row.targetCarbs
     },
     startDate: new Date(row.startDate),
-    days: [],
+    days: (row.days || []).map((d: any) => ({
+      id: d.id,
+      dayNumber: d.dayNumber,
+      date: new Date(d.date)
+    })),
     // Delegamos el mapeo de comidas a otra función
-    meals: mapMeals(row.meals)
+    meals: mapMeals(row.meals, duration)
   };
 }
 
 // --- Funciones de apoyo (Helpers) ---
 
-function mapMeals(meals: any[] = []): MealEntry[] {
+function mapMeals(meals: any[] = [], duration: number): MealEntry[] {
   return meals
     .sort((a, b) => a.orderIndex - b.orderIndex)
     .map(meal => ({
       id: meal.id,
       name: meal.name,
       orderIndex: meal.orderIndex,
-      slots: mapSlots(meal.slots) // Siguiente nivel
+      slots: mapSlots(meal.slots, duration) // Siguiente nivel
     }));
 }
 
-function mapSlots(slots: any[] = []): FoodSlot[] {
+function mapSlots(slots: any[] = [], duration: number): FoodSlot[] {
   return slots
     .sort((a, b) => a.slotIndex - b.slotIndex)
     .map(slot => ({
       id: slot.id,
       slotIndex: slot.slotIndex,
-      items: mapItems(slot.items) // Nivel final
+      items: mapItems(slot.items, duration)
     }));
 }
 
-function mapItems(items: any[] = []): (FoodPortion | null)[] {
-  return items.map(item => ({
-    id: item.id,
-    name: item.foodName,
-    grams: item.grams,
-    foodId: item.foodId,
-    dayNumber: item.dayNumber, 
-    kcal: item.kcal,
-    protein: item.protein,
-    fats: item.fats,
-    carbs: item.carbs
-  }));
+function mapItems(items: any[] = [], duration: number): (FoodPortion | null)[] {
+  const positionedItems = Array(duration).fill(null);
+
+  items.forEach(item => {
+    // Restamos 1 porque el dayNumber es 1-based y el array es 0-based
+    const index = item.dayNumber - 1;
+
+    if (index >= 0 && index < duration) {
+      positionedItems[index] = {
+        id: item.id,
+        name: item.foodName,
+        grams: item.grams,
+        foodId: item.foodId,
+        dayNumber: item.dayNumber,
+        kcal: item.kcal,
+        protein: item.protein,
+        fats: item.fats,
+        carbs: item.carbs
+      };
+    }
+  });
+
+  return positionedItems;
 }
 
 // Convierte de Interfaz de TS (Frontend) -> Lo que espera el Backend (DTO)
@@ -100,10 +116,10 @@ function mapToDto(diet: Partial<Diet>) {
     targetProtein: diet.targetMacros?.protein,
     targetFats: diet.targetMacros?.fats,
     targetCarbs: diet.targetMacros?.carbs,
-    startDate: diet.startDate instanceof Date 
-      ? diet.startDate.toISOString().split('T')[0] 
+    startDate: diet.startDate instanceof Date
+      ? diet.startDate.toISOString().split('T')[0]
       : diet.startDate,
-    
+
     // Mapeo inteligente de comidas
     meals: diet.meals?.map((meal, mIdx) => ({
       id: meal.id, // Si existe, el Back lo actualiza; si no, lo crea
@@ -113,7 +129,7 @@ function mapToDto(diet: Partial<Diet>) {
         id: slot.id,
         slotIndex: slot.slotIndex ?? sIdx,
         items: slot.items
-          .filter((item): item is FoodPortion => item !== null) 
+          .filter((item): item is FoodPortion => item !== null)
           .map(item => ({
             id: item.id,
             foodName: item.name,
