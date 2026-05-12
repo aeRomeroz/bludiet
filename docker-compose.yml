@@ -1,0 +1,27 @@
+services:
+  backend:
+    build:
+      context: ./backend/BluDiet.API
+    ports:
+      - "5123:8080"
+    # volumes:
+    #   - ./backend/BluDiet.API:/app # Mapea el código
+    #   - ~/.aspnet/https:/https:ro   # (Opcional) para certificados SSL
+    env_file:
+      - ./backend/.env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DOTNET_USE_POLLING_FILE_WATCHER=1 # Ayuda a .NET a detectar cambios en Docker
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app             # Sincroniza tu código de React
+      - /app/node_modules           # IMPORTANTE: No borra las librerías del contenedor
+    environment:
+      - VITE_API_URL=http://localhost:5123
