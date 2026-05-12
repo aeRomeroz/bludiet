@@ -1,9 +1,10 @@
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { ChevronLeftIcon, ChevronRightIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { useEffect, useState } from "react";
 import type { Diet } from "../../../../types/diet";
 import DietMealCell from "./DietMealCell";
 import { calculateDayMacros } from "../../../../utils/diets/dietMath";
 import MacroPieChart from "./MacroPieChart";
+import Button from "../../../ui/Button";
 
 interface DietGridProps {
     diet: Diet;
@@ -14,11 +15,14 @@ interface DietGridProps {
     onAddItem?: (mealId: string, slotIndex: number, dayIndex: number) => void;
     onRemoveItem?: (mealId: string, slotIndex: number, dayIndex: number) => void;
     onUpdateGrams?: (mealId: string, slotIndex: number, dayIndex: number, grams: number) => void;
+    onUpdateMealName?: (mealId: string, name: string) => void;
+    onRemoveMeal?: (mealId: string) => void;
+    onAddMeal?: () => void; 
 }
 
 const DAYS_PER_PAGE = 7;
 
-export default function DietGrid({ diet, selectedSlot, onSelectSlot, onAddSlot, onRemoveSlot, onAddItem, onRemoveItem, onUpdateGrams }: DietGridProps) {
+export default function DietGrid({ diet, selectedSlot, onSelectSlot, onAddSlot, onRemoveSlot, onAddItem, onRemoveItem, onUpdateGrams, onUpdateMealName, onRemoveMeal, onAddMeal }: DietGridProps) {
     const [weekOffset, setWeekOffset] = useState(0);
 
     const totalWeeks = Math.ceil(diet.days.length / DAYS_PER_PAGE);
@@ -97,57 +101,57 @@ export default function DietGrid({ diet, selectedSlot, onSelectSlot, onAddSlot, 
                         <>
                             {meal.slots.map((slot, slotIndex) => (
                                 <>
-                                    {slotIndex === 0 && meal.slots.length === 1 ? (
-                                        // Un solo slot: nombre + (+)
+                                    {/* COLUMNA IZQUIERDA: Etiquetas y Controles */}
+                                    {slotIndex === 0 ? (
+                                        // SIEMPRE EL PRIMER SLOT: Input de nombre + botón añadir
                                         <div
-                                            key={`label-${meal.id}`}
                                             onClick={() => onSelectSlot?.({ mealId: meal.id, slotIndex: 0 })}
-                                            className="flex items-center justify-between px-2 py-1 cursor-pointer hover:bg-blue-50/50 rounded-lg"
+                                            className="flex items-center justify-between px-2 py-1 cursor-pointer hover:bg-blue-50/50 rounded-lg group/meal"
                                         >
-                                            <p className="text-xs font-bold text-gray-primary uppercase tracking-wider">
-                                                {meal.name}
-                                            </p>
+                                            <div className="flex items-center gap-1 flex-1">
+                                                <EditableMealName 
+                                                    initialName={meal.name} 
+                                                    onSave={(newName) => onUpdateMealName?.(meal.id, newName)} 
+                                                />
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); onRemoveMeal?.(meal.id); }}
+                                                    className="opacity-0 group-hover/meal:opacity-100 p-0.5 text-gray-secondary hover:text-red-500 transition-all"
+                                                >
+                                                    <TrashIcon className="w-3 h-3" />
+                                                </button>
+                                            </div>
                                             <button
-                                                onClick={() => onAddSlot?.(meal.id)}
-                                                className="w-5 h-5 rounded flex items-center justify-center text-gray-secondary hover:bg-blue-50 hover:text-blue-brand transition-colors text-sm font-bold"
+                                                onClick={(e) => { e.stopPropagation(); onAddSlot?.(meal.id); }}
+                                                className="w-5 h-5 rounded flex items-center justify-center text-gray-secondary hover:bg-blue-100 hover:text-blue-brand transition-colors text-sm font-bold"
                                             >
                                                 +
                                             </button>
                                         </div>
-                                    ) : slotIndex === 0 ? (
-                                        // Primer slot con múltiples: solo nombre
-                                        <div
-                                            key={`label-${meal.id}`}
-                                            onClick={() => onSelectSlot?.({ mealId: meal.id, slotIndex: 0 })}
-                                            className="flex items-center px-2 py-1 cursor-pointer hover:bg-blue-50/50 rounded-lg"
-                                        >
-                                            <p className="text-xs font-bold text-gray-primary uppercase tracking-wider">
-                                                {meal.name}
-                                            </p>
-                                        </div>
                                     ) : slotIndex === meal.slots.length - 1 ? (
-                                        // Último slot: (-)(+)
+                                        // ÚLTIMO SLOT (si hay varios): Botones +/-
                                         <div
-                                            key={`label-${meal.id}-${slotIndex}`}
                                             onClick={() => onSelectSlot?.({ mealId: meal.id, slotIndex })}
                                             className="flex items-center justify-end px-2 py-1 gap-1 cursor-pointer hover:bg-blue-50/50 rounded-lg"
                                         >
                                             <button
-                                                onClick={() => onRemoveSlot?.(meal.id)}
+                                                onClick={(e) => { e.stopPropagation(); onRemoveSlot?.(meal.id); }}
                                                 className="w-5 h-5 rounded flex items-center justify-center text-gray-secondary hover:bg-red-50 hover:text-red-400 transition-colors text-sm font-bold"
                                             >
                                                 −
                                             </button>
                                             <button
-                                                onClick={() => onAddSlot?.(meal.id)}
+                                                onClick={(e) => { e.stopPropagation(); onAddSlot?.(meal.id); }}
                                                 className="w-5 h-5 rounded flex items-center justify-center text-gray-secondary hover:bg-blue-50 hover:text-blue-brand transition-colors text-sm font-bold"
                                             >
                                                 +
                                             </button>
                                         </div>
                                     ) : (
-                                        // Slots intermedios: vacío
-                                        <div key={`empty-label-${meal.id}-${slotIndex}`} onClick={() => onSelectSlot?.({ mealId: meal.id, slotIndex })} className="cursor-pointer hover:bg-blue-50/50 rounded-lg cursor-pointer hover:bg-blue-50/50 rounded-lg" />
+                                        // SLOTS INTERMEDIOS: Solo zona clickeable
+                                        <div 
+                                            onClick={() => onSelectSlot?.({ mealId: meal.id, slotIndex })} 
+                                            className="cursor-pointer hover:bg-blue-50/50 rounded-lg" 
+                                        />
                                     )}
 
                                     {/* Celdas por día */}
@@ -169,8 +173,48 @@ export default function DietGrid({ diet, selectedSlot, onSelectSlot, onAddSlot, 
                             ))}
                         </>
                     ))}
+                    <button
+    onClick={onAddMeal} // Necesitarás añadir esta prop a la interfaz DietGridProps
+    className="mt-4 flex items-center gap-2 px-4 py-3 border-2 border-dashed border-gray-200 rounded-xl text-gray-secondary hover:text-blue-brand hover:border-blue-brand/40 hover:bg-blue-50/30 transition-all group w-full justify-center"
+>
+    <PlusIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />
+    <span className="text-xs font-bold uppercase tracking-widest">Añadir Nueva Ingesta</span>
+</button>
                 </div>
             </div>
         </div>
     );
 }
+
+const EditableMealName = ({ 
+    initialName, 
+    onSave 
+}: { 
+    initialName: string, 
+    onSave: (newName: string) => void 
+}) => {
+    const [localName, setLocalName] = useState(initialName);
+
+    // Si el nombre cambia desde afuera (ej. por un reset), actualizamos el local
+    useEffect(() => {
+        setLocalName(initialName);
+    }, [initialName]);
+
+    return (
+        <input
+            value={localName}
+            onChange={(e) => setLocalName(e.target.value)}
+            onBlur={() => {
+                if (localName !== initialName) {
+                    onSave(localName);
+                }
+            }}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter') e.currentTarget.blur(); // Guardar al pulsar Enter
+            }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-transparent border-none p-0 text-[10px] font-bold text-gray-primary uppercase tracking-widest focus:ring-0 focus:bg-white w-full transition-colors cursor-text hover:bg-gray-100/50 rounded px-1"
+            placeholder="INGESTA..."
+        />
+    );
+};

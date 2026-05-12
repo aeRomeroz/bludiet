@@ -24,7 +24,7 @@ export const dietService = {
 
   async update(id: string, diet: Diet): Promise<Diet> {
     const { data } = await apiClient.put(apiRoutes.diets.update(id), mapToDto(diet));
-    return mapToDiet(data);
+    return data ? mapToDiet(data) : diet;
   },
 
   async delete(id: string): Promise<void> {

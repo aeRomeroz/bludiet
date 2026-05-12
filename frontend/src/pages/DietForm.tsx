@@ -6,9 +6,10 @@ import { usePatients } from "../context/PatientsContext";
 import DietGrid from "../components/dashboard/diets/form/DietGrid";
 import DietSidebar from "../components/dashboard/diets/form/DietSidebar";
 import AddFoodItemModal from "../components/dashboard/diets/form/AddFoodItemModal";
-import type { FoodPortion, SetupMacros } from "../types/diet";
+import type { FoodPortion, MealEntry, SetupMacros } from "../types/diet";
 import toast from "react-hot-toast";
 import DietSettingsModal from "../components/dashboard/diets/DietSettingsModal";
+import { dietService } from "../services/dietService";
 
 export default function DietForm() {
     const { patientId, dietId } = useParams();
@@ -83,6 +84,77 @@ export default function DietForm() {
             targetMacros: macros
         };
         updateDiet(updatedDiet);
+    };
+
+    const handleUpdateMealName = async (mealId: string, newName: string) => {
+    // 1. Clonar la dieta actual para no mutar el estado directamente
+    const updatedDiet = {
+        ...diet,
+        meals: diet.meals.map(m => m.id === mealId ? { ...m, name: newName } : m)
+    };
+
+    // 2. Actualizamos SOLO el estado local de la UI primero
+    updateDiet(updatedDiet);
+
+    // 3. Intentamos persistir con un pequeño retraso o control de errores
+    try {
+        await dietService.update(diet.id, updatedDiet);
+        // Quitamos el toast de éxito para no saturar la pantalla
+    } catch (error) {
+        console.error("Error persistiendo nombre:", error);
+        toast.error("Error al sincronizar con el servidor");
+    }
+};
+
+    const handleAddMeal = async () => {
+    // 1. Definimos la nueva ingesta
+    const newMeal: MealEntry = {
+        id: crypto.randomUUID(),
+        name: "NUEVA INGESTA",
+        orderIndex: diet.meals.length,
+        slots: [{
+            id: crypto.randomUUID(),
+            slotIndex: 0,
+            // Creamos los items vacíos (null) según la duración de la dieta
+            items: Array(diet.durationDays).fill(null)
+        }]
+    };
+
+    // 2. Actualizamos la dieta local
+    const updatedDiet = {
+        ...diet,
+        meals: [...diet.meals, newMeal]
+    };
+
+    updateDiet(updatedDiet);
+
+    // 3. Persistimos inmediatamente en la BDD
+    try {
+        await dietService.update(diet.id, updatedDiet);
+        toast.success("Ingesta añadida");
+    } catch (error) {
+        toast.error("Error al guardar la nueva ingesta");
+    }
+};
+
+    const handleRemoveMeal = async (mealId: string) => {
+        if (!window.confirm("¿Eliminar toda la ingesta y sus alimentos?")) return;
+
+        const updatedDiet = {
+            ...diet,
+            meals: diet.meals.filter(m => m.id !== mealId)
+        };
+
+        // 1. Actualizamos la UI
+        updateDiet(updatedDiet);
+
+        // 2. Persistimos en la BDD (Llamando a tu servicio de API)
+        try {
+            await dietService.update(diet.id, updatedDiet);
+            toast.success("Ingesta eliminada de la base de datos");
+        } catch (error) {
+            toast.error("Error al persistir el borrado");
+        }
     };
 
     const handleAddItem = (mealId: string, slotIndex: number, dayIndex: number) => {
@@ -269,6 +341,9 @@ export default function DietForm() {
                         onAddItem={handleAddItem}
                         onRemoveItem={handleRemoveItem}
                         onUpdateGrams={handleUpdateGrams}
+                        onUpdateMealName={handleUpdateMealName}
+                        onRemoveMeal={handleRemoveMeal}
+                        onAddMeal={handleAddMeal}
                     />
                 </div>
                 <DietSidebar
