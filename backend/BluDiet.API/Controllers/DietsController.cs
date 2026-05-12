@@ -58,7 +58,7 @@ public async Task<ActionResult<Diet>> CreateDiet(CreateDietDto dto)
             TargetProtein = dto.TargetProtein,
             TargetFats = dto.TargetFats,
             TargetCarbs = dto.TargetCarbs,
-            StartDate = DateOnly.FromDateTime(dto.StartDate), 
+            StartDate = dto.StartDate, 
             CreatedAt = DateTime.UtcNow,
 
             // GENERACIÓN DE ESTRUCTURA AUTOMÁTICA
