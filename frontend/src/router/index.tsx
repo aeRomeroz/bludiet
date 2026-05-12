@@ -4,6 +4,7 @@ import Home from '../pages/Home';
 import PatientsList from '../pages/PatientsList';
 import PatientDetail from '../pages/PatientDetail';
 import DietForm from '../pages/DietForm';
+import { PATHS } from '../routes/paths';
 import '../index.css';
 
 /**
@@ -22,7 +23,7 @@ import '../index.css';
 
 export const router = createBrowserRouter([
   {
-    path: '/',
+    path: PATHS.HOME,
     element: <Layout />,
     children: [
       {
@@ -30,15 +31,15 @@ export const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: 'patients/:patientId/diets/:dietId',
+        path: PATHS.PATIENTS.RAW_DIET_FORM,
         element: <DietForm/>,
       },
       {
-        path: 'patients/:id',
+        path: PATHS.PATIENTS.RAW_DETAIL,
         element: <PatientDetail/>,
       },
       {
-        path: 'patients',
+        path: PATHS.PATIENTS.ROOT,
         element: <PatientsList/>,
       },
       // {

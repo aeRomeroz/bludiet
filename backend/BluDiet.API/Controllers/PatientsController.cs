@@ -52,11 +52,10 @@ public class PatientsController : ControllerBase
         {
             FirstName = dto.FirstName,
             LastName = dto.LastName,
-            BirthDate = DateOnly.Parse(dto.BirthDate),
+            BirthDate = dto.BirthDate,
             Gender = dto.Gender,
             Occupation = dto.Occupation,
             ConsultationReason = dto.ConsultationReason,
-            Status = dto.Status,
             AvatarUrl = dto.AvatarUrl,
             CreatedAt = DateTime.UtcNow,
         };
@@ -140,7 +139,7 @@ public class PatientsController : ControllerBase
             Id = p.Id,
             FirstName = p.FirstName,
             LastName = p.LastName,
-            BirthDate = p.BirthDate.ToString("yyyy-MM-dd"),
+            BirthDate = p.BirthDate,
             Gender = p.Gender,
             Occupation = p.Occupation,
             ConsultationReason = p.ConsultationReason,
@@ -154,12 +153,12 @@ public class PatientsController : ControllerBase
             },
             MedicalHistory = p.MedicalHistory == null ? null : new MedicalHistoryDto
             {
-                ChronicDiseases = new MedicalRecordDto { HasCondition = p.MedicalHistory.ChronicDiseasesHasCondition, Observation = p.MedicalHistory.ChronicDiseasesObservation ?? string.Empty },
-                PreviousSurgeries = new MedicalRecordDto { HasCondition = p.MedicalHistory.PreviousSurgeriesHasCondition, Observation = p.MedicalHistory.PreviousSurgeriesObservation ?? string.Empty },
-                Allergies = new MedicalRecordDto { HasCondition = p.MedicalHistory.AllergiesHasCondition, Observation = p.MedicalHistory.AllergiesObservation ?? string.Empty },
-                Medications = new MedicalRecordDto { HasCondition = p.MedicalHistory.MedicationsHasCondition, Observation = p.MedicalHistory.MedicationsObservation ?? string.Empty },
-                Smokes = new MedicalRecordDto { HasCondition = p.MedicalHistory.SmokesHasCondition, Observation = p.MedicalHistory.SmokesObservation ?? string.Empty },
-                DrinksAlcohol = new MedicalRecordDto { HasCondition = p.MedicalHistory.DrinksAlcoholHasCondition, Observation = p.MedicalHistory.DrinksAlcoholObservation ?? string.Empty },
+                ChronicDiseases = new MedicalRecordDto ( p.MedicalHistory.ChronicDiseasesHasCondition, p.MedicalHistory.ChronicDiseasesObservation ?? string.Empty ),
+                PreviousSurgeries = new MedicalRecordDto (  p.MedicalHistory.PreviousSurgeriesHasCondition,  p.MedicalHistory.PreviousSurgeriesObservation ?? string.Empty ),
+                Allergies = new MedicalRecordDto (  p.MedicalHistory.AllergiesHasCondition,  p.MedicalHistory.AllergiesObservation ?? string.Empty ),
+                Medications = new MedicalRecordDto (  p.MedicalHistory.MedicationsHasCondition,  p.MedicalHistory.MedicationsObservation ?? string.Empty ),
+                Smokes = new MedicalRecordDto (  p.MedicalHistory.SmokesHasCondition,  p.MedicalHistory.SmokesObservation ?? string.Empty ),
+                DrinksAlcohol = new MedicalRecordDto (  p.MedicalHistory.DrinksAlcoholHasCondition,  p.MedicalHistory.DrinksAlcoholObservation ?? string.Empty ),
             }
         };
     }

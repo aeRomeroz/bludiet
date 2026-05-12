@@ -11,6 +11,7 @@ import { buildDietFromSetup } from "../utils/diets/dietMath";
 import type { DietSetupData } from "../types/diet";
 import EditPatientInfoCard from "../components/dashboard/patients/EditPatientInfoCard";
 import type { Patient } from "../types/patients";
+import { useAppNavigation } from "../hooks/useAppNavigation";
 
 type Tab = 'dietas';
 
@@ -19,7 +20,8 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 export default function PatientDetail() {
-    const { id } = useParams();
+    const { patientId } = useParams();
+    const { goToDietForm } = useAppNavigation();
     const navigate = useNavigate();
     const { patients, updatePatient } = usePatients();
     const { diets, addDiet } = useDiets();
@@ -30,14 +32,33 @@ export default function PatientDetail() {
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
-    const patient = patients.find(p => p.id === id);
-    const patientDiets = diets.filter(d => d.patientId === id);
+    const patient = patients.find(p => p.id === patientId);
+    const patientDiets = diets.filter(d => d.patientId === patientId);
 
-    const handleCreateDiet = (setup: DietSetupData) => {
-        const dietId = crypto.randomUUID();
-        const newDiet = buildDietFromSetup(setup, dietId);
-        addDiet(newDiet);
-        navigate(`/patients/${id}/diets/${dietId}`);
+    const handleCreateDiet = async (setup: DietSetupData) => {
+        try {
+            const dietId = crypto.randomUUID();
+            // buildDietFromSetup es tu lógica de cálculos que ya tienes
+            const newDiet = buildDietFromSetup(setup, dietId);
+
+            // Asignamos el ID del paciente actual
+            newDiet.patientId = patientId!;
+
+            // 1. Guardamos en la BDD a través del contexto
+            await addDiet(newDiet);
+
+            // 2. Si el paciente estaba PENDING, lo pasamos a ACTIVE
+            if (patient && patient.status !== 'ACTIVE') {
+                await updatePatient(patientId!, { ...patient, status: 'ACTIVE' });
+            }
+
+            // 3. Cerramos modal y navegamos a la edición de la dieta
+            setIsDietModalOpen(false);
+            goToDietForm(dietId, patientId);
+
+        } catch (error) {
+            alert("Error al crear la dieta en el servidor.");
+        }
     };
 
     const handleSave = async () => {
@@ -121,7 +142,7 @@ export default function PatientDetail() {
                             </Button>
                             <Button
                                 variant="primary"
-                                className="bg-green-600 hover:bg-green-700"
+                                className="bg-green-600 hover:bg-green-brand/40"
                                 onClick={handleSave} // <--- Llamamos directamente a la función
                             >
                                 Guardar Cambios
@@ -133,7 +154,7 @@ export default function PatientDetail() {
                             className="flex items-center gap-3"
                             onClick={() => setIsEditing(true)}
                         >
-                            <PencilIcon className="text-white h-5 w-5" />
+                            <PencilIcon className="text-green-brand h-5 w-5" />
                             Editar Perfil
                         </Button>
                     )}
@@ -166,7 +187,7 @@ export default function PatientDetail() {
 
                 {activeTab === 'dietas' && (
                     <PatientDietsTab
-                        patientId={id!}
+                        patientId={patient.id}
                         diets={patientDiets}
                         onCreateDiet={() => setIsDietModalOpen(true)}
                     />
@@ -178,7 +199,7 @@ export default function PatientDetail() {
                 onClose={() => setIsDietModalOpen(false)}
                 patients={patients}
                 onDietCreate={handleCreateDiet}
-                initialPatientId={id}
+                initialPatientId={patient.id}
                 initialStep={2}
             />
         </div>
