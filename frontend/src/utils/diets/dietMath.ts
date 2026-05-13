@@ -1,6 +1,5 @@
 import type { Diet, DietDay, MealEntry, DietSetupData } from "../../types/diet";
 import { DEFAULT_MEALS } from "../../constants/diet";
-import { BEDCA_FOODS } from "./bedca";
 
 export const KCAL_PER_GRAM = { PROTEIN: 4, CARBS: 4, FATS: 9 };
 
