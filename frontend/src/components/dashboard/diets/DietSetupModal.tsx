@@ -208,8 +208,13 @@ export default function DietSetupModal({ isOpen, onClose, patients, onDietCreate
                                     type="number"
                                     min="1"
                                     className="bg-white border border-primary-30 p-2.5 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-brand/20"
-                                    value={formData.durationDays}
-                                    onChange={(e) => setFormData({ ...formData, durationDays: Number(e.target.value) })}
+                                    value={formData.durationDays ||""}
+                                    onChange={(e) => {
+                                        setFormData({ 
+                                            ...formData, 
+                                            durationDays: e.target.value === "" ? 0 : Number(e.target.value) 
+                                        })
+                                    }}
                                 />
                             </div>
                         </div>
