@@ -16,7 +16,6 @@ export default function DietSettingsModal({ isOpen, onClose, diet, onSave }: Die
     const [kcal, setKcal] = useState(diet.targetKcalPerDay);
     const [isLoading, setIsLoading] = useState(false);
     
-    // Adaptamos el formato de Macros para el slider (p, g, c)
     const [macros, setMacros] = useState({
         p: diet.targetMacros.protein,
         g: diet.targetMacros.fats,
@@ -24,7 +23,6 @@ export default function DietSettingsModal({ isOpen, onClose, diet, onSave }: Die
     });
 
     const handleSave = () => {
-        // Prevenir múltiples clics
         if (isLoading) return;
         setIsLoading(true);
 

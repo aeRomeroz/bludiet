@@ -1,4 +1,4 @@
-import Modal from './Modal'; // Ajusta la ruta según tu carpeta
+import Modal from './Modal'; 
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 
@@ -24,26 +24,23 @@ export default function ConfirmationModal({
   const [isLoading, setIsLoading] = useState(false);
 
   const handleConfirm = async () => {
-    // Prevenir múltiples clics
     if (isLoading) return;
     setIsLoading(true);
 
     try {
       await onConfirm();
       onClose();
-    } fidisabled={isLoading}
-        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        Cancelar
-      </button>
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const footer = (
+    <div className="flex w-full gap-3 justify-end">
       <button
-        onClick={handleConfirm}
-        disabled={isLoading}
-        className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-          isDanger ? 'bg-red-600 hover:bg-red-700' : 'bg-primary-600 hover:bg-primary-700'
-        }`}
+        onClick={onClose}
+        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
       >
-        {isLoading ? "Procesando..." : 
         Cancelar
       </button>
       <button
