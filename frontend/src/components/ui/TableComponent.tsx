@@ -118,7 +118,8 @@
                 {expandedRow === index && (
                   <Table.Row className="bg-primary-10/20">
                     <Table.Cell colSpan={headers.length + 1} className="p-6">
-                      <div className="text-sm text-gray-600 animate-in fade-in slide-in-from-top-1">
+                      <div className="text-sm text-gray-600 animate-in fade-in slide-in-from-top-1 px-10 py-4">
+                        <p className="mb-1"><strong>Ultimo cambio en dieta:</strong> {item.lastDietUpdate instanceof Date ? item.lastDietUpdate.toLocaleDateString() : 'Sin registros'}</p>
                         <p className="mb-1"><strong>Ocupación:</strong> {item.occupation}</p>
                         <p><strong>Motivo completo:</strong> {item.consultationReason}</p>
                       </div>

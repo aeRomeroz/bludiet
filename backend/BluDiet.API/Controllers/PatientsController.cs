@@ -26,6 +26,7 @@ public class PatientsController : ControllerBase
         var patients = await _context.Patients
             .Include(p => p.Measurements.Where(m => m.IsInitial))
             .Include(p => p.MedicalHistory)
+            .Include(p => p.Diets)
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync();
 
@@ -38,6 +39,7 @@ public class PatientsController : ControllerBase
         var patient = await _context.Patients
             .Include(p => p.Measurements.Where(m => m.IsInitial))
             .Include(p => p.MedicalHistory)
+            .Include(p => p.Diets)
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (patient == null) return NotFound();
@@ -134,6 +136,11 @@ public class PatientsController : ControllerBase
     private static PatientResponseDto MapToResponseDto(Patient p)
     {
         var initialMeasurement = p.Measurements.FirstOrDefault(m => m.IsInitial);
+        var lastDietDate = p.Diets != null && p.Diets.Any() 
+            ? p.Diets.Max(d => d.CreatedAt) // Usamos solo CreatedAt
+            : (DateTime?)null;
+
+
         return new PatientResponseDto
         {
             Id = p.Id,
@@ -145,6 +152,7 @@ public class PatientsController : ControllerBase
             ConsultationReason = p.ConsultationReason,
             Status = p.Status,
             AvatarUrl = p.AvatarUrl,
+            LastDietUpdate = lastDietDate,
             InitialMeasurement = initialMeasurement == null ? null : new MeasurementDto
             {
                 Weight = initialMeasurement.Weight,
