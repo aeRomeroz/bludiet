@@ -46,6 +46,7 @@ const INITIAL_DIET_DATA: DietSetupData = {
 export default function DietSetupModal({ isOpen, onClose, patients, onDietCreate, initialPatientId, initialStep }: DietSetupModalProps) {
     const [step, setStep] = useState<SetupStep>(initialStep ?? 1);
     const [formData, setFormData] = useState<DietSetupData>({ ...INITIAL_DIET_DATA, patientId: initialPatientId ?? '' });
+    const [isLoading, setIsLoading] = useState(false);
     const { addDiet } = useDiets();
     const { goToDietForm } = useAppNavigation();
     const navigate = useNavigate();
@@ -98,6 +99,9 @@ export default function DietSetupModal({ isOpen, onClose, patients, onDietCreate
             return;
         }
 
+        if (isLoading) return;
+        setIsLoading(true);
+
         const dietPayload = {
         patientId: formData.patientId,
         name: formData.dietName,
@@ -114,10 +118,12 @@ export default function DietSetupModal({ isOpen, onClose, patients, onDietCreate
         const createdDiet = await addDiet(dietPayload);
         onClose();
         resetForm();
+        setIsLoading(false);
         goToDietForm(createdDiet.id, formData.patientId);
     } catch (error) {
         console.error("Error creating diet:", error);
         toast.error("No se pudo crear la dieta. Por favor intenta de nuevo.");
+        setIsLoading(false);
     }
     };
 
@@ -168,9 +174,10 @@ export default function DietSetupModal({ isOpen, onClose, patients, onDietCreate
                         )}
                         <Button
                             onClick={step === 1 ? handleNext : handleSubmit}
-                            className="min-w-[120px] px-8 bg-blue-brand text-white hover:bg-blue-brand/90 shadow-md transition-all"
+                            disabled={step === 2 && isLoading}
+                            className="min-w-[120px] px-8 bg-blue-brand text-white hover:bg-blue-brand/90 shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {step === 1 ? "Siguiente " : "Crear"}
+                            {isLoading ? "Creando..." : step === 1 ? "Siguiente " : "Crear"}
                         </Button>
                     </div>
                 </div>

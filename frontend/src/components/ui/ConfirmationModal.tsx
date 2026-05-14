@@ -1,5 +1,6 @@
 import Modal from './Modal'; // Ajusta la ruta según tu carpeta
 import { TrashIcon } from '@heroicons/react/24/outline';
+import { useState } from 'react';
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -20,18 +21,29 @@ export default function ConfirmationModal({
   confirmText = "Eliminar",
   isDanger = true,
 }: ConfirmationModalProps) {
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleConfirm = async () => {
-    await onConfirm();
-    onClose();
-  };
+    // Prevenir múltiples clics
+    if (isLoading) return;
+    setIsLoading(true);
 
-  const footer = (
-    <div className="flex w-full gap-3 justify-end">
-      <button
-        onClick={onClose}
-        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+    try {
+      await onConfirm();
+      onClose();
+    } fidisabled={isLoading}
+        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
+        Cancelar
+      </button>
+      <button
+        onClick={handleConfirm}
+        disabled={isLoading}
+        className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+          isDanger ? 'bg-red-600 hover:bg-red-700' : 'bg-primary-600 hover:bg-primary-700'
+        }`}
+      >
+        {isLoading ? "Procesando..." : 
         Cancelar
       </button>
       <button
