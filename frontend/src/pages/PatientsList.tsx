@@ -11,13 +11,16 @@ import { useDiets } from "../context/DietsContext";
 import { buildDietFromSetup } from "../utils/diets/dietMath";
 import type { Patient, Status } from "../types/patients";
 import type { DietSetupData } from "../types/diet";
+import toast from "react-hot-toast";
+import ConfirmationModal from "../components/ui/ConfirmationModal";
 
 export default function PatientsList() {
-    const { patients, addPatient } = usePatients();
+    const { patients, addPatient, deletePatient } = usePatients();
     const { addDiet } = useDiets();
     const navigate = useNavigate();
 
     const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
+    const [patientToDelete, setPatientToDelete] = useState<string | null>();
     const [isDietModalOpen, setIsDietModalOpen] = useState(false);
     const [selectedPatientId, setSelectedPatientId] = useState<string | undefined>(undefined);
     const [search, setSearch] = useState('');
@@ -33,6 +36,19 @@ export default function PatientsList() {
 
     const handleAddPatient = (newPatient: Patient) => {
         addPatient(newPatient);
+    };
+
+    const handleDeletePatient = async () => {
+        if (patientToDelete){
+            try {
+                deletePatient(patientToDelete);
+                setPatientToDelete(null)
+                toast.success("Paciente eliminado correctamente")
+            } catch (error){
+                toast.error("Error al eliminar el paciente")
+                console.error("Error al eliminar el paciente.")
+            }
+        }
     };
 
     const handleCreateDietForPatient = (patient: Patient) => {
@@ -74,7 +90,7 @@ export default function PatientsList() {
             <PatientsTable
                 patients={filteredPatients}
                 onEdit={(patient) => console.log('Editar:', patient)}
-                onDelete={(patient) => console.log('Eliminar:', patient)}
+                onDelete={(patient) => setPatientToDelete(patient.id)}
                 onCreateDiet={handleCreateDietForPatient}
             />
 
@@ -82,6 +98,15 @@ export default function PatientsList() {
                 isOpen={isPatientModalOpen}
                 onClose={() => setIsPatientModalOpen(false)}
                 onPatientCreate={handleAddPatient}
+            />
+
+            <ConfirmationModal
+                isOpen={!!patientToDelete}
+                onClose={() => setPatientToDelete(null)}
+                onConfirm={handleDeletePatient}
+                title="Eliminar Paciente"
+                message={`¿Estás seguro de que deseas eliminar a este paciente? Todos sus datos y dietas asociadas se borrarán permanentemente.`}
+                confirmText="Eliminar"    
             />
 
             <DietSetupModal
