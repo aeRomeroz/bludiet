@@ -171,6 +171,14 @@ export default function PatientDetail() {
                             Editar Perfil
                         </Button>
                     )}
+
+                    <Button 
+                        variant="primary" 
+                        className='flex items-center gap-3' 
+                        onClick={()=>{setIsDietModalOpen(true)}}
+                    > 
+                        <PlusIcon className='text-blue-brand h-5 w-5'/> Dieta
+                    </Button>
                 </div>
             </div>
 
