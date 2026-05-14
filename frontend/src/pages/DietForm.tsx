@@ -18,6 +18,7 @@ export default function DietForm() {
     const { patients } = usePatients();
 
     const [isAddFoodOpen, setIsAddFoodOpen] = useState(false);
+    const [editingItem, setEditingItem] = useState<FoodPortion | null>(null);
     const [activeMealId, setActiveMealId] = useState<string | null>(null);
     const [activeSlotIndex, setActiveSlotIndex] = useState<number | null>(null);
     const [activeDayIndex, setActiveDayIndex] = useState<number | null>(null);
@@ -161,6 +162,21 @@ export default function DietForm() {
         setActiveMealId(mealId);
         setActiveSlotIndex(slotIndex);
         setActiveDayIndex(dayIndex);
+        setEditingItem(null);
+        setIsAddFoodOpen(true);
+    };
+
+    const handleEditItem = (mealId: string, slotIndex: number, dayIndex: number) => {
+        const meal = diet.meals.find(m => m.id === mealId);
+        const slot = meal?.slots[slotIndex];
+        const item = slot?.items[dayIndex];
+
+        if (!item) return;
+
+        setActiveMealId(mealId);
+        setActiveSlotIndex(slotIndex);
+        setActiveDayIndex(dayIndex);
+        setEditingItem(item);
         setIsAddFoodOpen(true);
     };
 
@@ -191,6 +207,36 @@ export default function DietForm() {
 
         updateDiet(updatedDiet);
         setIsAddFoodOpen(false);
+    };
+
+    const handleFoodEdited = (item: FoodPortion) => {
+        if (!activeMealId || activeSlotIndex === null || activeDayIndex === null) return;
+
+        const itemWithDay = {
+            ...item,
+            dayNumber: activeDayIndex + 1
+        };
+
+        const updatedDiet = {
+            ...diet,
+            meals: diet.meals.map(meal =>
+                meal.id !== activeMealId ? meal : {
+                    ...meal,
+                    slots: meal.slots.map((slot, si) =>
+                        si !== activeSlotIndex ? slot : {
+                            ...slot,
+                            items: slot.items.map((existing, di) =>
+                                di !== activeDayIndex ? existing : itemWithDay
+                            )
+                        }
+                    )
+                }
+            )
+        };
+
+        updateDiet(updatedDiet);
+        setIsAddFoodOpen(false);
+        setEditingItem(null);
     };
 
     const handleAddSlot = (mealId: string) => {
@@ -339,6 +385,7 @@ export default function DietForm() {
                         onAddSlot={handleAddSlot}
                         onRemoveSlot={handleRemoveSlot}
                         onAddItem={handleAddItem}
+                        onEditItem={handleEditItem}
                         onRemoveItem={handleRemoveItem}
                         onUpdateGrams={handleUpdateGrams}
                         onUpdateMealName={handleUpdateMealName}
@@ -360,9 +407,15 @@ export default function DietForm() {
 
             <AddFoodItemModal
                 isOpen={isAddFoodOpen}
-                onClose={() => setIsAddFoodOpen(false)}
+                onClose={() => {
+                    setIsAddFoodOpen(false);
+                    setEditingItem(null);
+                }}
                 onAdd={handleFoodAdded}
+                onEdit={handleFoodEdited}
+                editingItem={editingItem}
                 mealName={activeMealName}
+                dayNumber={activeDayIndex !== null ? activeDayIndex + 1 : 1}
             />
         </div>
     );
