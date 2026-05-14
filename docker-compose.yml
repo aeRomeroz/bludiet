@@ -5,13 +5,15 @@ services:
     ports:
       - "5123:8080"
     # volumes:
-    #   - ./backend/BluDiet.API:/app # Mapea el código
+    #   - ./backend/BluDiet.API:/app 
     #   - ~/.aspnet/https:/https:ro   # (Opcional) para certificados SSL
     env_file:
       - ./backend/.env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - DOTNET_USE_POLLING_FILE_WATCHER=1 # Ayuda a .NET a detectar cambios en Docker
+    networks:
+      - bludiet-network
 
   frontend:
     build:
@@ -25,5 +27,9 @@ services:
       - /app/node_modules           # IMPORTANTE: No borra las librerías del contenedor
     env_file:         # <--- Añade esto para que lea el archivo .env
       - ./frontend/.env
-    environment:
-      - VITE_API_URL=${VITE_API_URL}
+    networks:
+      - bludiet-network
+
+networks:
+  bludiet-network:
+    driver: bridge

@@ -15,6 +15,12 @@ builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddScoped<BedcaSeederService>();
+}
 
 // Base de datos
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -24,41 +30,60 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     .UseSnakeCaseNamingConvention();
 });
 
-builder.Services.AddAutoMapper(typeof(MappingProfile));
-
 // CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendPolicy", policy =>
     {
-        // En Render/Producción, permitimos el origen de tu web desplegada
-        // Puedes usar .AllowAnyOrigin() para testear rápido o poner tu URL de Render/Vercel
-        policy.AllowAnyOrigin() 
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        if (builder.Environment.IsDevelopment())
+        {
+            // En desarrollo local (iPad/PC), permitimos todo para no tener fricción
+            policy.AllowAnyOrigin()
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        }
+        else
+        {
+            // EN PRODUCCIÓN: Solo tu URL real
+            policy.WithOrigins("https://bludiet-web.onrender.com") 
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        }
     });
 });
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-// En la sección de servicios (antes del builder.Build())
-builder.Services.AddScoped<BedcaSeederService>();
+// ---------------------------------------------------------
+var app = builder.Build(); // A partir de aquí ya no puedes registrar servicios
+// ---------------------------------------------------------
 
-var app = builder.Build();
+// 3. PIPELINE (Middleware)
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+else
+{
+    app.UseHsts();
+}
 
-// Pipeline
-app.UseSwagger();
-app.UseSwaggerUI();
-
+app.UseHttpsRedirection();
 app.UseCors("FrontendPolicy");
 app.UseAuthorization();
 app.MapControllers();
 
-using (var scope = app.Services.CreateScope())
+// 4. SEEDER (Seguro)
+if (app.Environment.IsDevelopment())
 {
-    var seeder = scope.ServiceProvider.GetRequiredService<BedcaSeederService>();
-    // Al estar en la misma carpeta que el código, la ruta es directa
-    await seeder.SeedAsync("BEDCA.json");
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        // Verificamos si el servicio existe antes de pedirlo
+        var seeder = services.GetService<BedcaSeederService>();
+        if (seeder != null) await seeder.SeedAsync("BEDCA.json");
+    }
 }
 
 app.Run();
