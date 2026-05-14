@@ -16,7 +16,7 @@ export const dietService = {
   async create(request: CreateDietRequest): Promise<Diet> {
     // El backend devuelve la dieta con estructura completa (meals, slots, items)
     const { data } = await apiClient.post(
-      apiRoutes.diets.index, request
+      apiRoutes.diets.index, request 
     );
 
     return mapToDiet(data);
@@ -26,7 +26,7 @@ export const dietService = {
     const { data } = await apiClient.put(apiRoutes.diets.update(id), mapToDto(diet));
     return data ? mapToDiet(data) : diet;
   },
-
+ 
   async delete(id: string): Promise<void> {
     await apiClient.delete(apiRoutes.diets.delete(id));
   },
@@ -58,7 +58,6 @@ function mapToDiet(row: any): Diet {
 }
 
 // --- Funciones de apoyo (Helpers) ---
-
 function mapMeals(meals: any[] = [], duration: number): MealEntry[] {
   return meals
     .sort((a, b) => a.orderIndex - b.orderIndex)
