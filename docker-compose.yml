@@ -23,5 +23,7 @@ services:
     volumes:
       - ./frontend:/app             # Sincroniza tu código de React
       - /app/node_modules           # IMPORTANTE: No borra las librerías del contenedor
+    env_file:         # <--- Añade esto para que lea el archivo .env
+      - ./frontend/.env
     environment:
-      - VITE_API_URL=http://localhost:5123
+      - VITE_API_URL=${VITE_API_URL}
