@@ -8,10 +8,12 @@ import PatientInfoCard from "../components/dashboard/patients/PatientInfoCard";
 import PatientDietsTab from "../components/dashboard/patients/PatientDietsTab";
 import DietSetupModal from "../components/dashboard/diets/DietSetupModal";
 import { buildDietFromSetup } from "../utils/diets/dietMath";
-import type { DietSetupData } from "../types/diet";
+import type { Diet, DietSetupData } from "../types/diet";
 import EditPatientInfoCard from "../components/dashboard/patients/EditPatientInfoCard";
 import type { Patient } from "../types/patients";
 import { useAppNavigation } from "../hooks/useAppNavigation";
+import toast from "react-hot-toast";
+import ConfirmationModal from "../components/ui/ConfirmationModal";
 
 type Tab = 'dietas';
 
@@ -24,10 +26,11 @@ export default function PatientDetail() {
     const { goToDietForm } = useAppNavigation();
     const navigate = useNavigate();
     const { patients, updatePatient } = usePatients();
-    const { diets, addDiet } = useDiets();
+    const { diets, addDiet, deleteDiet } = useDiets();
 
     // --- HOOKS ---
     const [activeTab, setActiveTab] = useState<Tab>('dietas');
+    const [dietToDelete, setDietToDelete] = useState< string | null >(null);
     const [isDietModalOpen, setIsDietModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -60,6 +63,16 @@ export default function PatientDetail() {
             alert("Error al crear la dieta en el servidor.");
         }
     };
+
+    const handleDeleteDiet = async () => {
+        if (!dietToDelete) return;
+        try {
+            await deleteDiet(dietToDelete)
+            toast.success("Dieta eliminada correctamente")
+        } catch (error) {
+            toast.error("No se pudo eliminar la dieta")
+        }
+    }
 
     const handleSave = async () => {
         if (!patient || isSaving) return;
@@ -190,6 +203,7 @@ export default function PatientDetail() {
                         patientId={patient.id}
                         diets={patientDiets}
                         onCreateDiet={() => setIsDietModalOpen(true)}
+                        onDeleteDiet={(id) => setDietToDelete(id)}
                     />
                 )}
             </div>
@@ -201,6 +215,15 @@ export default function PatientDetail() {
                 onDietCreate={handleCreateDiet}
                 initialPatientId={patient.id}
                 initialStep={2}
+            />
+
+            <ConfirmationModal 
+                isOpen={!!dietToDelete}
+                onClose={() => setDietToDelete(null)}
+                onConfirm={handleDeleteDiet}
+                title="Eliminar Dieta"
+                message="¿Estas seguro que deseas eliminar esta dieta? Se perderán todos los datos y registros asociados a ella."
+                confirmText="Eliminar"
             />
         </div>
     );
