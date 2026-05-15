@@ -157,8 +157,8 @@ public class DietsController : ControllerBase
         _context.ChangeTracker.Clear(); // Limpia memoria
 
         var diet = await _context.Diets
-            .Include(d => d.Days)
-            .Include(d => d.Meals)
+            .Include(d => d.Days.OrderBy(day => day.DayNumber))
+            .Include(d => d.Meals.OrderBy(m => m.OrderIndex))
                 .ThenInclude(m => m.Slots)
                     .ThenInclude(s => s.Items)
             .FirstOrDefaultAsync(d => d.Id == id);
