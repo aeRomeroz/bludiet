@@ -1,6 +1,6 @@
 import { apiClient } from '../lib/apiClient';
 import { apiRoutes } from './apiRoutes';
-import { type Diet, type FoodSlot, type MealEntry, type FoodPortion, type CreateDietRequest } from '../types/diet';
+import { type Diet, type FoodSlot, type MealEntry, type FoodPortion, type CreateDietRequest, type DietStats } from '../types/diet';
 
 export const dietService = {
   async getAll(): Promise<Diet[]> {
@@ -8,8 +8,8 @@ export const dietService = {
     return data.map(mapToDiet);
   },
 
-  async getCount(): Promise<number> {
-    const { data } = await apiClient.get(apiRoutes.diets.count);
+  async getStats(): Promise<DietStats> {
+    const { data } = await apiClient.get<DietStats>(apiRoutes.diets.stats);
     return data;
   },
 
@@ -21,7 +21,7 @@ export const dietService = {
   async create(request: CreateDietRequest): Promise<Diet> {
     // El backend devuelve la dieta con estructura completa (meals, slots, items)
     const { data } = await apiClient.post(
-      apiRoutes.diets.index, request 
+      apiRoutes.diets.index, request
     );
 
     return mapToDiet(data);
@@ -31,7 +31,7 @@ export const dietService = {
     const { data } = await apiClient.put(apiRoutes.diets.update(id), mapToDto(diet));
     return data ? mapToDiet(data) : diet;
   },
- 
+
   async delete(id: string): Promise<void> {
     await apiClient.delete(apiRoutes.diets.delete(id));
   },

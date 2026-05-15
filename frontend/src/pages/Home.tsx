@@ -23,7 +23,7 @@ import { useAppNavigation } from '../hooks/useAppNavigation';
 export default function Home() {
   const [name] = useState('Dietista');
   
-  const { dietCount, fetchDietCount, addDiet } = useDiets();
+  const { dietStats, fetchDietStats, addDiet } = useDiets();
   const { patients, refreshPatients, addPatient } = usePatients();
 
     const { goToDietForm } = useAppNavigation();
@@ -33,7 +33,7 @@ export default function Home() {
   
   useEffect(() => {
     refreshPatients();
-    fetchDietCount(); 
+    fetchDietStats(); 
   }, []);
 
   const headers = ['PACIENTE', 'ESTADO', 'ULTIMA ACCIÓN', 'FECHA'];
@@ -65,8 +65,20 @@ export default function Home() {
     },
     {
       title: 'Dietas Activas',
-      value: dietCount,
-      description: '+4% desde el último mes',
+      value: dietStats.total,
+      description: (
+      <div className="text-gray-secondary text-sm">
+        {/* Lógica para el porcentaje coloreado */}
+        {(() => {
+          const val = dietStats.percentageChange;
+          if (val > 0) return <span className="text-green-600 font-bold">+{val}%</span>;
+          if (val < 0) return <span className="text-red-600 font-bold">{val}%</span>;
+          return <span className="text-gray-400 font-bold">0%</span>;
+        })()}
+        {/* Texto estático en gris */}
+        <span className="ml-1">desde el último mes</span>
+      </div>
+    ),
       icon: (
         <div className="flex items-center justify-center rounded-lg bg-green-brand/20 p-4 shrink-0">
           <UtensilsCrossedIcon className="text-green-brand h-8 w-8 fill-green-brand" fill="currentColor"/>

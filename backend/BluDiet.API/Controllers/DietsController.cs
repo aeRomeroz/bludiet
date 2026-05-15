@@ -17,10 +17,36 @@ public class DietsController : ControllerBase
         _context = context;
     }
 
-    [HttpGet("count")]
-    public async Task<ActionResult<int>> GetTotalDietsCount()
+    [HttpGet("stats")]
+    public async Task<ActionResult<StatsResponseDto>> GetDietStats()
     {
-        return await _context.Diets.CountAsync();
+        var now = DateTime.UtcNow;
+        var thirtyDaysAgo = now.AddDays(-30);
+        var sixtyDaysAgo = now.AddDays(-60);
+
+        // Dietas creadas en los últimos 30 días
+        var currentPeriod = await _context.Diets
+            .CountAsync(d => d.CreatedAt >= thirtyDaysAgo);
+
+        // Dietas creadas entre hace 60 y 30 días
+        var previousPeriod = await _context.Diets
+            .CountAsync(d => d.CreatedAt >= sixtyDaysAgo && d.CreatedAt < thirtyDaysAgo);
+
+        double percentage = 0;
+        if (previousPeriod > 0)
+        {
+            percentage = ((double)(currentPeriod - previousPeriod) / previousPeriod) * 100;
+        }
+        else if (currentPeriod > 0)
+        {
+            percentage = 100; // Si no había nada antes y ahora sí, crecimos 100%
+        }
+
+        return new StatsResponseDto
+        {
+            Total = await _context.Diets.CountAsync(), // Total histórico
+            PercentageChange = Math.Round(percentage, 1)
+        };
     }
 
     // 1. Obtener todas las dietas (Usado por el Contexto al inicio)
