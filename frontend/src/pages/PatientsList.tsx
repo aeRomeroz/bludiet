@@ -27,10 +27,14 @@ export default function PatientsList() {
     const [statusFilter, setStatusFilter] = useState<Status | 'ALL'>('ALL');
 
     const filteredPatients = patients.filter((p) => {
-        const matchesSearch = `${p.firstName} ${p.lastName}`
-            .toLowerCase()
-            .includes(search.toLowerCase());
+        const patientTerms = `${p.firstName} ${p.lastName}`.toLowerCase()
+
+        const searchTerms = search.toLowerCase().trim().split(/\s+/);
+        
+        const matchesSearch = searchTerms.every(word => patientTerms.includes(word));
+
         const matchesStatus = statusFilter === 'ALL' || p.status === statusFilter;
+
         return matchesSearch && matchesStatus;
     });
 
