@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import { PlusIcon } from '@heroicons/react/24/outline';
@@ -30,10 +30,13 @@ export default function Home() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
   const [isDietModalOpen, setIsDietModalOpen] = useState(false);
   
-  const { patients, addPatient } = usePatients();
+  const { patients, refreshPatients, addPatient } = usePatients();
+
+  useEffect(() => {
+    refreshPatients();
+  }, []);
 
   const headers = ['PACIENTE', 'ESTADO', 'ULTIMA ACCIÓN', 'FECHA'];
-
   
   const handleAddPatient = (newPatient: Patient) => {
     addPatient(newPatient);
