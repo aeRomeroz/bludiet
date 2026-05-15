@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"; 
 import { PlusIcon } from "@heroicons/react/24/outline";
 import Button from "../components/ui/Button";
 import PatientsTable from "../components/dashboard/patients/PatientsTable";
@@ -8,16 +7,16 @@ import PatientCreateModal from "../components/dashboard/patients/PatientCreateMo
 import DietSetupModal from "../components/dashboard/diets/DietSetupModal";
 import { usePatients } from "../context/PatientsContext";
 import { useDiets } from "../context/DietsContext";
-import { buildDietFromSetup } from "../utils/diets/dietMath";
+import { useAppNavigation } from "../hooks/useAppNavigation";
 import type { Patient, Status } from "../types/patients";
-import type { DietSetupData } from "../types/diet";
+import type { CreateDietRequest } from "../types/diet";
 import toast from "react-hot-toast";
 import ConfirmationModal from "../components/ui/ConfirmationModal";
 
 export default function PatientsList() {
     const { patients, addPatient, deletePatient } = usePatients();
     const { addDiet } = useDiets();
-    const navigate = useNavigate();
+    const { goToDietForm } = useAppNavigation();
 
     const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
     const [patientToDelete, setPatientToDelete] = useState<string | null>();
@@ -60,11 +59,14 @@ export default function PatientsList() {
         setIsDietModalOpen(true);
     };
 
-    const handleCreateDiet = (setup: DietSetupData) => {
-        const dietId = crypto.randomUUID();
-        const newDiet = buildDietFromSetup(setup, dietId);
-        addDiet(newDiet);
-        navigate(`/patients/${setup.patientId}/diets/${dietId}`);
+    const handleCreateDiet = async (payload: CreateDietRequest) => {
+        try {
+            const createdDiet = await addDiet(payload);
+            goToDietForm(createdDiet.id, payload.patientId);
+        } catch (error) {
+            toast.error("Error al crear la dieta. Por favor, inténtalo de nuevo.");
+            throw error; // Re-lanzamos para que el modal sepa que falló
+        }
     };
 
     return (

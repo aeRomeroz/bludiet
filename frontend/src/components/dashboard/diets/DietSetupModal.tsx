@@ -1,7 +1,5 @@
-import { useNavigate } from "react-router-dom"; 
-import { useDiets } from "../../../context/DietsContext";
 import { type Patient } from "../../../types/patients";
-import { type SetupStep, type DietSetupData } from "../../../types/diet";
+import { type SetupStep, type DietSetupData, type CreateDietRequest } from "../../../types/diet";
 import { useEffect, useState } from "react";
 import Modal from "../../ui/Modal";
 import Button from "../../ui/Button";
@@ -14,7 +12,6 @@ import * as Progress from '@radix-ui/react-progress';
 import { MacroCard } from "./MacroCard";
 import { DEFAULT_MEALS } from "../../../constants/diet";
 import { PatientSearchList } from "../patients/PatientSearchList";
-import { useAppNavigation } from "../../../hooks/useAppNavigation";
 
 // Helper para mapear IDs de comidas a sus labels en español
 const getMealLabelsFromIds = (mealIds: string[]): string[] => {
@@ -28,7 +25,7 @@ interface DietSetupModalProps {
     isOpen: boolean;
     onClose: () => void;
     patients: Patient[];
-    onDietCreate: (data: DietSetupData) => void;
+    onDietCreate: (data: CreateDietRequest) => Promise<void>;
     initialPatientId?: string;
     initialStep?: SetupStep;
 }
@@ -47,9 +44,6 @@ export default function DietSetupModal({ isOpen, onClose, patients, onDietCreate
     const [step, setStep] = useState<SetupStep>(initialStep ?? 1);
     const [formData, setFormData] = useState<DietSetupData>({ ...INITIAL_DIET_DATA, patientId: initialPatientId ?? '' });
     const [isLoading, setIsLoading] = useState(false);
-    const { addDiet } = useDiets();
-    const { goToDietForm } = useAppNavigation();
-    const navigate = useNavigate();
     const progressValue = (step / 2) * 100;
 
     const resetForm = () => {
@@ -102,29 +96,29 @@ export default function DietSetupModal({ isOpen, onClose, patients, onDietCreate
         if (isLoading) return;
         setIsLoading(true);
 
-        const dietPayload = {
-        patientId: formData.patientId,
-        name: formData.dietName,
-        durationDays: formData.durationDays,
-        targetKcalPerDay: formData.targetKcal,
-        targetProtein: formData.macros.protein,
-        targetFats: formData.macros.fats,
-        targetCarbs: formData.macros.carbs,
-        startDate: formData.startDate.toISOString().split('T')[0], 
-        selectedMealNames: getMealLabelsFromIds(formData.selectedMeals)    
+        const dietPayload: CreateDietRequest = {
+            patientId: formData.patientId,
+            name: formData.dietName,
+            durationDays: formData.durationDays,
+            targetKcalPerDay: formData.targetKcal,
+            targetProtein: formData.macros.protein,
+            targetFats: formData.macros.fats,
+            targetCarbs: formData.macros.carbs,
+            startDate: formData.startDate.toISOString().split('T')[0],
+            selectedMealNames: getMealLabelsFromIds(formData.selectedMeals)
         };
 
-    try {
-        const createdDiet = await addDiet(dietPayload);
-        onClose();
-        resetForm();
-        setIsLoading(false);
-        goToDietForm(createdDiet.id, formData.patientId);
-    } catch (error) {
-        console.error("Error creating diet:", error);
-        toast.error("No se pudo crear la dieta. Por favor intenta de nuevo.");
-        setIsLoading(false);
-    }
+        try {
+            await onDietCreate(dietPayload);
+            onClose();
+            resetForm();
+        } catch (error) {
+            console.error("Error creating diet:", error);
+            toast.error("No se pudo crear la dieta. Por favor intenta de nuevo.");
+            setIsLoading(false);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -215,11 +209,11 @@ export default function DietSetupModal({ isOpen, onClose, patients, onDietCreate
                                     type="number"
                                     min="1"
                                     className="bg-white border border-primary-30 p-2.5 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-brand/20"
-                                    value={formData.durationDays ||""}
+                                    value={formData.durationDays || ""}
                                     onChange={(e) => {
-                                        setFormData({ 
-                                            ...formData, 
-                                            durationDays: e.target.value === "" ? 0 : Number(e.target.value) 
+                                        setFormData({
+                                            ...formData,
+                                            durationDays: e.target.value === "" ? 0 : Number(e.target.value)
                                         })
                                     }}
                                 />

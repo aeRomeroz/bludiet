@@ -6,13 +6,12 @@ import { ExclamationCircleIcon, UserGroupIcon } from '@heroicons/react/24/solid'
 import { UtensilsCrossedIcon } from 'lucide-react';
 import TableComponent from '../components/ui/TableComponent';
 import type { Patient } from '../types/patients';
-import type { DietSetupData } from '../types/diet';
+import type { CreateDietRequest } from '../types/diet';
 import PatientCreateModal from '../components/dashboard/patients/PatientCreateModal';
 import DietSetupModal from '../components/dashboard/diets/DietSetupModal';
 import { usePatients } from '../context/PatientsContext';
-import { useNavigate } from 'react-router-dom';
 import { useDiets } from '../context/DietsContext';
-import { buildDietFromSetup } from '../utils/diets/dietMath';
+import { useAppNavigation } from '../hooks/useAppNavigation';
 
 /**
  * Home Page - Página de inicio
@@ -23,10 +22,11 @@ import { buildDietFromSetup } from '../utils/diets/dietMath';
 
 export default function Home() {
   const [name] = useState('Dietista');
-  const navigate = useNavigate();
   
   const { dietCount, fetchDietCount, addDiet } = useDiets();
   const { patients, refreshPatients, addPatient } = usePatients();
+
+    const { goToDietForm } = useAppNavigation();
 
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
   const [isDietModalOpen, setIsDietModalOpen] = useState(false);
@@ -42,12 +42,16 @@ export default function Home() {
     addPatient(newPatient);
   };
 
-  const handleCreateDiet = (setup: DietSetupData) => {
-    const dietId = crypto.randomUUID();
-    const newDiet = buildDietFromSetup(setup, dietId);
-    addDiet(newDiet);
-    navigate(`/patients/${setup.patientId}/diets/${dietId}`);
-  };
+  const handleCreateDiet = async (payload: CreateDietRequest) => {
+    try {
+        const createdDiet = await addDiet(payload);
+
+        goToDietForm(createdDiet.id, payload.patientId);
+    } catch (error) {
+        console.error("Error en Home:", error);
+    }
+};
+
   const features = [
     {
       title: 'Pacientes totales',

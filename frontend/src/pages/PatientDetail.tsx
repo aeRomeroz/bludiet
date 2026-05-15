@@ -8,7 +8,7 @@ import PatientInfoCard from "../components/dashboard/patients/PatientInfoCard";
 import PatientDietsTab from "../components/dashboard/patients/PatientDietsTab";
 import DietSetupModal from "../components/dashboard/diets/DietSetupModal";
 import { buildDietFromSetup } from "../utils/diets/dietMath";
-import type { Diet, DietSetupData } from "../types/diet";
+import type { CreateDietRequest, Diet, DietSetupData } from "../types/diet";
 import EditPatientInfoCard from "../components/dashboard/patients/EditPatientInfoCard";
 import type { Patient } from "../types/patients";
 import { useAppNavigation } from "../hooks/useAppNavigation";
@@ -38,29 +38,16 @@ export default function PatientDetail() {
     const patient = patients.find(p => p.id === patientId);
     const patientDiets = diets.filter(d => d.patientId === patientId);
 
-    const handleCreateDiet = async (setup: DietSetupData) => {
+    const handleCreateDiet = async (payload: CreateDietRequest) => {
         try {
-            const dietId = crypto.randomUUID();
-            // buildDietFromSetup es tu lógica de cálculos que ya tienes
-            const newDiet = buildDietFromSetup(setup, dietId);
-
-            // Asignamos el ID del paciente actual
-            newDiet.patientId = patientId!;
-
-            // 1. Guardamos en la BDD a través del contexto
-            await addDiet(newDiet);
-
-            // 2. Si el paciente estaba PENDING, lo pasamos a ACTIVE
+            const createdDiet = await addDiet(payload);
             if (patient && patient.status !== 'ACTIVE') {
                 await updatePatient(patientId!, { ...patient, status: 'ACTIVE' });
             }
-
-            // 3. Cerramos modal y navegamos a la edición de la dieta
             setIsDietModalOpen(false);
-            goToDietForm(dietId, patientId);
-
+            goToDietForm(createdDiet.id, patientId!);
         } catch (error) {
-            alert("Error al crear la dieta en el servidor.");
+            console.error("Error al crear la dieta en detalle de paciente:", error);
         }
     };
 
