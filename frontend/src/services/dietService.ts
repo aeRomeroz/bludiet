@@ -8,6 +8,11 @@ export const dietService = {
     return data.map(mapToDiet);
   },
 
+  async getCount(): Promise<number> {
+    const { data } = await apiClient.get(apiRoutes.diets.count);
+    return data;
+  },
+
   async getByPatient(patientId: string): Promise<Diet[]> {
     const { data } = await apiClient.get(apiRoutes.diets.byPatient(patientId));
     return data.map(mapToDiet);

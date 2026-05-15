@@ -17,6 +17,12 @@ public class DietsController : ControllerBase
         _context = context;
     }
 
+    [HttpGet("count")]
+    public async Task<ActionResult<int>> GetTotalDietsCount()
+    {
+        return await _context.Diets.CountAsync();
+    }
+
     // 1. Obtener todas las dietas (Usado por el Contexto al inicio)
     [HttpGet]
     public async Task<ActionResult<IEnumerable<DietResponseDto>>> GetDiets()
@@ -180,24 +186,24 @@ public class DietsController : ControllerBase
         {
             var mealEntity = diet.Meals.FirstOrDefault(m => m.Id == mealDto.Id);
             if (mealEntity == null)
-    {
-        // SI LA COMIDA NO EXISTE, LA CREAMOS
-        mealEntity = new DietMeal
-        {
-            Id = mealDto.Id ?? Guid.NewGuid(), // Usamos el ID generado en el Front
-            DietId = diet.Id,
-            Name = mealDto.Name,
-            OrderIndex = mealDto.OrderIndex,
-            Slots = new List<DietSlot>()
-        };
-        diet.Meals.Add(mealEntity);
-    }
-    else
-    {
-        // SI EXISTE, SOLO ACTUALIZAMOS NOMBRE Y ORDEN
-        mealEntity.Name = mealDto.Name;
-        mealEntity.OrderIndex = mealDto.OrderIndex;
-    }
+            {
+                // SI LA COMIDA NO EXISTE, LA CREAMOS
+                mealEntity = new DietMeal
+                {
+                    Id = mealDto.Id ?? Guid.NewGuid(), // Usamos el ID generado en el Front
+                    DietId = diet.Id,
+                    Name = mealDto.Name,
+                    OrderIndex = mealDto.OrderIndex,
+                    Slots = new List<DietSlot>()
+                };
+                diet.Meals.Add(mealEntity);
+            }
+            else
+            {
+                // SI EXISTE, SOLO ACTUALIZAMOS NOMBRE Y ORDEN
+                mealEntity.Name = mealDto.Name;
+                mealEntity.OrderIndex = mealDto.OrderIndex;
+            }
 
             // 4. Actualizar Items (Nuke & Pave con precaución)
             foreach (var slotDto in mealDto.Slots)

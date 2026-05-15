@@ -23,17 +23,17 @@ import { buildDietFromSetup } from '../utils/diets/dietMath';
 
 export default function Home() {
   const [name] = useState('Dietista');
-  
   const navigate = useNavigate();
-  const { diets, addDiet } = useDiets();
+  
+  const { dietCount, fetchDietCount, addDiet } = useDiets();
+  const { patients, refreshPatients, addPatient } = usePatients();
 
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
   const [isDietModalOpen, setIsDietModalOpen] = useState(false);
   
-  const { patients, refreshPatients, addPatient } = usePatients();
-
   useEffect(() => {
     refreshPatients();
+    fetchDietCount(); 
   }, []);
 
   const headers = ['PACIENTE', 'ESTADO', 'ULTIMA ACCIÓN', 'FECHA'];
@@ -61,7 +61,7 @@ export default function Home() {
     },
     {
       title: 'Dietas Activas',
-      value: diets.length > 0 ? diets.length : 12,
+      value: dietCount,
       description: '+4% desde el último mes',
       icon: (
         <div className="flex items-center justify-center rounded-lg bg-green-brand/20 p-4 shrink-0">

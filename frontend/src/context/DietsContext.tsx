@@ -5,30 +5,21 @@ import toast from "react-hot-toast";
 
 interface DietsContextType {
   diets: Diet[];
+  dietCount: number;
   loading: boolean;
   refreshDiets: () => Promise<void>;
   addDiet: (dietRequest: CreateDietRequest) => Promise<Diet>;
   deleteDiet: (id: string) => Promise<void>;
   updateDiet: (diet: Diet) => Promise<void>;
+  fetchDietCount: () => Promise<void>;
 }
 
 const DietsContext = createContext<DietsContextType | null>(null);
 
 export function DietsProvider({ children }: { children: ReactNode }) {
   const [diets, setDiets] = useState<Diet[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchDiets = async () => {
-        try {
-            const data = await dietService.getAll(); // Tu llamada al backend
-            setDiets(data);
-        } catch (error) {
-            console.error("Error cargando dietas:", error);
-        }
-    };
-    fetchDiets();
-}, []);
+  const [dietCount, setDietCount] = useState<number>(0);
+  const [loading, setLoading] = useState(false);
 
   const refreshDiets = useCallback(async () => {
     try {
@@ -37,16 +28,19 @@ export function DietsProvider({ children }: { children: ReactNode }) {
       setDiets(data);
     } catch (error) {
       console.error("Error fetching diets:", error);
-      // No mostramos toast aquí para no molestar al usuario en cada carga, 
-      // pero el error queda logueado.
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    refreshDiets();
-  }, [refreshDiets]);
+  const fetchDietCount = useCallback(async () => {
+    try {
+      const count = await dietService.getCount();
+      setDietCount(count);
+    } catch (error) {
+      console.error("Error fetching diet count:", error);
+    }
+  }, []);
 
   const addDiet = useCallback(async (dietRequest: CreateDietRequest) => {
     try {
@@ -74,10 +68,7 @@ export function DietsProvider({ children }: { children: ReactNode }) {
 
   const updateDiet = useCallback(async (updatedDiet: Diet) => {
     try {
-        // Guardamos optimistamente en el estado local para que la UI sea fluida
         setDiets(prev => prev.map(d => d.id === updatedDiet.id ? updatedDiet : d));
-        
-        // Enviamos al servidor
         await dietService.update(updatedDiet.id, updatedDiet);
     } catch (error) {
         toast.error('Error al sincronizar los cambios');
@@ -87,7 +78,7 @@ export function DietsProvider({ children }: { children: ReactNode }) {
 }, [refreshDiets]);
 
   return (
-    <DietsContext.Provider value={{ diets, loading, refreshDiets, addDiet, deleteDiet, updateDiet }}>
+    <DietsContext.Provider value={{ diets, dietCount, loading, refreshDiets, fetchDietCount, addDiet, deleteDiet, updateDiet }}>
       {children}
     </DietsContext.Provider>
   );
