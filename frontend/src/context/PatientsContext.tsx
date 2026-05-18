@@ -31,6 +31,7 @@ const DEFAULT_TEST_PATIENT: Patient = {
 interface PatientsContextType {
   patients: Patient[];
   loading: boolean;
+  refreshPatients: () => Promise<void>;
   addPatient: (patient: Patient) => Promise<void>;
   deletePatient: (id: string) => Promise<void>;
   updatePatient: (id: string, data: Partial<Patient>) => Promise<void>;
@@ -42,20 +43,24 @@ export function PatientsProvider({ children }: { children: ReactNode }) {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    patientService.getAll()
-      .then((data) => {
-        if (data.length === 0) {
-          setPatients([DEFAULT_TEST_PATIENT]);
-        } else {
-          setPatients(data);
-        }
-      })
-      .catch(() => {
-        toast.error('Error al cargar pacientes. Se usará un paciente de prueba.');
+  const refreshPatients = async () => {
+    try {
+      const data = await patientService.getAll();
+      if (data.length === 0) {
         setPatients([DEFAULT_TEST_PATIENT]);
-      })
-      .finally(() => setLoading(false));
+      } else {
+        setPatients(data);
+      }
+    } catch (error) {
+      toast.error('Error al actualizar pacientes');
+      if (patients.length === 0) setPatients([DEFAULT_TEST_PATIENT]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refreshPatients();
   }, []);
 
   const addPatient = async (patient: Patient) => {
@@ -82,7 +87,7 @@ export function PatientsProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <PatientsContext.Provider value={{ patients, loading, addPatient, deletePatient, updatePatient }}>
+    <PatientsContext.Provider value={{ patients, loading, refreshPatients, addPatient, deletePatient, updatePatient }}>
       {children}
     </PatientsContext.Provider>
   );

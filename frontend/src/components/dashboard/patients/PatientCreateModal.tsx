@@ -27,6 +27,7 @@ export default function PatientCreateModal({
         weight: '' as number | '',
         height: '' as number | '',
     });
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -35,6 +36,9 @@ export default function PatientCreateModal({
             toast.error('El motivo de consulta es demasiado corto. Detalla un poco más.');
             return; 
         }
+
+        if (isLoading) return;
+        setIsLoading(true);
 
         try {
             const newPatient: Patient = {
@@ -61,9 +65,11 @@ export default function PatientCreateModal({
             onPatientCreate(newPatient);
             toast.success(`Paciente ${formData.firstName} ${formData.lastName} registrado con éxito`);
             onClose(); // Cerramos el modal
+            setIsLoading(false);
         } catch (error) {
             toast.error('Ocurrió un error al registrar el paciente. Inténtalo de nuevo.');
             console.error('Error al crear paciente:', error);
+            setIsLoading(false);
         }
 
         // Opcional: Limpiar el formulario
@@ -99,9 +105,10 @@ export default function PatientCreateModal({
                     <Button 
                         type="submit"
                         form="patient-form"
-                        className="flex-1 bg-blue-brand text-white hover:bg-blue-brand/90"
+                        disabled={isLoading}
+                        className="flex-1 bg-blue-brand text-white hover:bg-blue-brand/90 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Guardar Paciente
+                        {isLoading ? 'Registrando...' : 'Guardar Paciente'}
                     </Button>
                 </>
             }

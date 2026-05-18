@@ -1,43 +1,51 @@
 export type SetupStep = 1 | 2;
 
 export interface SetupMacros {
-  protein: number;
-  fats: number;
-  carbs: number;
+    protein: number;
+    fats: number;
+    carbs: number;
 }
 
 export interface DietSetupData {
-  patientId: string;
-  dietName: string;
-  durationDays: number;
-  selectedMeals: string[];
-  targetKcal: number;
-  macros: SetupMacros;
-  startDate: Date;
+    patientId: string;
+    dietName: string;
+    durationDays: number;
+    selectedMeals: string[];
+    targetKcal: number;
+    macros: SetupMacros;
+    startDate: Date;
 }
 
 //FoodPortion ES TEMPORAL, EN FUTURO 'foodName' REFERENCIARA A LAS INSTANCIAS DE ALIMENTOS
 export interface FoodPortion {
-  id: string;
-  name: string;
-  grams: number;
-  bedcaId?: string;
+    id?: string;
+    foodId: string;
+    name: string;
+    grams: number;
+    dayNumber: number;
+    kcal?: number;
+    protein?: number;
+    fats?: number;
+    carbs?: number;
 }
 
 export interface FoodSlot {
-    id: string;           
+    id: string;
+    slotIndex: number;
     items: (FoodPortion | null)[];
 }
 
 export interface MealEntry {
     id: string;
     name: string;
-    slots: FoodSlot[];    
+    orderIndex: number;
+    slots: FoodSlot[];
 }
 
 export interface DietDay {
     id: string;
     dayNumber: number;
+    date?: Date;
 }
 
 export interface Diet {
@@ -49,5 +57,22 @@ export interface Diet {
     targetMacros: SetupMacros;
     startDate: Date;
     days: DietDay[];
-    meals: MealEntry[];  
+    meals: MealEntry[];
+}
+
+export interface DietStats {
+  total: number;
+  percentageChange: number;
+}
+
+export interface CreateDietRequest {
+    patientId: string;
+    name: string;
+    durationDays: number;
+    targetKcalPerDay: number;
+    targetProtein: number;
+    targetFats: number;
+    targetCarbs: number;
+    startDate: string;
+    selectedMealNames: string[];
 }

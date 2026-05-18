@@ -8,9 +8,12 @@ import PatientInfoCard from "../components/dashboard/patients/PatientInfoCard";
 import PatientDietsTab from "../components/dashboard/patients/PatientDietsTab";
 import DietSetupModal from "../components/dashboard/diets/DietSetupModal";
 import { buildDietFromSetup } from "../utils/diets/dietMath";
-import type { DietSetupData } from "../types/diet";
+import type { CreateDietRequest, Diet, DietSetupData } from "../types/diet";
 import EditPatientInfoCard from "../components/dashboard/patients/EditPatientInfoCard";
 import type { Patient } from "../types/patients";
+import { useAppNavigation } from "../hooks/useAppNavigation";
+import toast from "react-hot-toast";
+import ConfirmationModal from "../components/ui/ConfirmationModal";
 
 type Tab = 'dietas';
 
@@ -19,26 +22,44 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 export default function PatientDetail() {
-    const { id } = useParams();
+    const { patientId } = useParams();
+    const { goToDietForm } = useAppNavigation();
     const navigate = useNavigate();
     const { patients, updatePatient } = usePatients();
-    const { diets, addDiet } = useDiets();
+    const { diets, addDiet, deleteDiet } = useDiets();
 
     // --- HOOKS ---
     const [activeTab, setActiveTab] = useState<Tab>('dietas');
+    const [dietToDelete, setDietToDelete] = useState< string | null >(null);
     const [isDietModalOpen, setIsDietModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
-    const patient = patients.find(p => p.id === id);
-    const patientDiets = diets.filter(d => d.patientId === id);
+    const patient = patients.find(p => p.id === patientId);
+    const patientDiets = diets.filter(d => d.patientId === patientId);
 
-    const handleCreateDiet = (setup: DietSetupData) => {
-        const dietId = crypto.randomUUID();
-        const newDiet = buildDietFromSetup(setup, dietId);
-        addDiet(newDiet);
-        navigate(`/patients/${id}/diets/${dietId}`);
+    const handleCreateDiet = async (payload: CreateDietRequest) => {
+        try {
+            const createdDiet = await addDiet(payload);
+            if (patient && patient.status !== 'ACTIVE') {
+                await updatePatient(patientId!, { ...patient, status: 'ACTIVE' });
+            }
+            setIsDietModalOpen(false);
+            goToDietForm(createdDiet.id, patientId!);
+        } catch (error) {
+            console.error("Error al crear la dieta en detalle de paciente:", error);
+        }
     };
+
+    const handleDeleteDiet = async () => {
+        if (!dietToDelete) return;
+        try {
+            await deleteDiet(dietToDelete)
+            toast.success("Dieta eliminada correctamente")
+        } catch (error) {
+            toast.error("No se pudo eliminar la dieta")
+        }
+    }
 
     const handleSave = async () => {
         if (!patient || isSaving) return;
@@ -121,7 +142,7 @@ export default function PatientDetail() {
                             </Button>
                             <Button
                                 variant="primary"
-                                className="bg-green-600 hover:bg-green-700"
+                                className="bg-green-600 hover:bg-green-brand/40"
                                 onClick={handleSave} // <--- Llamamos directamente a la función
                             >
                                 Guardar Cambios
@@ -133,10 +154,18 @@ export default function PatientDetail() {
                             className="flex items-center gap-3"
                             onClick={() => setIsEditing(true)}
                         >
-                            <PencilIcon className="text-white h-5 w-5" />
+                            <PencilIcon className="text-green-brand h-5 w-5" />
                             Editar Perfil
                         </Button>
                     )}
+
+                    <Button 
+                        variant="primary" 
+                        className='flex items-center gap-3' 
+                        onClick={()=>{setIsDietModalOpen(true)}}
+                    > 
+                        <PlusIcon className='text-blue-brand h-5 w-5'/> Dieta
+                    </Button>
                 </div>
             </div>
 
@@ -166,9 +195,10 @@ export default function PatientDetail() {
 
                 {activeTab === 'dietas' && (
                     <PatientDietsTab
-                        patientId={id!}
+                        patientId={patient.id}
                         diets={patientDiets}
                         onCreateDiet={() => setIsDietModalOpen(true)}
+                        onDeleteDiet={(id) => setDietToDelete(id)}
                     />
                 )}
             </div>
@@ -178,8 +208,17 @@ export default function PatientDetail() {
                 onClose={() => setIsDietModalOpen(false)}
                 patients={patients}
                 onDietCreate={handleCreateDiet}
-                initialPatientId={id}
+                initialPatientId={patient.id}
                 initialStep={2}
+            />
+
+            <ConfirmationModal 
+                isOpen={!!dietToDelete}
+                onClose={() => setDietToDelete(null)}
+                onConfirm={handleDeleteDiet}
+                title="Eliminar Dieta"
+                message="¿Estas seguro que deseas eliminar esta dieta? Se perderán todos los datos y registros asociados a ella."
+                confirmText="Eliminar"
             />
         </div>
     );

@@ -10,8 +10,7 @@ public class MappingProfile : Profile
         CreateMap<UpdatePatientDto, Patient>()
             .ForMember(dest => dest.Id, opt => opt.Ignore()) // El ID nunca se cambia
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore()) // Mantener fecha de creación
-            .ForMember(dest => dest.BirthDate, opt => opt.MapFrom(src => 
-                string.IsNullOrEmpty(src.BirthDate) ? DateOnly.MinValue : DateOnly.Parse(src.BirthDate)))
+            .ForMember(dest => dest.BirthDate, opt => opt.MapFrom(src => src.BirthDate ?? DateOnly.MinValue))
             .ForPath(dest => dest.MedicalHistory, opt => opt.MapFrom(src => src.MedicalHistory));
 
         // 2. Mapeo del Historial Médico (Dinamismo para las condiciones)

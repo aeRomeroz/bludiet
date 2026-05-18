@@ -1,7 +1,11 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace BluDiet.API.Models;
 
 public class Diet
 {
+    [Key]
     public Guid Id { get; set; }
     public Guid PatientId { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -13,6 +17,10 @@ public class Diet
     public DateOnly StartDate { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public Patient Patient { get; set; } = null!;
-    public ICollection<DietMeal> Meals { get; set; } = new List<DietMeal>();
+    // Navigators and Relationships
+    [ForeignKey("PatientId")] 
+    public virtual Patient Patient { get; set; } = null!;
+    
+    public virtual ICollection<DietDay> Days { get; set; } = new List<DietDay>();
+    public virtual ICollection<DietMeal> Meals { get; set; } = new List<DietMeal>();
 }

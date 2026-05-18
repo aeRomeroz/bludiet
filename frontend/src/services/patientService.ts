@@ -26,6 +26,7 @@ export const patientService = {
 function mapToPatient(row: any): Patient {
   return {
     ...row, // Mantenemos campos planos (id, names, dates)
+    lastDietUpdate: row.lastDietUpdate ? new Date(row.lastDietUpdate) : null,
     initialMeasurement: row.initialMeasurement ? {
       date: row.initialMeasurement.date,
       weight: row.initialMeasurement.weight,

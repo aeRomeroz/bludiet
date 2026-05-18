@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import { PlusIcon } from '@heroicons/react/24/outline';
@@ -6,13 +6,12 @@ import { ExclamationCircleIcon, UserGroupIcon } from '@heroicons/react/24/solid'
 import { UtensilsCrossedIcon } from 'lucide-react';
 import TableComponent from '../components/ui/TableComponent';
 import type { Patient } from '../types/patients';
-import type { DietSetupData } from '../types/diet';
+import type { CreateDietRequest } from '../types/diet';
 import PatientCreateModal from '../components/dashboard/patients/PatientCreateModal';
 import DietSetupModal from '../components/dashboard/diets/DietSetupModal';
 import { usePatients } from '../context/PatientsContext';
-import { useNavigate } from 'react-router-dom';
 import { useDiets } from '../context/DietsContext';
-import { buildDietFromSetup } from '../utils/diets/dietMath';
+import { useAppNavigation } from '../hooks/useAppNavigation';
 
 /**
  * Home Page - Página de inicio
@@ -24,27 +23,35 @@ import { buildDietFromSetup } from '../utils/diets/dietMath';
 export default function Home() {
   const [name] = useState('Dietista');
   
-  const navigate = useNavigate();
-  const { diets, addDiet } = useDiets();
+  const { dietStats, fetchDietStats, addDiet } = useDiets();
+  const { patients, refreshPatients, addPatient } = usePatients();
+
+    const { goToDietForm } = useAppNavigation();
 
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
   const [isDietModalOpen, setIsDietModalOpen] = useState(false);
   
-  const { patients, addPatient } = usePatients();
+  useEffect(() => {
+    refreshPatients();
+    fetchDietStats(); 
+  }, []);
 
   const headers = ['PACIENTE', 'ESTADO', 'ULTIMA ACCIÓN', 'FECHA'];
-
   
   const handleAddPatient = (newPatient: Patient) => {
     addPatient(newPatient);
   };
 
-  const handleCreateDiet = (setup: DietSetupData) => {
-    const dietId = crypto.randomUUID();
-    const newDiet = buildDietFromSetup(setup, dietId);
-    addDiet(newDiet);
-    navigate(`/patients/${setup.patientId}/diets/${dietId}`);
-  };
+  const handleCreateDiet = async (payload: CreateDietRequest) => {
+    try {
+        const createdDiet = await addDiet(payload);
+
+        goToDietForm(createdDiet.id, payload.patientId);
+    } catch (error) {
+        console.error("Error en Home:", error);
+    }
+};
+
   const features = [
     {
       title: 'Pacientes totales',
@@ -58,8 +65,20 @@ export default function Home() {
     },
     {
       title: 'Dietas Activas',
-      value: diets.length > 0 ? diets.length : 12,
-      description: '+4% desde el último mes',
+      value: dietStats.total,
+      description: (
+      <div className="text-gray-secondary text-sm">
+        {/* Lógica para el porcentaje coloreado */}
+        {(() => {
+          const val = dietStats.percentageChange;
+          if (val > 0) return <span className="text-green-600 font-bold">+{val}%</span>;
+          if (val < 0) return <span className="text-red-600 font-bold">{val}%</span>;
+          return <span className="text-gray-400 font-bold">0%</span>;
+        })()}
+        {/* Texto estático en gris */}
+        <span className="ml-1">desde el último mes</span>
+      </div>
+    ),
       icon: (
         <div className="flex items-center justify-center rounded-lg bg-green-brand/20 p-4 shrink-0">
           <UtensilsCrossedIcon className="text-green-brand h-8 w-8 fill-green-brand" fill="currentColor"/>
