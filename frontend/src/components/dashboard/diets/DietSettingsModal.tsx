@@ -14,8 +14,8 @@ interface DietSettingsModalProps {
 export default function DietSettingsModal({ isOpen, onClose, diet, onSave }: DietSettingsModalProps) {
     const [name, setName] = useState(diet.name);
     const [kcal, setKcal] = useState(diet.targetKcalPerDay);
+    const [isLoading, setIsLoading] = useState(false);
     
-    // Adaptamos el formato de Macros para el slider (p, g, c)
     const [macros, setMacros] = useState({
         p: diet.targetMacros.protein,
         g: diet.targetMacros.fats,
@@ -23,12 +23,19 @@ export default function DietSettingsModal({ isOpen, onClose, diet, onSave }: Die
     });
 
     const handleSave = () => {
-        onSave(name, kcal, {
-            protein: macros.p,
-            fats: macros.g,
-            carbs: macros.c
-        });
-        onClose();
+        if (isLoading) return;
+        setIsLoading(true);
+
+        try {
+            onSave(name, kcal, {
+                protein: macros.p,
+                fats: macros.g,
+                carbs: macros.c
+            });
+            onClose();
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -43,10 +50,11 @@ export default function DietSettingsModal({ isOpen, onClose, diet, onSave }: Die
                         Cancelar
                     </Button>
                     <Button
-                        className="flex-1 bg-blue-brand text-white"
+                        disabled={isLoading}
+                        className="flex-1 bg-blue-brand text-white disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={handleSave}
                     >
-                        Guardar Cambios
+                        {isLoading ? "Guardando..." : "Guardar Cambios"}
                     </Button>
                 </div>
             }

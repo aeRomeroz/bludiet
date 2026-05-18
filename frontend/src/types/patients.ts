@@ -37,4 +37,5 @@ export interface Patient {
   status: Status;
   avatarUrl?: string; 
   initialMeasurement?: Measurement;
+  lastDietUpdate?: Date | null;
 }

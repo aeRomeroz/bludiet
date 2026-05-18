@@ -60,6 +60,11 @@ export interface Diet {
     meals: MealEntry[];
 }
 
+export interface DietStats {
+  total: number;
+  percentageChange: number;
+}
+
 export interface CreateDietRequest {
     patientId: string;
     name: string;

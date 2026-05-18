@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { apiClient } from "../../../../lib/apiClient";
 import Modal from "../../../ui/Modal";
 import Button from "../../../ui/Button";
 import toast from "react-hot-toast";
@@ -11,16 +10,34 @@ interface AddFoodItemModalProps {
     isOpen: boolean;
     onClose: () => void;
     onAdd: (item: FoodPortion) => void;
+    onEdit?: (item: FoodPortion) => void;
     mealName?: string;
     dayNumber: number;
+    editingItem?: FoodPortion | null;
 }
 
-export default function AddFoodItemModal({ isOpen, onClose, onAdd, mealName, dayNumber }: AddFoodItemModalProps) {
+export default function AddFoodItemModal({ isOpen, onClose, onAdd, onEdit, mealName, dayNumber, editingItem }: AddFoodItemModalProps) {
     const [search, setSearch] = useState('');
     const [results, setResults] = useState<ApiFood[]>([]);
     const [selected, setSelected] = useState<ApiFood | null>(null);
     const [grams, setGrams] = useState(100);
     const [isLoading, setIsLoading] = useState(false);
+    const isEditing = !!editingItem;
+
+    useEffect(() => {
+        if (isEditing && editingItem) {
+            setSearch(editingItem.name);
+            setGrams(editingItem.grams);
+            setSelected({
+                id: editingItem.foodId,
+                nameEs: editingItem.name,
+                kcalPer100g: editingItem.kcal ? (editingItem.kcal * 100) / editingItem.grams : 0,
+                proteinPer100g: editingItem.protein ? (editingItem.protein * 100) / editingItem.grams : 0,
+                fatsPer100g: editingItem.fats ? (editingItem.fats * 100) / editingItem.grams : 0,
+                carbsPer100g: editingItem.carbs ? (editingItem.carbs * 100) / editingItem.grams : 0,
+            } as ApiFood);
+        }
+    }, [isEditing, editingItem]);
 
     // Efecto de búsqueda reactiva
     useEffect(() => {
@@ -58,17 +75,23 @@ export default function AddFoodItemModal({ isOpen, onClose, onAdd, mealName, day
             return;
         }
 
-        onAdd({
-            id: crypto.randomUUID(),
-            name: selected.nameEs, // Usamos nameEs
+        const foodData: FoodPortion = {
+            id: isEditing && editingItem ? editingItem.id : crypto.randomUUID(),
+            name: selected.nameEs,
             grams,
             foodId: selected.id,
-            dayNumber: dayNumber, // Usamos el dayNumber real que viene por props
+            dayNumber: dayNumber,
             kcal: (selected.kcalPer100g * grams) / 100,
             protein: (selected.proteinPer100g * grams) / 100,
             fats: (selected.fatsPer100g * grams) / 100,
             carbs: (selected.carbsPer100g * grams) / 100,
-        });
+        };
+
+        if (isEditing && onEdit) {
+            onEdit(foodData);
+        } else {
+            onAdd(foodData);
+        }
 
         handleClose();
     };
@@ -85,7 +108,7 @@ export default function AddFoodItemModal({ isOpen, onClose, onAdd, mealName, day
         <Modal
             isOpen={isOpen}
             onClose={handleClose}
-            title="Añadir Alimento"
+            title={isEditing ? "Editar Alimento" : "Añadir Alimento"}
             size="sm"
             footer={
                 <div className="flex gap-3 w-full">
@@ -97,7 +120,7 @@ export default function AddFoodItemModal({ isOpen, onClose, onAdd, mealName, day
                         onClick={handleSubmit}
                         disabled={!selected}
                     >
-                        Añadir
+                        {isEditing ? "Guardar" : "Añadir"}
                     </Button>
                 </div>
             }
@@ -105,7 +128,7 @@ export default function AddFoodItemModal({ isOpen, onClose, onAdd, mealName, day
             <div className="space-y-4">
                 {mealName && (
                     <p className="text-xs text-gray-secondary">
-                        Añadiendo a <span className="font-semibold text-black-primary">{mealName}</span> (Día {dayNumber})
+                        {isEditing ? "Editando" : "Añadiendo"} a <span className="font-semibold text-black-primary">{mealName}</span> (Día {dayNumber})
                     </p>
                 )}
 

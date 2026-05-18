@@ -74,3 +74,9 @@ public class CreateDietDto
     // Ejemplo: ["Desayuno", "Comida", "Cena"]
     public List<string> SelectedMealNames { get; set; } = new();
 }
+
+public class StatsResponseDto
+{
+    public int Total { get; set; }
+    public double PercentageChange { get; set; }
+}

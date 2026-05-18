@@ -17,6 +17,38 @@ public class DietsController : ControllerBase
         _context = context;
     }
 
+    [HttpGet("stats")]
+    public async Task<ActionResult<StatsResponseDto>> GetDietStats()
+    {
+        var now = DateTime.UtcNow;
+        var thirtyDaysAgo = now.AddDays(-30);
+        var sixtyDaysAgo = now.AddDays(-60);
+
+        // Dietas creadas en los últimos 30 días
+        var currentPeriod = await _context.Diets
+            .CountAsync(d => d.CreatedAt >= thirtyDaysAgo);
+
+        // Dietas creadas entre hace 60 y 30 días
+        var previousPeriod = await _context.Diets
+            .CountAsync(d => d.CreatedAt >= sixtyDaysAgo && d.CreatedAt < thirtyDaysAgo);
+
+        double percentage = 0;
+        if (previousPeriod > 0)
+        {
+            percentage = ((double)(currentPeriod - previousPeriod) / previousPeriod) * 100;
+        }
+        else if (currentPeriod > 0)
+        {
+            percentage = 100; // Si no había nada antes y ahora sí, crecimos 100%
+        }
+
+        return new StatsResponseDto
+        {
+            Total = await _context.Diets.CountAsync(), // Total histórico
+            PercentageChange = Math.Round(percentage, 1)
+        };
+    }
+
     // 1. Obtener todas las dietas (Usado por el Contexto al inicio)
     [HttpGet]
     public async Task<ActionResult<IEnumerable<DietResponseDto>>> GetDiets()
@@ -157,8 +189,8 @@ public class DietsController : ControllerBase
         _context.ChangeTracker.Clear(); // Limpia memoria
 
         var diet = await _context.Diets
-            .Include(d => d.Days)
-            .Include(d => d.Meals)
+            .Include(d => d.Days.OrderBy(day => day.DayNumber))
+            .Include(d => d.Meals.OrderBy(m => m.OrderIndex))
                 .ThenInclude(m => m.Slots)
                     .ThenInclude(s => s.Items)
             .FirstOrDefaultAsync(d => d.Id == id);
@@ -180,24 +212,24 @@ public class DietsController : ControllerBase
         {
             var mealEntity = diet.Meals.FirstOrDefault(m => m.Id == mealDto.Id);
             if (mealEntity == null)
-    {
-        // SI LA COMIDA NO EXISTE, LA CREAMOS
-        mealEntity = new DietMeal
-        {
-            Id = mealDto.Id ?? Guid.NewGuid(), // Usamos el ID generado en el Front
-            DietId = diet.Id,
-            Name = mealDto.Name,
-            OrderIndex = mealDto.OrderIndex,
-            Slots = new List<DietSlot>()
-        };
-        diet.Meals.Add(mealEntity);
-    }
-    else
-    {
-        // SI EXISTE, SOLO ACTUALIZAMOS NOMBRE Y ORDEN
-        mealEntity.Name = mealDto.Name;
-        mealEntity.OrderIndex = mealDto.OrderIndex;
-    }
+            {
+                // SI LA COMIDA NO EXISTE, LA CREAMOS
+                mealEntity = new DietMeal
+                {
+                    Id = mealDto.Id ?? Guid.NewGuid(), // Usamos el ID generado en el Front
+                    DietId = diet.Id,
+                    Name = mealDto.Name,
+                    OrderIndex = mealDto.OrderIndex,
+                    Slots = new List<DietSlot>()
+                };
+                diet.Meals.Add(mealEntity);
+            }
+            else
+            {
+                // SI EXISTE, SOLO ACTUALIZAMOS NOMBRE Y ORDEN
+                mealEntity.Name = mealDto.Name;
+                mealEntity.OrderIndex = mealDto.OrderIndex;
+            }
 
             // 4. Actualizar Items (Nuke & Pave con precaución)
             foreach (var slotDto in mealDto.Slots)

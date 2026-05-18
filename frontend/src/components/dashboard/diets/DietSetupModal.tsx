@@ -1,7 +1,5 @@
-import { useNavigate } from "react-router-dom"; 
-import { useDiets } from "../../../context/DietsContext";
 import { type Patient } from "../../../types/patients";
-import { type SetupStep, type DietSetupData } from "../../../types/diet";
+import { type SetupStep, type DietSetupData, type CreateDietRequest } from "../../../types/diet";
 import { useEffect, useState } from "react";
 import Modal from "../../ui/Modal";
 import Button from "../../ui/Button";
@@ -14,7 +12,6 @@ import * as Progress from '@radix-ui/react-progress';
 import { MacroCard } from "./MacroCard";
 import { DEFAULT_MEALS } from "../../../constants/diet";
 import { PatientSearchList } from "../patients/PatientSearchList";
-import { useAppNavigation } from "../../../hooks/useAppNavigation";
 
 // Helper para mapear IDs de comidas a sus labels en español
 const getMealLabelsFromIds = (mealIds: string[]): string[] => {
@@ -28,7 +25,7 @@ interface DietSetupModalProps {
     isOpen: boolean;
     onClose: () => void;
     patients: Patient[];
-    onDietCreate: (data: DietSetupData) => void;
+    onDietCreate: (data: CreateDietRequest) => Promise<void>;
     initialPatientId?: string;
     initialStep?: SetupStep;
 }
@@ -46,9 +43,7 @@ const INITIAL_DIET_DATA: DietSetupData = {
 export default function DietSetupModal({ isOpen, onClose, patients, onDietCreate, initialPatientId, initialStep }: DietSetupModalProps) {
     const [step, setStep] = useState<SetupStep>(initialStep ?? 1);
     const [formData, setFormData] = useState<DietSetupData>({ ...INITIAL_DIET_DATA, patientId: initialPatientId ?? '' });
-    const { addDiet } = useDiets();
-    const { goToDietForm } = useAppNavigation();
-    const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(false);
     const progressValue = (step / 2) * 100;
 
     const resetForm = () => {
@@ -98,27 +93,32 @@ export default function DietSetupModal({ isOpen, onClose, patients, onDietCreate
             return;
         }
 
-        const dietPayload = {
-        patientId: formData.patientId,
-        name: formData.dietName,
-        durationDays: formData.durationDays,
-        targetKcalPerDay: formData.targetKcal,
-        targetProtein: formData.macros.protein,
-        targetFats: formData.macros.fats,
-        targetCarbs: formData.macros.carbs,
-        startDate: formData.startDate.toISOString().split('T')[0], 
-        selectedMealNames: getMealLabelsFromIds(formData.selectedMeals)    
+        if (isLoading) return;
+        setIsLoading(true);
+
+        const dietPayload: CreateDietRequest = {
+            patientId: formData.patientId,
+            name: formData.dietName,
+            durationDays: formData.durationDays,
+            targetKcalPerDay: formData.targetKcal,
+            targetProtein: formData.macros.protein,
+            targetFats: formData.macros.fats,
+            targetCarbs: formData.macros.carbs,
+            startDate: formData.startDate.toISOString().split('T')[0],
+            selectedMealNames: getMealLabelsFromIds(formData.selectedMeals)
         };
 
-    try {
-        const createdDiet = await addDiet(dietPayload);
-        onClose();
-        resetForm();
-        goToDietForm(createdDiet.id, formData.patientId);
-    } catch (error) {
-        console.error("Error creating diet:", error);
-        toast.error("No se pudo crear la dieta. Por favor intenta de nuevo.");
-    }
+        try {
+            await onDietCreate(dietPayload);
+            onClose();
+            resetForm();
+        } catch (error) {
+            console.error("Error creating diet:", error);
+            toast.error("No se pudo crear la dieta. Por favor intenta de nuevo.");
+            setIsLoading(false);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -168,9 +168,10 @@ export default function DietSetupModal({ isOpen, onClose, patients, onDietCreate
                         )}
                         <Button
                             onClick={step === 1 ? handleNext : handleSubmit}
-                            className="min-w-[120px] px-8 bg-blue-brand text-white hover:bg-blue-brand/90 shadow-md transition-all"
+                            disabled={step === 2 && isLoading}
+                            className="min-w-[120px] px-8 bg-blue-brand text-white hover:bg-blue-brand/90 shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {step === 1 ? "Siguiente " : "Crear"}
+                            {isLoading ? "Creando..." : step === 1 ? "Siguiente " : "Crear"}
                         </Button>
                     </div>
                 </div>
@@ -208,8 +209,13 @@ export default function DietSetupModal({ isOpen, onClose, patients, onDietCreate
                                     type="number"
                                     min="1"
                                     className="bg-white border border-primary-30 p-2.5 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-brand/20"
-                                    value={formData.durationDays}
-                                    onChange={(e) => setFormData({ ...formData, durationDays: Number(e.target.value) })}
+                                    value={formData.durationDays || ""}
+                                    onChange={(e) => {
+                                        setFormData({
+                                            ...formData,
+                                            durationDays: e.target.value === "" ? 0 : Number(e.target.value)
+                                        })
+                                    }}
                                 />
                             </div>
                         </div>

@@ -1,19 +1,20 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Table } from "@radix-ui/themes";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon, ChevronRightIcon, TrashIcon } from "@heroicons/react/24/outline";
 import type { Diet } from "../../../types/diet";
 
 interface PatientDietsTabProps {
     patientId: string;
     diets: Diet[];
     onCreateDiet?: () => void;
+    onDeleteDiet?: (dietId: string) => void;
 }
 
 const PAGE_SIZE = 5;
 const headers = ['Nombre', 'Duración', 'Objetivo Kcal', 'Inicio'];
 
-export default function PatientDietsTab({ patientId, diets, onCreateDiet }: PatientDietsTabProps) {
+export default function PatientDietsTab({ patientId, diets, onCreateDiet, onDeleteDiet }: PatientDietsTabProps) {
     const navigate = useNavigate();
     const [page, setPage] = useState(1);
 
@@ -49,6 +50,7 @@ export default function PatientDietsTab({ patientId, diets, onCreateDiet }: Pati
                                     </div>
                                 </Table.ColumnHeaderCell>
                             ))}
+                            <Table.ColumnHeaderCell className="p-0 w-[48px]"/>
                         </Table.Row>
                     </Table.Header>
 
@@ -77,6 +79,20 @@ export default function PatientDietsTab({ patientId, diets, onCreateDiet }: Pati
                                 <Table.Cell className="p-0">
                                     <div className="py-3 px-6 text-sm text-gray-secondary">
                                         {new Date(diet.startDate).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                    </div>
+                                </Table.Cell>
+
+                                <Table.Cell>
+                                    <div className="py-3 px-6">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onDeleteDiet?.(diet.id);
+                                            }}
+                                            className="p-1.5 text-gray-primary hover:text-red-error hover:bg-red-error/50 rounded-lg transition-colors"
+                                        >
+                                            <TrashIcon className="h-5 w-5"/>
+                                        </button>
                                     </div>
                                 </Table.Cell>
                             </Table.Row>

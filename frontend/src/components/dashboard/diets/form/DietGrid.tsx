@@ -4,7 +4,6 @@ import type { Diet } from "../../../../types/diet";
 import DietMealCell from "./DietMealCell";
 import { calculateDayMacros } from "../../../../utils/diets/dietMath";
 import MacroPieChart from "./MacroPieChart";
-import Button from "../../../ui/Button";
 
 interface DietGridProps {
     diet: Diet;
@@ -13,6 +12,7 @@ interface DietGridProps {
     onAddSlot?: (mealId: string) => void;
     onRemoveSlot?: (mealId: string) => void;
     onAddItem?: (mealId: string, slotIndex: number, dayIndex: number) => void;
+    onEditItem?: (mealId: string, slotIndex: number, dayIndex: number) => void;
     onRemoveItem?: (mealId: string, slotIndex: number, dayIndex: number) => void;
     onUpdateGrams?: (mealId: string, slotIndex: number, dayIndex: number, grams: number) => void;
     onUpdateMealName?: (mealId: string, name: string) => void;
@@ -22,7 +22,7 @@ interface DietGridProps {
 
 const DAYS_PER_PAGE = 7;
 
-export default function DietGrid({ diet, selectedSlot, onSelectSlot, onAddSlot, onRemoveSlot, onAddItem, onRemoveItem, onUpdateGrams, onUpdateMealName, onRemoveMeal, onAddMeal }: DietGridProps) {
+export default function DietGrid({ diet, selectedSlot, onSelectSlot, onAddSlot, onRemoveSlot, onAddItem, onEditItem, onRemoveItem, onUpdateGrams, onUpdateMealName, onRemoveMeal, onAddMeal }: DietGridProps) {
     const [weekOffset, setWeekOffset] = useState(0);
 
     const totalWeeks = Math.ceil(diet.days.length / DAYS_PER_PAGE);
@@ -164,6 +164,7 @@ export default function DietGrid({ diet, selectedSlot, onSelectSlot, onAddSlot, 
                                                 item={item}
                                                 isSelected={selectedSlot?.mealId === meal.id && selectedSlot?.slotIndex === slotIndex}
                                                 onAdd={() => onAddItem?.(meal.id, slotIndex, dayIndex)}
+                                                onEdit={() => onEditItem?.(meal.id, slotIndex, dayIndex)}
                                                 onRemove={() => onRemoveItem?.(meal.id, slotIndex, dayIndex)}
                                                 onUpdateGrams={(grams) => onUpdateGrams?.(meal.id, slotIndex, dayIndex, grams)}
                                             />

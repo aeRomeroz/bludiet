@@ -1,11 +1,16 @@
 import { apiClient } from '../lib/apiClient';
 import { apiRoutes } from './apiRoutes';
-import { type Diet, type FoodSlot, type MealEntry, type FoodPortion, type CreateDietRequest } from '../types/diet';
+import { type Diet, type FoodSlot, type MealEntry, type FoodPortion, type CreateDietRequest, type DietStats } from '../types/diet';
 
 export const dietService = {
   async getAll(): Promise<Diet[]> {
     const { data } = await apiClient.get(apiRoutes.diets.index);
     return data.map(mapToDiet);
+  },
+
+  async getStats(): Promise<DietStats> {
+    const { data } = await apiClient.get<DietStats>(apiRoutes.diets.stats);
+    return data;
   },
 
   async getByPatient(patientId: string): Promise<Diet[]> {
@@ -58,7 +63,6 @@ function mapToDiet(row: any): Diet {
 }
 
 // --- Funciones de apoyo (Helpers) ---
-
 function mapMeals(meals: any[] = [], duration: number): MealEntry[] {
   return meals
     .sort((a, b) => a.orderIndex - b.orderIndex)

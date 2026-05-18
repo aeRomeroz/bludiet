@@ -32,6 +32,7 @@ public class PatientResponseDto
     public string? AvatarUrl { get; set; }
     
     // Propiedades calculadas útiles para el Front
+    public DateTime? LastDietUpdate { get; set; }
     public int Age => DateTime.Now.Year - BirthDate.Year;
     public MeasurementDto? InitialMeasurement { get; set; }
     public MedicalHistoryDto? MedicalHistory { get; set; }

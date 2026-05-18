@@ -6,6 +6,7 @@ export const apiRoutes = {
   },
   diets: {
     index: '/api/diets',
+    stats: '/api/diets/stats',
     byPatient: (patientId: string) => `/api/diets/patient/${patientId}`,
     detail: (id: string) => `/api/diets/${id}`,
     update: (id: string) => `/api/diets/${id}`,

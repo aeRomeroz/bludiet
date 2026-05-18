@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"; 
 import { PlusIcon } from "@heroicons/react/24/outline";
 import Button from "../components/ui/Button";
 import PatientsTable from "../components/dashboard/patients/PatientsTable";
@@ -8,26 +7,33 @@ import PatientCreateModal from "../components/dashboard/patients/PatientCreateMo
 import DietSetupModal from "../components/dashboard/diets/DietSetupModal";
 import { usePatients } from "../context/PatientsContext";
 import { useDiets } from "../context/DietsContext";
-import { buildDietFromSetup } from "../utils/diets/dietMath";
+import { useAppNavigation } from "../hooks/useAppNavigation";
 import type { Patient, Status } from "../types/patients";
-import type { DietSetupData } from "../types/diet";
+import type { CreateDietRequest } from "../types/diet";
+import toast from "react-hot-toast";
+import ConfirmationModal from "../components/ui/ConfirmationModal";
 
 export default function PatientsList() {
-    const { patients, addPatient } = usePatients();
+    const { patients, addPatient, deletePatient } = usePatients();
     const { addDiet } = useDiets();
-    const navigate = useNavigate();
+    const { goToDietForm } = useAppNavigation();
 
     const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
+    const [patientToDelete, setPatientToDelete] = useState<string | null>();
     const [isDietModalOpen, setIsDietModalOpen] = useState(false);
     const [selectedPatientId, setSelectedPatientId] = useState<string | undefined>(undefined);
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState<Status | 'ALL'>('ALL');
 
     const filteredPatients = patients.filter((p) => {
-        const matchesSearch = `${p.firstName} ${p.lastName}`
-            .toLowerCase()
-            .includes(search.toLowerCase());
+        const patientTerms = `${p.firstName} ${p.lastName}`.toLowerCase()
+
+        const searchTerms = search.toLowerCase().trim().split(/\s+/);
+        
+        const matchesSearch = searchTerms.every(word => patientTerms.includes(word));
+
         const matchesStatus = statusFilter === 'ALL' || p.status === statusFilter;
+
         return matchesSearch && matchesStatus;
     });
 
@@ -35,16 +41,32 @@ export default function PatientsList() {
         addPatient(newPatient);
     };
 
+    const handleDeletePatient = async () => {
+        if (patientToDelete){
+            try {
+                deletePatient(patientToDelete);
+                setPatientToDelete(null)
+                toast.success("Paciente eliminado correctamente")
+            } catch (error){
+                toast.error("Error al eliminar el paciente")
+                console.error("Error al eliminar el paciente.")
+            }
+        }
+    };
+
     const handleCreateDietForPatient = (patient: Patient) => {
         setSelectedPatientId(patient.id);
         setIsDietModalOpen(true);
     };
 
-    const handleCreateDiet = (setup: DietSetupData) => {
-        const dietId = crypto.randomUUID();
-        const newDiet = buildDietFromSetup(setup, dietId);
-        addDiet(newDiet);
-        navigate(`/patients/${setup.patientId}/diets/${dietId}`);
+    const handleCreateDiet = async (payload: CreateDietRequest) => {
+        try {
+            const createdDiet = await addDiet(payload);
+            goToDietForm(createdDiet.id, payload.patientId);
+        } catch (error) {
+            toast.error("Error al crear la dieta. Por favor, inténtalo de nuevo.");
+            throw error; // Re-lanzamos para que el modal sepa que falló
+        }
     };
 
     return (
@@ -74,7 +96,7 @@ export default function PatientsList() {
             <PatientsTable
                 patients={filteredPatients}
                 onEdit={(patient) => console.log('Editar:', patient)}
-                onDelete={(patient) => console.log('Eliminar:', patient)}
+                onDelete={(patient) => setPatientToDelete(patient.id)}
                 onCreateDiet={handleCreateDietForPatient}
             />
 
@@ -82,6 +104,15 @@ export default function PatientsList() {
                 isOpen={isPatientModalOpen}
                 onClose={() => setIsPatientModalOpen(false)}
                 onPatientCreate={handleAddPatient}
+            />
+
+            <ConfirmationModal
+                isOpen={!!patientToDelete}
+                onClose={() => setPatientToDelete(null)}
+                onConfirm={handleDeletePatient}
+                title="Eliminar Paciente"
+                message={`¿Estás seguro de que deseas eliminar a este paciente? Todos sus datos y dietas asociadas se borrarán permanentemente.`}
+                confirmText="Eliminar"    
             />
 
             <DietSetupModal
