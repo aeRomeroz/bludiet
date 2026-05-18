@@ -44,7 +44,7 @@ describe('Pruebas unitarias para los calculos en las Dietas (dietMath.ts)', () =
 describe('Pruebas para calculateDayMacros', () => {
 
   it('Debería sumar correctamente los macronutrientes de los alimentos asignados a un día específico', () => {
-    // 1. ARRANGE: Creamos una Dieta Mock (falsa) con la estructura mínima que necesita la función
+    //ARRANGE
     const mockDiet: Partial<Diet> = {
       id: 'diet-123',
       meals: [
@@ -57,9 +57,7 @@ describe('Pruebas para calculateDayMacros', () => {
               id: 'slot-1',
               slotIndex: 0,
               items: [
-                // Día 1 (Índice 0): El paciente come un plátano/huevo con estos macros
                 { id: 'item-1', foodId: 'food-1', name: 'Alimento Pro', grams: 100, dayNumber: 1, kcal: 290, protein: 20, fats: 10, carbs: 30 },
-                // Día 2 (Índice 1): Vacío (null)
                 null 
               ]
             }
@@ -68,13 +66,11 @@ describe('Pruebas para calculateDayMacros', () => {
       ]
     };
 
-    // 2. ACT: Ejecutamos la función para el Día 1 (índice 0)
-    // Usamos "as Diet" porque pasamos un objeto parcial simulado para no rellenar todo el tipado gigante
+    // ACT
     const day1Result = calculateDayMacros(mockDiet as Diet, 0);
     const day2Result = calculateDayMacros(mockDiet as Diet, 1);
 
-    // 3. ASSERT: Verificamos que las sumas sean exactas
-    // Para comparar objetos en Jest, usamos .toEqual() en lugar de .toBe()
+    //ASSERT
     expect(day1Result).toEqual({
       protein: 20,
       fats: 10,
@@ -82,7 +78,6 @@ describe('Pruebas para calculateDayMacros', () => {
       kcal: 290
     });
 
-    // Verificamos que el Día 2, al estar null, devuelva todo en 0 y no explote la app
     expect(day2Result).toEqual({
       protein: 0,
       fats: 0,
@@ -97,6 +92,7 @@ describe('Pruebas para calculateDayMacros', () => {
 describe('Pruebas para buildDietFromSetup (Factoría de Dietas)', () => {
 
   it('Debería estructurar correctamente una nueva dieta a partir de los datos del formulario de configuración', () => {
+    //ARRANGE
     const mockSetup: DietSetupData = {
       patientId: 'patient-abc',
       dietName: 'Dieta Hipertrofia',
@@ -108,22 +104,24 @@ describe('Pruebas para buildDietFromSetup (Factoría de Dietas)', () => {
     };
     const mockDietId = 'generated-diet-id-999';
 
-    const resultado = buildDietFromSetup(mockSetup, mockDietId);
+    // ACT
+    const result = buildDietFromSetup(mockSetup, mockDietId);
 
-    expect(resultado.id).toBe(mockDietId);
-    expect(resultado.patientId).toBe(mockSetup.patientId);
-    expect(resultado.name).toBe(mockSetup.dietName);
-    expect(resultado.targetKcalPerDay).toBe(mockSetup.targetKcal);
+    //ASSERT
+    expect(result.id).toBe(mockDietId);
+    expect(result.patientId).toBe(mockSetup.patientId);
+    expect(result.name).toBe(mockSetup.dietName);
+    expect(result.targetKcalPerDay).toBe(mockSetup.targetKcal);
     
-    expect(resultado.days).toHaveLength(3);
-    expect(typeof resultado.days[0].id).toEqual('string');
-    expect(resultado.days[0].id).not.toEqual(''); 
+    expect(result.days).toHaveLength(3);
+    expect(typeof result.days[0].id).toEqual('string');
+    expect(result.days[0].id).not.toEqual(''); 
 
-    expect(resultado.meals).toHaveLength(2);
-    expect(resultado.meals[0].name).toBeDefined(); 
+    expect(result.meals).toHaveLength(2);
+    expect(result.meals[0].name).toBeDefined(); 
     
-    expect(resultado.meals[0].slots[0].items).toHaveLength(3);
-    expect(resultado.meals[0].slots[0].items.every(item => item === null)).toBe(true);
+    expect(result.meals[0].slots[0].items).toHaveLength(3);
+    expect(result.meals[0].slots[0].items.every(item => item === null)).toBe(true);
   });
 
 });
