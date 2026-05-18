@@ -1,5 +1,7 @@
 export const PATHS = {
   HOME: '/',
+  LOGIN: '/login',
+  REGISTER: '/register',
   PATIENTS: {
     ROOT: '/patients',
     DETAIL: (id: string) => `/patients/${id}`,

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { PatientsProvider } from "./PatientsContext";
 import { DietsProvider } from "./DietsContext";
+import { AuthProvider } from "./AuthContext";
 
 interface AppProvidersProps {
   children: ReactNode;
@@ -8,10 +9,12 @@ interface AppProvidersProps {
 
 export function AppProviders({ children }: AppProvidersProps) {
   return (
-    <PatientsProvider>
-      <DietsProvider>
-        {children}
-      </DietsProvider>
-    </PatientsProvider>
+    <AuthProvider>
+      <PatientsProvider>
+        <DietsProvider>
+          {children}
+        </DietsProvider>
+      </PatientsProvider>
+    </AuthProvider>
   );
 }
