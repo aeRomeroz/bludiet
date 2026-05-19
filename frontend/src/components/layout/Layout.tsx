@@ -56,9 +56,9 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      <footer className="bg-gray-800 text-white p-4 text-center">
+      {/* <footer className="bg-gray-800 text-white p-4 text-center">
         <p>&copy; 2026 BluDiet. Todos los derechos reservados.</p>
-      </footer>
+      </footer> */}
     </div>
   );
 }

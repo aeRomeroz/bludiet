@@ -90,7 +90,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50 transition-colors"
+              className="flex w-full justify-center rounded-lg bg-blue-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#2c7ade] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50 transition-colors"
             >
               {loading ? 'Iniciando sesión...' : 'Entrar'}
             </button>
@@ -99,7 +99,7 @@ export default function Login() {
           {/* Enlace al Registro */}
           <div className="text-center text-sm text-gray-600">
             ¿No tienes una cuenta aún?{' '}
-            <Link to={PATHS.REGISTER} className="font-semibold text-blue-600 hover:text-blue-500">
+            <Link to={PATHS.REGISTER} className="font-semibold text-blue-brand hover:text-[#2c7ade]">
               Regístrate gratis
             </Link>
           </div>
