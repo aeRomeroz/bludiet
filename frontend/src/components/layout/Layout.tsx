@@ -1,6 +1,9 @@
+import { useEffect, useState } from 'react';
 import { BellIcon } from '@heroicons/react/24/outline';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import logo from '../../assets/bludiet_logo.svg';
+import { LogOut, LogIn } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 /**
  * Layout: Componente contenedor que envuelve todas las páginas
@@ -15,11 +18,42 @@ import logo from '../../assets/bludiet_logo.svg';
  */
 
 export default function Layout() {
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleAuthAction = async () => {
+    if (isLoggedIn) {
+      try {
+        await supabase.auth.signOut();
+        localStorage.clear();
+        sessionStorage.clear();
+        navigate('/login');
+      } catch (error) {
+        console.error('Error al cerrar sesión:', error);
+      }
+    } else {
+      navigate('/login');
+    }
+  };
+
   const navLinks = [
     { name: 'Inicio', path: '/' },
     { name: 'Pacientes', path: '/patients' },
     // { name: 'Dietas', path: '/diets' },
   ];
+
 
   const linkStyles = ({ isActive }: { isActive: boolean }) => 
     `transition-all duration-200 ease-in-out inline-block ${
@@ -47,6 +81,21 @@ export default function Layout() {
           <div className='flex items-center'>
             <button className="mr-4 p-0 bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity">
               <BellIcon className='w-6 h-6 text-black-primary'/>
+            </button>
+            <button
+              className={`px-2 py-2 border-none rounded-md cursor-pointer transition-colors flex items-center text-white ${
+                isLoggedIn 
+                  ? "bg-red-600 hover:bg-red-700" 
+                  : "bg-blue-brand hover:bg-[#2c7ade]"
+              }`}
+              onClick={handleAuthAction}
+              title={isLoggedIn ? "Cerrar sesión" : "Iniciar sesión"}
+            >
+              {isLoggedIn ? (
+                <LogOut className='w-4 h-4 mr-1 text-white shrink-0' />
+              ) : (
+                <LogIn className='w-4 h-4 mr-1 text-white shrink-0' />
+              )}
             </button>
           </div>
         </div>
