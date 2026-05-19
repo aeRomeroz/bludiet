@@ -3,12 +3,14 @@ using Microsoft.EntityFrameworkCore;
 using BluDiet.API.Data;
 using BluDiet.API.Models;
 using BluDiet.API.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BluDiet.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class DietsController : ControllerBase
+public class DietsController : BaseApiController
 {
     private readonly AppDbContext _context;
 
@@ -26,11 +28,11 @@ public class DietsController : ControllerBase
 
         // Dietas creadas en los últimos 30 días
         var currentPeriod = await _context.Diets
-            .CountAsync(d => d.CreatedAt >= thirtyDaysAgo);
+            .CountAsync(d => d.Patient.UserId == CurrentUserId && d.CreatedAt >= thirtyDaysAgo);
 
         // Dietas creadas entre hace 60 y 30 días
         var previousPeriod = await _context.Diets
-            .CountAsync(d => d.CreatedAt >= sixtyDaysAgo && d.CreatedAt < thirtyDaysAgo);
+            .CountAsync(d => d.Patient.UserId == CurrentUserId && d.CreatedAt >= sixtyDaysAgo && d.CreatedAt < thirtyDaysAgo);
 
         double percentage = 0;
         if (previousPeriod > 0)
@@ -44,7 +46,7 @@ public class DietsController : ControllerBase
 
         return new StatsResponseDto
         {
-            Total = await _context.Diets.CountAsync(), // Total histórico
+            Total = await _context.Diets.CountAsync(d => d.Patient.UserId == CurrentUserId),
             PercentageChange = Math.Round(percentage, 1)
         };
     }
@@ -54,6 +56,7 @@ public class DietsController : ControllerBase
     public async Task<ActionResult<IEnumerable<DietResponseDto>>> GetDiets()
     {
         var diets = await _context.Diets
+            .Where(d => d.Patient.UserId == CurrentUserId)
             .Include(d => d.Days)
             .Include(d => d.Meals)
                 .ThenInclude(m => m.Slots)
@@ -72,7 +75,7 @@ public class DietsController : ControllerBase
     public async Task<ActionResult<IEnumerable<DietResponseDto>>> GetByPatient(Guid patientId)
     {
         var diet = await _context.Diets
-            .Where(d => d.PatientId == patientId)
+            .Where(d => d.PatientId == patientId && d.Patient.UserId == CurrentUserId)
             .Include(d => d.Days)
             .Include(d => d.Meals)
                 .ThenInclude(m => m.Slots)
@@ -92,8 +95,10 @@ public class DietsController : ControllerBase
         try
         {
             // 1. Verificar que el paciente existe
-            var patient = await _context.Patients.FindAsync(request.PatientId);
-            if (patient == null) return NotFound("Paciente no encontrado");
+            var patient = await _context.Patients
+                .FirstOrDefaultAsync(p => p.Id == request.PatientId && p.UserId == CurrentUserId);
+
+            if (patient == null) return NotFound("Paciente no encontrado o acceso denegado");
 
             var diet = new Diet
             {
@@ -163,7 +168,7 @@ public class DietsController : ControllerBase
             .ThenInclude(m => m.Slots)
                 .ThenInclude(s => s.Items)
                     .ThenInclude(i => i.Day)
-            .FirstOrDefaultAsync(d => d.Id == id);
+            .FirstOrDefaultAsync(d => d.Id == id && d.Patient.UserId == CurrentUserId);
 
         if (diet == null) return NotFound();
         return MapToResponseDto(diet);
@@ -173,7 +178,9 @@ public class DietsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteDiet(Guid id)
     {
-        var diet = await _context.Diets.FindAsync(id);
+        var diet = await _context.Diets
+            .FirstOrDefaultAsync(d => d.Id == id && d.Patient.UserId == CurrentUserId);
+
         if (diet == null) return NotFound();
 
         _context.Diets.Remove(diet);
@@ -193,7 +200,7 @@ public class DietsController : ControllerBase
             .Include(d => d.Meals.OrderBy(m => m.OrderIndex))
                 .ThenInclude(m => m.Slots)
                     .ThenInclude(s => s.Items)
-            .FirstOrDefaultAsync(d => d.Id == id);
+            .FirstOrDefaultAsync(d => d.Id == id && d.Patient.UserId == CurrentUserId);
 
         if (diet == null) return NotFound();
 
