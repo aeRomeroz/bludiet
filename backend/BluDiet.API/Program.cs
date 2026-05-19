@@ -3,11 +3,11 @@ using BluDiet.API.Data;
 using AutoMapper;
 using BluDiet.API.DTOs;
 using BluDiet.API;
+using BluDiet.API.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Configurar el puerto para Render
-// Render asigna un puerto aleatorio mediante la variable de entorno PORT
+//Configurar el puerto para Render
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
@@ -21,6 +21,12 @@ if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddScoped<BedcaSeederService>();
 }
+
+// =========================================================
+//              Autenticación de Supabase
+// =========================================================
+builder.Services.AddSupabaseAuthentication(builder.Configuration);
+// =========================================================
 
 // Base de datos
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -71,7 +77,10 @@ else
 
 app.UseHttpsRedirection();
 app.UseCors("FrontendPolicy");
+
+app.UseAuthentication(); 
 app.UseAuthorization();
+
 app.MapControllers();
 
 // 4. SEEDER (Seguro)

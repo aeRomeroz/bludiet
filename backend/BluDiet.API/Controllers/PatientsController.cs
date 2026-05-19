@@ -4,12 +4,14 @@ using BluDiet.API.Data;
 using BluDiet.API.Models;
 using BluDiet.API.DTOs;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BluDiet.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class PatientsController : ControllerBase
+public class PatientsController : BaseApiController
 {
     private readonly AppDbContext _context;
     private readonly IMapper _mapper;
@@ -22,8 +24,9 @@ public class PatientsController : ControllerBase
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PatientResponseDto>>> GetPatients()
-    {
+    {        
         var patients = await _context.Patients
+            .Where(p => p.UserId == CurrentUserId)
             .Include(p => p.Measurements.Where(m => m.IsInitial))
             .Include(p => p.MedicalHistory)
             .Include(p => p.Diets)
@@ -40,7 +43,7 @@ public class PatientsController : ControllerBase
             .Include(p => p.Measurements.Where(m => m.IsInitial))
             .Include(p => p.MedicalHistory)
             .Include(p => p.Diets)
-            .FirstOrDefaultAsync(p => p.Id == id);
+            .FirstOrDefaultAsync(p => p.Id == id && p.UserId == CurrentUserId);
 
         if (patient == null) return NotFound();
 
@@ -52,6 +55,7 @@ public class PatientsController : ControllerBase
     {
         var patient = new Patient
         {
+            UserId = CurrentUserId,
             FirstName = dto.FirstName,
             LastName = dto.LastName,
             BirthDate = dto.BirthDate,
@@ -103,28 +107,28 @@ public class PatientsController : ControllerBase
     {
         var patient = await _context.Patients
             .Include(p => p.MedicalHistory)
-            .FirstOrDefaultAsync(p => p.Id == id);
+            .FirstOrDefaultAsync(p => p.Id == id && p.UserId == CurrentUserId);
 
         if (patient == null) return NotFound();
 
-        _mapper.Map(dto, patient); 
+        _mapper.Map(dto, patient);
 
         try
-    {
-        await _context.SaveChangesAsync();
-        return NoContent(); // 204
-    }
-    catch (DbUpdateException ex)
-    {
-        // Log the actual error here
-        return StatusCode(500, "Database update failed");
-    }
+        {
+            await _context.SaveChangesAsync();
+            return NoContent(); // 204
+        }
+        catch (DbUpdateException ex)
+        {
+            // Log the actual error here
+            return StatusCode(500, "Database update failed");
+        }
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePatient(Guid id)
     {
-        var patient = await _context.Patients.FindAsync(id);
+        var patient = await _context.Patients.FirstOrDefaultAsync(p => p.Id == id && p.UserId == CurrentUserId);
         if (patient == null) return NotFound();
 
         _context.Patients.Remove(patient);
@@ -136,7 +140,7 @@ public class PatientsController : ControllerBase
     private static PatientResponseDto MapToResponseDto(Patient p)
     {
         var initialMeasurement = p.Measurements.FirstOrDefault(m => m.IsInitial);
-        var lastDietDate = p.Diets != null && p.Diets.Any() 
+        var lastDietDate = p.Diets != null && p.Diets.Any()
             ? p.Diets.Max(d => d.CreatedAt) // Usamos solo CreatedAt
             : (DateTime?)null;
 
@@ -161,12 +165,12 @@ public class PatientsController : ControllerBase
             },
             MedicalHistory = p.MedicalHistory == null ? null : new MedicalHistoryDto
             {
-                ChronicDiseases = new MedicalRecordDto ( p.MedicalHistory.ChronicDiseasesHasCondition, p.MedicalHistory.ChronicDiseasesObservation ?? string.Empty ),
-                PreviousSurgeries = new MedicalRecordDto (  p.MedicalHistory.PreviousSurgeriesHasCondition,  p.MedicalHistory.PreviousSurgeriesObservation ?? string.Empty ),
-                Allergies = new MedicalRecordDto (  p.MedicalHistory.AllergiesHasCondition,  p.MedicalHistory.AllergiesObservation ?? string.Empty ),
-                Medications = new MedicalRecordDto (  p.MedicalHistory.MedicationsHasCondition,  p.MedicalHistory.MedicationsObservation ?? string.Empty ),
-                Smokes = new MedicalRecordDto (  p.MedicalHistory.SmokesHasCondition,  p.MedicalHistory.SmokesObservation ?? string.Empty ),
-                DrinksAlcohol = new MedicalRecordDto (  p.MedicalHistory.DrinksAlcoholHasCondition,  p.MedicalHistory.DrinksAlcoholObservation ?? string.Empty ),
+                ChronicDiseases = new MedicalRecordDto(p.MedicalHistory.ChronicDiseasesHasCondition, p.MedicalHistory.ChronicDiseasesObservation ?? string.Empty),
+                PreviousSurgeries = new MedicalRecordDto(p.MedicalHistory.PreviousSurgeriesHasCondition, p.MedicalHistory.PreviousSurgeriesObservation ?? string.Empty),
+                Allergies = new MedicalRecordDto(p.MedicalHistory.AllergiesHasCondition, p.MedicalHistory.AllergiesObservation ?? string.Empty),
+                Medications = new MedicalRecordDto(p.MedicalHistory.MedicationsHasCondition, p.MedicalHistory.MedicationsObservation ?? string.Empty),
+                Smokes = new MedicalRecordDto(p.MedicalHistory.SmokesHasCondition, p.MedicalHistory.SmokesObservation ?? string.Empty),
+                DrinksAlcohol = new MedicalRecordDto(p.MedicalHistory.DrinksAlcoholHasCondition, p.MedicalHistory.DrinksAlcoholObservation ?? string.Empty),
             }
         };
     }
