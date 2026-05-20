@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback, type React
 import { type CreateDietRequest, type Diet, type DietStats } from "../types/diet";
 import { dietService } from "../services/dietService";
 import toast from "react-hot-toast";
+import { useAuth } from "./AuthContext";
 
 interface DietsContextType {
   diets: Diet[];
@@ -20,9 +21,12 @@ export function DietsProvider({ children }: { children: ReactNode }) {
   const [diets, setDiets] = useState<Diet[]>([]);
   const [dietStats, setDietStats] = useState<DietStats>({ total: 0, percentageChange: 0 });
   const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
 
   const refreshDiets = useCallback(async () => {
     try {
+      if (!user) return;
+
       setLoading(true);
       const data = await dietService.getAll();
       setDiets(data);
@@ -31,12 +35,30 @@ export function DietsProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   const fetchDietStats = useCallback(async () => {
-    const stats = await dietService.getStats();
-    setDietStats(stats);
-  }, []);
+    if (!user) return;
+
+    try {
+      const stats = await dietService.getStats();
+      setDietStats(stats);
+    } catch (error) {
+      console.error("Error fetching diet stats:", error);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) {
+      setDiets([]);
+      setDietStats({ total: 0, percentageChange: 0 });
+      setLoading(false);
+      return;
+    }
+
+    refreshDiets();
+    fetchDietStats();
+  }, [user, refreshDiets, fetchDietStats]);
 
   const addDiet = useCallback(async (dietRequest: CreateDietRequest) => {
     try {

@@ -11,26 +11,28 @@ import { PATHS } from '../routes/paths';
 import '../index.css';
 
 export const router = createBrowserRouter([
+
+
+  // -----------------------------------------------------------
+  // RUTAS PÚBLICAS: Van sueltas dentro del Layout
+  // -----------------------------------------------------------
+  {
+    path: PATHS.LOGIN,
+    element: <Login />,
+  },
+  {
+    path: PATHS.REGISTER,
+    element: <Register />,
+  },
+  // -----------------------------------------------------------
+  // RUTAS PROTEGIDAS: Se meten como hijos del ProtectedRoute
+  // -----------------------------------------------------------
   {
     path: PATHS.HOME,
-    element: <Layout />,
+    element: <ProtectedRoute />,
     children: [
-      // -----------------------------------------------------------
-      // RUTAS PÚBLICAS: Van sueltas dentro del Layout
-      // -----------------------------------------------------------
       {
-        path: PATHS.LOGIN,
-        element: <Login />,
-      },
-      {
-        path: PATHS.REGISTER,
-        element: <Register />,
-      },
-      // -----------------------------------------------------------
-      // RUTAS PROTEGIDAS: Se meten como hijos del ProtectedRoute
-      // -----------------------------------------------------------
-      {
-        element: <ProtectedRoute />,
+        element: <Layout />,
         children: [
           {
             index: true,
@@ -49,13 +51,13 @@ export const router = createBrowserRouter([
             element: <PatientsList />,
           }
         ]
-      },
-      // Ruta comodín: Si entran a cualquier url rota, los manda a la raíz
-      {
-        path: '*',
-        element: <Navigate to={PATHS.HOME} replace />,
-      },
-    ],
+      }
+    ]
+  },
+  // Ruta comodín: Si entran a cualquier url rota, los manda a la raíz
+  {
+    path: '*',
+    element: <Navigate to={PATHS.HOME} replace />,
   },
 ]);
 

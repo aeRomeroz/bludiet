@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from "
 import type { Patient } from "../types/patients";
 import { patientService } from "../services/patientService";
 import toast from "react-hot-toast";
+import { useAuth } from "./AuthContext";
 
 const DEFAULT_TEST_PATIENT: Patient = {
   id: 'test-patient',
@@ -42,8 +43,12 @@ const PatientsContext = createContext<PatientsContextType | null>(null);
 export function PatientsProvider({ children }: { children: ReactNode }) {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   const refreshPatients = async () => {
+    if (!user) return;
+
+    setLoading(true);
     try {
       const data = await patientService.getAll();
       if (data.length === 0) {
@@ -60,8 +65,14 @@ export function PatientsProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    if (!user) {
+      setPatients([]);
+      setLoading(false);
+      return;
+    }
+
     refreshPatients();
-  }, []);
+  }, [user]);
 
   const addPatient = async (patient: Patient) => {
     const created = await patientService.create(patient);
