@@ -61,6 +61,44 @@ export default function DietForm() {
         }
     }, [diet?.id, diet?.durationDays]);
 
+    // Funcionalidad Copy-Paste
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.target instanceof HTMLInputElement) return;
+
+            if (e.ctrlKey && e.key === 'c' && selectedSlot && diet) {
+                const meal = diet.meals.find(m => m.id === selectedSlot.mealId);
+                const slot = meal?.slots[selectedSlot.slotIndex];
+                if (slot) {
+                    setCopiedSlot([...slot.items]);
+                    toast.success("Fila copiada");
+                }
+            }
+
+            if (e.ctrlKey && e.key === 'v' && copiedSlot && selectedSlot && diet) {
+                const updatedDiet = {
+                    ...diet,
+                    meals: diet.meals.map(meal =>
+                        meal.id !== selectedSlot.mealId ? meal : {
+                            ...meal,
+                            slots: meal.slots.map((slot, si) =>
+                                si !== selectedSlot.slotIndex ? slot : {
+                                    ...slot,
+                                    items: copiedSlot.map(item => item ? { ...item, id: crypto.randomUUID() } : null)
+                                }
+                            )
+                        }
+                    )
+                };
+                updateDiet(updatedDiet);
+                toast.success("Fila pegada");
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [selectedSlot, copiedSlot, diet]);
+
     if (!diet || !patient) {
         return (
             <div className="flex flex-col items-center justify-center h-64 gap-4">
@@ -312,44 +350,6 @@ export default function DietForm() {
         };
         updateDiet(updatedDiet);
     };
-
-    // Funcionalidad Copy-Paste
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.target instanceof HTMLInputElement) return;
-
-            if (e.ctrlKey && e.key === 'c' && selectedSlot) {
-                const meal = diet.meals.find(m => m.id === selectedSlot.mealId);
-                const slot = meal?.slots[selectedSlot.slotIndex];
-                if (slot) {
-                    setCopiedSlot([...slot.items]);
-                    toast.success("Fila copiada");
-                }
-            }
-
-            if (e.ctrlKey && e.key === 'v' && copiedSlot && selectedSlot) {
-                const updatedDiet = {
-                    ...diet,
-                    meals: diet.meals.map(meal =>
-                        meal.id !== selectedSlot.mealId ? meal : {
-                            ...meal,
-                            slots: meal.slots.map((slot, si) =>
-                                si !== selectedSlot.slotIndex ? slot : {
-                                    ...slot,
-                                    items: copiedSlot.map(item => item ? { ...item, id: crypto.randomUUID() } : null)
-                                }
-                            )
-                        }
-                    )
-                };
-                updateDiet(updatedDiet);
-                toast.success("Fila pegada");
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [selectedSlot, copiedSlot, diet]);
 
     console.log("DEBUG - Dieta completa:", diet);
     console.log("DEBUG - Comidas:", diet.meals);

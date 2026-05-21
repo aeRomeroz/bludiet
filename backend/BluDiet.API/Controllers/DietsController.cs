@@ -207,7 +207,9 @@ public class DietsController : BaseApiController
         // 1. Datos básicos
         diet.Name = request.Name;
         diet.TargetKcalPerDay = (int)request.TargetKcalPerDay;
-        // ... macros ...
+        diet.TargetProtein = request.TargetProtein;
+        diet.TargetFats = request.TargetFats;
+        diet.TargetCarbs = request.TargetCarbs;
 
         // 2. Sincronizar Meals (Borrar sobrantes)
         var incomingMealIds = request.Meals.Select(m => m.Id).ToList();
